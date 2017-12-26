@@ -1,0 +1,5 @@
+# Until the model is stable, don't track migrations
+migrations
+*.pyc
+*.pyo
+__pycache__
