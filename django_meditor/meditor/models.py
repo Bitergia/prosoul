@@ -37,7 +37,7 @@ class Attribute(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
     # Relations
     metrics = models.ManyToManyField(Metric)
-    subattributes = models.ManyToManyField("Attribute")
+    subattributes = models.ManyToManyField("Attribute", blank=True)
 
     def __str__(self):
         return self.name
@@ -47,7 +47,7 @@ class Goal(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
     # Relations
     attributes = models.ManyToManyField(Attribute)
-    subgoals = models.ManyToManyField("Goal")
+    subgoals = models.ManyToManyField("Goal", blank=True)
 
     def __str__(self):
         return self.name
