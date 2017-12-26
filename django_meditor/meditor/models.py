@@ -51,3 +51,13 @@ class Goal(MeditorModel):
 
     def __str__(self):
         return self.name
+
+
+class MetricsModel(MeditorModel):
+    """ Quality, Maturity, Health ... Model """
+    name = models.CharField(max_length=200, unique=True)
+    # Relations
+    goals = models.ManyToManyField("Goal")
+
+    def __str__(self):
+        return self.name
