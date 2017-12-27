@@ -101,10 +101,10 @@ def show_report(models_json):
                 nattributes += 1
                 nmetrics += len(models_json[model][goal][attribute])
 
-    print("Models exported", nmodels)
-    print("Goals exported", ngoals)
-    print("Attributes exported", nattributes)
-    print("Metrics exported", nmetrics)
+    print("Models:", nmodels)
+    print("Goals:", ngoals)
+    print("Attributes:", nattributes)
+    print("Metrics:", nmetrics)
 
 
 if __name__ == '__main__':
@@ -134,7 +134,7 @@ if __name__ == '__main__':
                 logging.info("Exporting all models to file %s", args.file)
                 model_json = fetch_all_models()
 
-            json.dump(model_json, fmodel, indent=True)
+            json.dump(model_json, fmodel, indent=True, sort_keys=True)
             show_report(model_json)
         except Exception:
             os.remove(args.file)
