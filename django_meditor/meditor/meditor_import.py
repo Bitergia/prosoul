@@ -85,9 +85,10 @@ def feed_models(models_json):
                 goal_orm.attributes.add(attribute_orm)
 
                 for metric in models_json[model][goal][attribute]:
-                    dsparams = {"name": metric[1]}
+                    dsparams = {"name": metric['data_source_type']}
                     data_source_orm = add(DataSourceType, **dsparams)
-                    metparams = {"name": metric[0],
+                    metparams = {"name": metric['name'],
+                                 "mclass": metric['mclass'],
                                  "data_source_type": data_source_orm}
                     metric_orm = add(Metric, **metparams)
                     attribute_orm.metrics.add(metric_orm)

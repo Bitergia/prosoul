@@ -71,7 +71,13 @@ def fetch_model(model):
             model_json[model][goal_orm.name][attribute.name] = []
 
             for metric in attribute.metrics.all():
-                model_json[model][goal_orm.name][attribute.name].append((metric.name, metric.data_source_type.name))
+                metric_data = {
+                    "name": metric.name,
+                    "data_source_type": metric.data_source_type.name,
+                    "mclass": metric.mclass
+
+                }
+                model_json[model][goal_orm.name][attribute.name].append(metric_data)
 
     return model_json
 
