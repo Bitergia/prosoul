@@ -43,7 +43,7 @@ def get_params():
     parser = argparse.ArgumentParser(usage="usage: meditor_export.py [options]",
                                      description="Export a Metrics Model to a file")
     parser.add_argument("-f", "--file", required=True,
-                        help="File path in which to export the Metrics Model")
+                        help="File path in which to export the Metrics Models")
     parser.add_argument('-g', '--debug', action='store_true')
     parser.add_argument('-m', '--model', help='Model to be exported. If not provided all models will be exported.')
 
@@ -71,7 +71,7 @@ def fetch_model(model):
             model_json[model][goal_orm.name][attribute.name] = []
 
             for metric in attribute.metrics.all():
-                model_json[model][goal_orm.name][attribute.name].append(metric.name)
+                model_json[model][goal_orm.name][attribute.name].append((metric.name, metric.data_source_type.name))
 
     return model_json
 
