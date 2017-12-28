@@ -1,0 +1,512 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "It refers to the possibility of having software failures. The amount of error prone or even inefficient code can reduce the overall maturity of the considered product.",
+       "factoids": [
+        {
+         "data_source_type": null,
+         "name": "errorProneFactoid"
+        },
+        {
+         "data_source_type": null,
+         "name": "inefficientStringsFactoid"
+        },
+        {
+         "data_source_type": null,
+         "name": "headerUse"
+        }
+       ],
+       "metrics": [
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "org.ossmeter.metricprovider.style.spreadOfErrorProneness.historic"
+        },
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "org.ossmeter.metricprovider.style.spreadOfInefficiencies.historic"
+        },
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "headerCounts"
+        }
+       ],
+       "name": "MaturityCode"
+      },
+      {
+       "description": "Software systems are evolving entities and as a such a sign of quality is also the effort needed to test the system when for some reason it has been changed. The availability of unit tests is an example of fact that can affect the testability factor of a given product.",
+       "factoids": [
+        {
+         "data_source_type": null,
+         "name": "JavaUnitTestCoverage"
+        }
+       ],
+       "metrics": [
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "TestOverPublicMethods"
+        }
+       ],
+       "name": "Testability"
+      }
+     ],
+     "name": "code",
+     "subgoals": [
+      {
+       "attributes": [
+        {
+         "description": "It refers at what extent the source code of the considered product is properly designed and implemented. Adherence to coding style and usage of comments in the code are only some examples of facts that can affect the analyzability of the product code.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "percentageCommentedOutCode"
+          },
+          {
+           "data_source_type": null,
+           "name": "commentPercentage"
+          },
+          {
+           "data_source_type": null,
+           "name": "understandabilityFactoid"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.rascal.LOC.locPerLanguage"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "commentLinesPerLanguage"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "spreadOfUnderstandabilityIssues"
+          }
+         ],
+         "name": "Analyzability"
+        },
+        {
+         "description": "It refers to the effort required to change the product e.g., to address unforeseen requirements. The size of code, the used programming languages, the amount of cloned code, or even characteristics like coupling and cohesion are examples of facts that can affect the changeability property of a given product.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "codesize"
+          },
+          {
+           "data_source_type": null,
+           "name": "Coupling"
+          },
+          {
+           "data_source_type": null,
+           "name": "Cohesion"
+          },
+          {
+           "data_source_type": null,
+           "name": "cloneCode"
+          },
+          {
+           "data_source_type": null,
+           "name": "commitLocality"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.rascal.activecommitters.projectAge"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.rascal.OO.java.CBO-Java-Quartiles.historic"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.rascal.OO.java.LCC-Java-Quartiles.historic"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "cloneLOCPerLanguage"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "filesPerCommit.historic"
+          }
+         ],
+         "name": "Changeability"
+        }
+       ],
+       "name": "Maintainability",
+       "subgoals": []
+      }
+     ]
+    },
+    {
+     "attributes": [
+      {
+       "description": "It refers to the availability of a stable number of developers working on the project. The number of commits over time per developer, is an example of measure that can contribute to understand if the team working on a product is growing or shrinking.",
+       "factoids": [
+        {
+         "data_source_type": null,
+         "name": "developmentTeamStability"
+        },
+        {
+         "data_source_type": null,
+         "name": "developmentTeamExperienceSpread"
+        }
+       ],
+       "metrics": [
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "numberOfActiveCommitters.historic"
+        },
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "committersoverfile"
+        }
+       ],
+       "name": "Stability"
+      },
+      {
+       "description": "It refers to the experience of the developers working on the product. This can be measured by considering their activity e.g., the number of commits per developer, or the number of commits per day, etc.",
+       "factoids": [
+        {
+         "data_source_type": null,
+         "name": "developmentTeamExperience"
+        },
+        {
+         "data_source_type": null,
+         "name": "commitSiza"
+        }
+       ],
+       "metrics": [
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "firstLastCommitDatesPerDeveloper"
+        },
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "churnPerCommitInTwoWeeks.historic"
+        }
+       ],
+       "name": "Professionalism"
+      },
+      {
+       "description": "If a project is developed and maintained by a representative number of developers with a high level of commitment to the project is of course a good sign. The commitment of a developer can be assessed by analysing his/her activity e.g., if there a commits done over the weekend, or if the amount of code committed by the developer is increasing.",
+       "factoids": [
+        {
+         "data_source_type": null,
+         "name": "weekendProject"
+        },
+        {
+         "data_source_type": null,
+         "name": "churnVolume"
+        }
+       ],
+       "metrics": [
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "percentageOfWeekendCommits"
+        },
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "churnInTwoWeeks.historic"
+        }
+       ],
+       "name": "Commitment"
+      }
+     ],
+     "name": "developerBaseQuality",
+     "subgoals": []
+    },
+    {
+     "attributes": [],
+     "name": "communicationChannel",
+     "subgoals": [
+      {
+       "attributes": [
+        {
+         "description": "The responsiveness to bug reports and to feature requests is an important measure that permits to assess if there is a strong community maintaining the product and its development over time.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.channelusage"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.users"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.bugs.comments"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.bugs.users"
+          }
+         ],
+         "name": "SustainabilityBTS"
+        },
+        {
+         "description": "It refers to at what extent potential users might take advantage of the information available from bug tracking systems and thus being supported during the adoption of the product.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.size"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.responsetime"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.threadlength"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.weekly"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.daily"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.bugs.comments"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.bugs.responsetime"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.bugs.dailycomments"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.bugs.hourlycomments"
+          }
+         ],
+         "name": "Maintenance capacity BTS"
+        },
+        {
+         "description": "It permits to assess if a considered bug tracking system is mature with respect to the ways bugs are replied (e.g., properly or inadequately), to number of bugs closed, fixed, and even duplicated.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.status"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.bugs.status"
+          }
+         ],
+         "name": "MaturityBTS"
+        },
+        {
+         "description": "Sentimental and emotional polarities are important indicators about the overall consideration of the users that are adopting the considered product. For instance, if the average sentimental and emotional polarities in all bug tracking systems associated with the project are negative then it is possible to conclude that people that are using the project and are trying to ask for support are somehow unhappy and consequently the overall quality of the product is affected.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.sentiment"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.bugs.emotion"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.bugs.sentiment"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.bugs.emotions"
+          }
+         ],
+         "name": "PolarityBTS"
+        }
+       ],
+       "name": "bugTrackingSystem",
+       "subgoals": []
+      },
+      {
+       "attributes": [
+        {
+         "description": "The responsiveness of newsgroups is an important measure that permits to assess if there is a strong community maintaining the product and its development over time.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.channelusage"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.users"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.newsgroups.newthreads"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.newsgroups.threads"
+          }
+         ],
+         "name": "Sustainability"
+        },
+        {
+         "description": "It refers to at what extent potential users might take advantage of the information available in the newsgroups of the project and thus being supported during the adoption of the product.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.size"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.responsetime"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.threadlength"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.weekly"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.daily"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.newsgroups.newthreads"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.newsgroups.responsetime"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.newsgroups.threads"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.newsgroups.dailyrequestsreplies"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.trans.newsgroups.hourlyrequestsreplies"
+          }
+         ],
+         "name": "Maintenance capacity"
+        },
+        {
+         "description": "It permits to assess if a considered newsgroup is mature.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.status"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.newsgroups.requestsreplies"
+          }
+         ],
+         "name": "Maturity"
+        },
+        {
+         "description": "Sentimental and emotional polarities are important indicators about the overall consideration of the users that are adopting the considered product. For instance, if the average sentimental and emotional polarities in all the posts of the project newsgroups are negative then it is possible to conclude that people that are using the project and are trying to ask for support are somehow unhappy and consequently the overall quality of the product is affected.",
+         "factoids": [
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.sentiment"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.emotion"
+          },
+          {
+           "data_source_type": null,
+           "name": "org.ossmeter.factoid.newsgroups.severity"
+          }
+         ],
+         "metrics": [
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.newsgroups.sentiment"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.newsgroups.emotions"
+          },
+          {
+           "data_source_type": null,
+           "mclass": null,
+           "name": "org.ossmeter.metricprovider.historic.newsgroups.severity"
+          }
+         ],
+         "name": "Polarity"
+        }
+       ],
+       "name": "newsGroup",
+       "subgoals": []
+      }
+     ]
+    }
+   ],
+   "name": "Default OSSMETER quality model"
+  }
+ ]
+}
