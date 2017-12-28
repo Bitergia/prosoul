@@ -1,0 +1,240 @@
+{
+  "qualityModel": {
+    "name": "Default OSSMETER quality model",
+    "qualityAspects ": [
+      {
+        "name": "code",
+        "qualityAspects": [
+          {
+            "name": "Maintainability",
+            "qualityAspects": [],
+            "attributes": [
+              {
+                "name": "Analyzability",
+                "description": "It refers at what extent the source code of the considered product is properly designed and implemented. Adherence to coding style and usage of comments in the code are only some examples of facts that can affect the analyzability of the product code.",
+                "factoids": [
+                  "percentageCommentedOutCode",
+                  "commentPercentage",
+                  "understandabilityFactoid"
+                ],
+                "metrics": [
+                  "org.ossmeter.metricprovider.trans.rascal.LOC.locPerLanguage",
+                  "commentLinesPerLanguage",
+                  "spreadOfUnderstandabilityIssues"
+                ]
+              },
+              {
+                "name": "Changeability",
+                "description": "It refers to the effort required to change the product e.g., to address unforeseen requirements. The size of code, the used programming languages, the amount of cloned code, or even characteristics like coupling and cohesion are examples of facts that can affect the changeability property of a given product.",
+                "factoids": [
+                  "codesize",
+                  "Coupling",
+                  "Cohesion",
+                  "cloneCode",
+                  "commitLocality"
+                ],
+                "metrics": [
+                  "org.ossmeter.metricprovider.trans.rascal.activecommitters.projectAge",
+                  "org.ossmeter.metricprovider.trans.rascal.OO.java.CBO-Java-Quartiles.historic",
+                  "org.ossmeter.metricprovider.trans.rascal.OO.java.LCC-Java-Quartiles.historic",
+                  "cloneLOCPerLanguage",
+                  "filesPerCommit.historic"
+                ]
+              }
+            ]
+          }
+        ],
+        "attributes": [
+          {
+            "name": "Maturity",
+            "description": "It refers to the possibility of having software failures. The amount of error prone or even inefficient code can reduce the overall maturity of the considered product.",
+            "factoids": [
+              "errorProneFactoid",
+              "inefficientStringsFactoid",
+              "headerUse"
+            ],
+            "metrics": [
+              "org.ossmeter.metricprovider.style.spreadOfErrorProneness.historic",
+              "org.ossmeter.metricprovider.style.spreadOfInefficiencies.historic",
+              "headerCounts"
+            ]
+          },
+          {
+            "name": "Testability",
+            "description": "Software systems are evolving entities and as a such a sign of quality is also the effort needed to test the system when for some reason it has been changed. The availability of unit tests is an example of fact that can affect the testability factor of a given product.",
+            "factoids": [
+              "JavaUnitTestCoverage"
+            ],
+            "metrics": [
+              "TestOverPublicMethods"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "developerBaseQuality",
+        "attributes": [
+          {
+            "name": "Stability",
+            "description": "It refers to the availability of a stable number of developers working on the project. The number of commits over time per developer, is an example of measure that can contribute to understand if the team working on a product is growing or shrinking.",
+            "factoids": [
+              "developmentTeamStability",
+              "developmentTeamExperienceSpread"
+            ],
+            "metrics": [
+              "numberOfActiveCommitters.historic",
+              "committersoverfile"
+            ]
+          },
+          {
+            "name": "Professionalism",
+            "description": "It refers to the experience of the developers working on the product. This can be measured by considering their activity e.g., the number of commits per developer, or the number of commits per day, etc.",
+            "factoids": [
+              "developmentTeamExperience",
+              "commitSiza"
+            ],
+            "metrics": [
+              "firstLastCommitDatesPerDeveloper",
+              "churnPerCommitInTwoWeeks.historic"
+            ]
+          },
+          {
+            "name": "Commitment",
+            "description": "If a project is developed and maintained by a representative number of developers with a high level of commitment to the project is of course a good sign. The commitment of a developer can be assessed by analysing his/her activity e.g., if there a commits done over the weekend, or if the amount of code committed by the developer is increasing.",
+            "factoids": [
+              "weekendProject",
+              "churnVolume"
+            ],
+            "metrics": [
+              "percentageOfWeekendCommits",
+              "churnInTwoWeeks.historic"
+            ]
+          }
+        ],
+        "qualityAspects": {}
+      },
+      {
+        "name": "communicationChannel",
+        "attributes": [],
+        "qualityAspects": [
+          {
+            "name": "bugTrackingSystem",
+            "attributes": [
+              {
+                "name": "Sustainability",
+                "description": "The responsiveness to bug reports and to feature requests is an important measure that permits to assess if there is a strong community maintaining the product and its development over time.",
+                "factoids": [
+                  "org.ossmeter.factoid.bugs.channelusage",
+                  "org.ossmeter.factoid.bugs.users"
+                ],
+                "metrics": [
+                  "org.ossmeter.metricprovider.historic.bugs.comments",
+                  "org.ossmeter.metricprovider.historic.bugs.users"
+                ]
+              },
+              {
+                "name": "Maintenance capacity",
+                "description": "It refers to at what extent potential users might take advantage of the information available from bug tracking systems and thus being supported during the adoption of the product.",
+                "factoids": [
+                  "org.ossmeter.factoid.bugs.size",
+                  "org.ossmeter.factoid.bugs.responsetime",
+                  "org.ossmeter.factoid.bugs.threadlength",
+                  "org.ossmeter.factoid.bugs.weekly",
+                  "org.ossmeter.factoid.bugs.daily"
+                ],
+                "metrics": [
+					"org.ossmeter.metricprovider.historic.bugs.comments",
+					"org.ossmeter.metricprovider.historic.bugs.responsetime",
+					"org.ossmeter.metricprovider.historic.bugs.comments",
+					"org.ossmeter.metricprovider.trans.bugs.dailycomments",
+					"org.ossmeter.metricprovider.trans.bugs.hourlycomments"				
+				]
+              },
+              {
+                "name": "Maturity",
+                "description": "It permits to assess if a considered bug tracking system is mature with respect to the ways bugs are replied (e.g., properly or inadequately), to number of bugs closed, fixed, and even duplicated.",
+                "factoids": [
+                  "org.ossmeter.factoid.bugs.status"
+                ],
+                "metrics": [
+                  "org.ossmeter.metricprovider.historic.bugs.status"
+                ]
+              },
+              {
+                "name": "Polarity",
+                "description": "Sentimental and emotional polarities are important indicators about the overall consideration of the users that are adopting the considered product. For instance, if the average sentimental and emotional polarities in all bug tracking systems associated with the project are negative then it is possible to conclude that people that are using the project and are trying to ask for support are somehow unhappy and consequently the overall quality of the product is affected.",
+                "factoids": [
+                  "org.ossmeter.factoid.bugs.sentiment",
+                  "org.ossmeter.factoid.bugs.emotion"
+                ],
+                "metrics": [
+					"org.ossmeter.metricprovider.historic.bugs.sentiment",
+					"org.ossmeter.metricprovider.historic.bugs.emotions"
+				]
+              }
+            ]
+          },
+          {
+            "name": "newsGroup",
+            "attributes": [
+              {
+                "name": "Sustainability",
+                "description": "The responsiveness of newsgroups is an important measure that permits to assess if there is a strong community maintaining the product and its development over time.",
+                "factoids": [
+                  "org.ossmeter.factoid.newsgroups.channelusage",
+                  "org.ossmeter.factoid.newsgroups.users"
+                ],
+                "metrics": [
+                  "org.ossmeter.metricprovider.historic.newsgroups.newthreads",
+                  "org.ossmeter.metricprovider.historic.newsgroups.threads"
+                ]
+              },
+              {
+                "name": "Maintenance capacity",
+                "description": "It refers to at what extent potential users might take advantage of the information available in the newsgroups of the project and thus being supported during the adoption of the product.",
+                "factoids": [
+                  "org.ossmeter.factoid.newsgroups.size",
+                  "org.ossmeter.factoid.newsgroups.responsetime",
+                  "org.ossmeter.factoid.newsgroups.threadlength",
+                  "org.ossmeter.factoid.newsgroups.weekly",
+                  "org.ossmeter.factoid.newsgroups.daily"
+                ],
+                "metrics": [
+                  "org.ossmeter.metricprovider.historic.newsgroups.newthreads",
+				  "org.ossmeter.metricprovider.historic.newsgroups.responsetime",
+				  "org.ossmeter.metricprovider.trans.newsgroups.threads",
+				  "org.ossmeter.metricprovider.trans.newsgroups.dailyrequestsreplies",
+				  "org.ossmeter.metricprovider.trans.newsgroups.hourlyrequestsreplies"
+                ]
+              },
+              {
+                "name": "Maturity",
+                "description": "It permits to assess if a considered newsgroup is mature.",
+                "factoids": [
+                  "org.ossmeter.factoid.newsgroups.status"
+                ],
+                "metrics": [
+					"org.ossmeter.metricprovider.historic.newsgroups.requestsreplies"					
+				]
+              },
+              {
+                "name": "Polarity",
+                "description": "Sentimental and emotional polarities are important indicators about the overall consideration of the users that are adopting the considered product. For instance, if the average sentimental and emotional polarities in all the posts of the project newsgroups are negative then it is possible to conclude that people that are using the project and are trying to ask for support are somehow unhappy and consequently the overall quality of the product is affected.",
+                "factoids": [
+                  "org.ossmeter.factoid.newsgroups.sentiment",
+                  "org.ossmeter.factoid.newsgroups.emotion",
+                  "org.ossmeter.factoid.newsgroups.severity"
+                ],
+                "metrics": [
+					"org.ossmeter.metricprovider.historic.newsgroups.sentiment",
+					"org.ossmeter.metricprovider.historic.newsgroups.emotions",
+					"org.ossmeter.metricprovider.historic.newsgroups.severity"
+				]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
