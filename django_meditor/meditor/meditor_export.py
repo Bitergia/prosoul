@@ -53,20 +53,8 @@ def get_params():
 def fetch_model(model_name):
     """ Fetch a data model from Meditor and convert it to JSON """
 
-    model_json = {}
-
-    logging.debug("Fetch the model %s", model_name)
-
-    try:
-        model_orm = QualityModel.objects.get(name=model_name)
-        model_json['name'] = model_orm.name
-        model_json['goals'] = []
-    except QualityModel.DoesNotExist:
-        logging.error('Can not find model %s', model_name)
-        raise
-
-    for goal_orm in model_orm.goals.all():
-        goal_json = {"name": goal_orm.name, "attributes": []}
+    def fetch_goal(goal_orm):
+        goal_json = {"name": goal_orm.name, "attributes": [], "subgoals": []}
 
         for attribute_orm in goal_orm.attributes.all():
             attribute_json = {"name": attribute_orm.name,
@@ -102,6 +90,30 @@ def fetch_model(model_name):
 
             goal_json['attributes'].append(attribute_json)
 
+        for subgoal_orm in goal_orm.subgoals.all():
+            subgoal_json = fetch_goal(subgoal_orm)
+            goal_json['subgoals'].append(subgoal_json)
+
+        return goal_json
+
+
+    model_json = {}
+
+    logging.debug("Fetch the model %s", model_name)
+
+    try:
+        model_orm = QualityModel.objects.get(name=model_name)
+        model_json['name'] = model_orm.name
+        model_json['goals'] = []
+    except QualityModel.DoesNotExist:
+        logging.error('Can not find model %s', model_name)
+        raise
+
+    for goal_orm in model_orm.goals.all():
+
+        goal_json = fetch_goal(goal_orm)
+
+
         model_json['goals'].append(goal_json)
 
     return model_json
@@ -120,6 +132,21 @@ def fetch_models(model_name=None):
 
 
 def show_report(models_json):
+
+    def report_goal(goal, nattributes, nmetrics, nfactoids, ngoals):
+        for attribute in goal['attributes']:
+            nattributes += 1
+            nmetrics += len(attribute['metrics'])
+            nfactoids += len(attribute['factoids'])
+
+        if 'subgoals' in goal:
+            for subgoal in goal['subgoals']:
+                ngoals += 1
+                (nattributes, nmetrics, nfactoids, ngoals) = \
+                    report_goal(subgoal, nattributes, nmetrics, nfactoids, ngoals)
+
+        return (nattributes, nmetrics, nfactoids, ngoals)
+
     nmodels = 0
     ngoals = 0
     nattributes = 0
@@ -130,10 +157,8 @@ def show_report(models_json):
         nmodels += 1
         for goal in model['goals']:
             ngoals += 1
-            for attribute in goal['attributes']:
-                nattributes += 1
-                nmetrics += len(attribute['metrics'])
-                nfactoids  += len(attribute['factoids'])
+            (nattributes, nmetrics, nfactoids, ngoals) = \
+                report_goal(goal, nattributes, nmetrics, nfactoids, ngoals)
 
     print("Models:", nmodels)
     print("Goals:", ngoals)

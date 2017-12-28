@@ -74,49 +74,64 @@ def add(cls_orm, **params):
 
 def feed_models(models_json):
 
+    def feed_attribute(attribute):
+        aparams = {"name": attribute['name'],
+                   "description": attribute['description']}
+        attribute_orm = add(Attribute, **aparams)
+
+        for metric in attribute['metrics']:
+            data_source_orm = None
+            metric_class = None
+            if 'data_source_type' in metric and metric['data_source_type']:
+                dsparams = {"name": metric['data_source_type']}
+                data_source_orm = add(DataSourceType, **dsparams)
+            if 'mclass' in metric:
+                metric_class = metric['mclass']
+            metparams = {"name": metric['name'],
+                         "mclass": metric_class,
+                         "data_source_type": data_source_orm}
+            metric_orm = add(Metric, **metparams)
+            attribute_orm.metrics.add(metric_orm)
+
+        for factoid in attribute['factoids']:
+            data_source_orm = None
+            if 'data_source_type' in factoid and factoid['data_source_type']:
+                dsparams = {"name": factoid['data_source_type']}
+                data_source_orm = add(DataSourceType, **dsparams)
+            fparams = {"name": factoid['name'],
+                       "data_source_type": data_source_orm}
+            factoid_orm = add(Factoid, **fparams)
+            attribute_orm.factoids.add(factoid_orm)
+
+        attribute_orm.save()
+
+        return attribute_orm
+
+
+    def feed_goal(goal):
+        gparams = {"name": goal['name']}
+        goal_orm = add(Goal, **gparams)
+
+        for subgoal in goal['subgoals']:
+            subgoal_orm = feed_goal(subgoal)
+            goal_orm.subgoals.add(subgoal_orm)
+
+        for attribute in goal['attributes']:
+            attribute_orm = feed_attribute(attribute)
+            goal_orm.attributes.add(attribute_orm)
+
+        goal_orm.save()
+
+        return goal_orm
+
+
     for model in models_json['qualityModels']:
         mparams = {"name": model['name']}
         model_orm = add(QualityModel, **mparams)
 
         for goal in model['goals']:
-            gparams = {"name": goal['name']}
-            goal_orm = add(Goal, **gparams)
+            goal_orm = feed_goal(goal)
             model_orm.goals.add(goal_orm)
-
-            for attribute in goal['attributes']:
-                aparams = {"name": attribute['name'],
-                           "description": attribute['description']}
-                attribute_orm = add(Attribute, **aparams)
-                goal_orm.attributes.add(attribute_orm)
-
-                for metric in attribute['metrics']:
-                    data_source_orm = None
-                    metric_class = None
-                    if 'data_source_type' in metric and metric['data_source_type']:
-                        dsparams = {"name": metric['data_source_type']}
-                        data_source_orm = add(DataSourceType, **dsparams)
-                    if 'mclass' in metric:
-                        metric_class =  metric['mclass']
-                    metparams = {"name": metric['name'],
-                                 "mclass": metric_class,
-                                 "data_source_type": data_source_orm}
-                    metric_orm = add(Metric, **metparams)
-                    attribute_orm.metrics.add(metric_orm)
-
-                for factoid in attribute['factoids']:
-                    data_source_orm = None
-                    if 'data_source_type' in factoid and factoid['data_source_type']:
-                        dsparams = {"name": factoid['data_source_type']}
-                        data_source_orm = add(DataSourceType, **dsparams)
-                    fparams = {"name": factoid['name'],
-                               "data_source_type": data_source_orm}
-                    factoid_orm = add(Factoid, **fparams)
-                    attribute_orm.factoids.add(factoid_orm)
-
-
-                attribute_orm.save()
-
-            goal_orm.save()
 
         model_orm.save()
 
@@ -124,19 +139,10 @@ def feed_models(models_json):
 def ossmeter2gl(model_json):
     """ Convert a JSON from OSSMeter format to GrimoireLab """
 
-    logging.debug('Converting from OSSMeter to GrimoireLab quality model')
-
-    grimoirelab_json = {"qualityModels": []}
-
-    model_json = model_json['qualityModel']
-
-    gl_model_json = {"name": model_json["name"], "goals": []}
-
-    print(model_json.keys())
-
-    for qualityAspect in model_json['qualityAspects']:
+    def build_goal(qualityAspect):
         # A qualityAspect is a Goal in GrimoireLab
-        goal_json = {"name": qualityAspect['name'], "attributes": []}
+        goal_json = {"name": qualityAspect['name'], "attributes": [],
+                     "subgoals": []}
 
         for attribute_om in qualityAspect['attributes']:
             attribute_json = {"name": attribute_om['name'],
@@ -151,10 +157,31 @@ def ossmeter2gl(model_json):
 
             goal_json["attributes"].append(attribute_json)
 
+        if 'qualityAspects' in qualityAspect:
+            for subqualityAspect in qualityAspect['qualityAspects']:
+                subgoal_json = build_goal(subqualityAspect)
+                goal_json["subgoals"].append(subgoal_json)
+
+        return goal_json
+
+
+    logging.debug('Converting from OSSMeter to GrimoireLab quality model')
+
+    grimoirelab_json = {"qualityModels": []}
+
+    model_json = model_json['qualityModel']
+
+    gl_model_json = {"name": model_json["name"], "goals": []}
+
+    for qualityAspect in model_json['qualityAspects']:
+        goal_json = build_goal(qualityAspect)
+
         gl_model_json["goals"].append(goal_json)
 
 
     grimoirelab_json["qualityModels"].append(gl_model_json)
+
+    print(json.dumps(grimoirelab_json, indent=True))
 
     return grimoirelab_json
 
