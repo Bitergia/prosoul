@@ -30,16 +30,12 @@ import os
 import sys
 
 
-from time import time
-
-import requests
-
 import django
 # settings.configure()
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_meditor.settings'
 django.setup()
 
-from meditor.models import MetricsModel
+from meditor.models import QualityModel
 
 from grimoire_elk.panels import search_dashboards, fetch_dashboard, feed_dashboard
 
@@ -56,6 +52,7 @@ def get_params():
                         help='Model to be used to build the Dashboard')
 
     return parser.parse_args()
+
 
 def find_dash_id(es_url, dash_name):
     dash_id = None
@@ -101,7 +98,6 @@ def build_filters(metrics, index):
     return filter_json
 
 
-
 def build_dashboard(es_url, es_index, template_dashboard, model_name):
     logging.debug('Building the dashboard ... %s')
 
@@ -109,8 +105,8 @@ def build_dashboard(es_url, es_index, template_dashboard, model_name):
     model_orm = None
     try:
         metric_params = {"name": model_name}
-        model_orm = MetricsModel.objects.get(**metric_params)
-    except MetricsModel.DoesNotExist:
+        model_orm = QualityModel.objects.get(**metric_params)
+    except QualityModel.DoesNotExist:
         logging.error('Can not find the metrics model %s', model_name)
         sys.exit(1)
 
@@ -137,11 +133,9 @@ def build_dashboard(es_url, es_index, template_dashboard, model_name):
     dashboard['dashboard']['value']['title'] = dashboard['dashboard']['value']['title'] + "_" + model_name
     dashboard['dashboard']['id'] = dashboard['dashboard']['id'] + "_" + model_name
 
-
     feed_dashboard(dashboard, es_url)
 
     logging.info('Created Metrics Model dashboard %s', dashboard['dashboard']['value']['title'])
-
 
 
 if __name__ == '__main__':

@@ -33,8 +33,16 @@ class Metric(MeditorModel):
         return self.data_source_type.name + " " + self.mclass + " " + self.name
 
 
+class Factoid(MeditorModel):
+    name = models.CharField(max_length=200, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Attribute(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
+    description = models.CharField(max_length=4096, null=True)
     # Relations
     metrics = models.ManyToManyField(Metric)
     subattributes = models.ManyToManyField("Attribute", blank=True)
@@ -53,8 +61,8 @@ class Goal(MeditorModel):
         return self.name
 
 
-class MetricsModel(MeditorModel):
-    """ Quality, Maturity, Health ... Model """
+class QualityModel(MeditorModel):
+    """ Quality Model (maturity, Health ...)"""
     name = models.CharField(max_length=200, unique=True)
     # Relations
     goals = models.ManyToManyField("Goal")

@@ -36,7 +36,7 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_meditor.settings'
 django.setup()
 
-from meditor.models import MetricsModel
+from meditor.models import QualityModel
 
 
 def get_params():
@@ -50,45 +50,54 @@ def get_params():
     return parser.parse_args()
 
 
-def fetch_model(model):
+def fetch_model(model_name):
     """ Fetch a data model from Meditor and convert it to JSON """
 
     model_json = {}
 
-    logging.debug("Fetch the model %s", model)
+    logging.debug("Fetch the model %s", model_name)
 
     try:
-        model_orm = MetricsModel.objects.get(name=model)
-        model_json[model] = {}
-    except MetricsModel.DoesNotExist:
-        logging.error('Can not find model %s', model)
+        model_orm = QualityModel.objects.get(name=model_name)
+        model_json['name'] = model_orm.name
+        model_json['goals'] = []
+    except QualityModel.DoesNotExist:
+        logging.error('Can not find model %s', model_name)
         raise
 
     for goal_orm in model_orm.goals.all():
-        model_json[model][goal_orm.name] = {}
+        goal_json = {"name": goal_orm.name, "attributes": []}
 
-        for attribute in goal_orm.attributes.all():
-            model_json[model][goal_orm.name][attribute.name] = []
+        for attribute_orm in goal_orm.attributes.all():
+            attribute_json = {"name": attribute_orm.name,
+                              "description": attribute_orm.description,
+                              "metrics": []}
 
-            for metric in attribute.metrics.all():
-                metric_data = {
+            for metric in attribute_orm.metrics.all():
+                metric_json = {
                     "name": metric.name,
                     "data_source_type": metric.data_source_type.name,
                     "mclass": metric.mclass
 
                 }
-                model_json[model][goal_orm.name][attribute.name].append(metric_data)
+                attribute_json['metrics'].append(metric_json)
+
+            goal_json['attributes'].append(attribute_json)
+
+        model_json['goals'].append(goal_json)
 
     return model_json
 
 
-def fetch_all_models():
-    models_json = {}
+def fetch_models(model_name=None):
+    models_json = {"qualityModels": []}
 
-    models = MetricsModel.objects.all()
-
-    for model in models:
-        models_json.update(fetch_model(model.name))
+    if model_name:
+        models_json["qualityModels"].append(fetch_model(model_name))
+    else:
+        models = QualityModel.objects.all()
+        for model in models:
+            models_json["qualityModels"].append(fetch_model(model.name))
 
     return models_json
 
@@ -99,13 +108,13 @@ def show_report(models_json):
     nattributes = 0
     nmetrics = 0
 
-    for model in models_json:
+    for model in models_json['qualityModels']:
         nmodels += 1
-        for goal in models_json[model]:
+        for goal in model['goals']:
             ngoals += 1
-            for attribute in models_json[model][goal]:
+            for attribute in goal['attributes']:
                 nattributes += 1
-                nmetrics += len(models_json[model][goal][attribute])
+                nmetrics += len(attribute['metrics'])
 
     print("Models:", nmodels)
     print("Goals:", ngoals)
@@ -135,10 +144,10 @@ if __name__ == '__main__':
         try:
             if args.model:
                 logging.info("Exporting model %s to file %s", args.model, args.file)
-                model_json = fetch_model(args.model)
+                model_json = fetch_models(args.model)
             else:
                 logging.info("Exporting all models to file %s", args.file)
-                model_json = fetch_all_models()
+                model_json = fetch_models()
 
             json.dump(model_json, fmodel, indent=True, sort_keys=True)
             show_report(model_json)

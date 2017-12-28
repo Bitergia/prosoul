@@ -35,9 +35,10 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_meditor.settings'
 django.setup()
 
-from meditor.models import Attribute, DataSourceType, Goal, Metric, MetricsModel
+from meditor.models import Attribute, DataSourceType, Goal, Metric, QualityModel
 
 from meditor.meditor_export import show_report
+
 
 def get_params():
     parser = argparse.ArgumentParser(usage="usage: meditor_import.py [options]",
@@ -45,6 +46,9 @@ def get_params():
     parser.add_argument('-g', '--debug', action='store_true')
     parser.add_argument("-f", "--file", required=True,
                         help="File path from which to load the Metrics Models")
+    parser.add_argument('--format', default='grimoirelab',
+                        help="Import file format (default grimoirelab)")
+
     return parser.parse_args()
 
 
@@ -70,21 +74,22 @@ def add(cls_orm, **params):
 
 def feed_models(models_json):
 
-    for model in models_json:
-        mparams = {"name": model}
-        model_orm = add(MetricsModel, **mparams)
+    for model in models_json['qualityModels']:
+        mparams = {"name": model['name']}
+        model_orm = add(QualityModel, **mparams)
 
-        for goal in models_json[model]:
-            gparams = {"name": goal}
+        for goal in model['goals']:
+            gparams = {"name": goal['name']}
             goal_orm = add(Goal, **gparams)
             model_orm.goals.add(goal_orm)
 
-            for attribute in models_json[model][goal]:
-                aparams = {"name": attribute}
+            for attribute in goal['attributes']:
+                aparams = {"name": attribute['name'],
+                           "description": attribute['description']}
                 attribute_orm = add(Attribute, **aparams)
                 goal_orm.attributes.add(attribute_orm)
 
-                for metric in models_json[model][goal][attribute]:
+                for metric in attribute['metrics']:
                     dsparams = {"name": metric['data_source_type']}
                     data_source_orm = add(DataSourceType, **dsparams)
                     metparams = {"name": metric['name'],
@@ -98,6 +103,32 @@ def feed_models(models_json):
             goal_orm.save()
 
         model_orm.save()
+
+
+def ossmeter2gl(model_json):
+    """ Convert a JSON from OSSMeter format to GrimoireLab """
+
+    logging.debug('Converting from OSSMeter to GrimoireLab quality model')
+
+    raise
+
+
+def convert_to_grimoirelab(format_, model_json):
+    """ Convert a json from supported format_ to grimoirelab format """
+
+    grimoirelab_json = {}
+
+    if format_ not in ['ossmeter', 'grimoirelab']:
+        grimoirelab_json = models_json
+
+    if format_ == 'grimoirelab':
+        return models_json
+    elif format_ == 'ossmeter':
+        grimoirelab_json = ossmeter2gl(model_json)
+    else:
+        logging.error("Quality Model format not supported %s", format_)
+
+    return grimoirelab_json
 
 
 if __name__ == '__main__':
@@ -116,6 +147,8 @@ if __name__ == '__main__':
     logging.info("Importing models from file %s", args.file)
     with open(args.file) as fmodel:
         models_json = json.load(fmodel)
+        if args.format != "grimoirelab":
+            models_json = convert_to_grimoirelab(args.format, models_json)
         feed_models(models_json)
 
     show_report(models_json)
