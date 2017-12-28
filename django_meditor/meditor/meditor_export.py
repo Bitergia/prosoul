@@ -71,23 +71,40 @@ def fetch_model(model_name):
         for attribute_orm in goal_orm.attributes.all():
             attribute_json = {"name": attribute_orm.name,
                               "description": attribute_orm.description,
-                              "metrics": []}
+                              "metrics": [],
+                              "factoids": []}
 
-            for metric in attribute_orm.metrics.all():
+            for metric_orm in attribute_orm.metrics.all():
+                data_source_type_name = None
+                if metric_orm.data_source_type:
+                    data_source_type_name = metric_orm.data_source_type.name
+
                 metric_json = {
-                    "name": metric.name,
-                    "data_source_type": metric.data_source_type.name,
-                    "mclass": metric.mclass
+                    "name": metric_orm.name,
+                    "data_source_type": data_source_type_name,
+                    "mclass": metric_orm.mclass
 
                 }
                 attribute_json['metrics'].append(metric_json)
+
+            for factoid_orm in attribute_orm.factoids.all():
+                data_source_type_name = None
+                if factoid_orm.data_source_type:
+                    data_source_type_name = factoid_orm.data_source_type.name
+
+                factoid_json = {
+                    "name": factoid_orm.name,
+                    "data_source_type": data_source_type_name
+
+                }
+                attribute_json['factoids'].append(factoid_json)
+
 
             goal_json['attributes'].append(attribute_json)
 
         model_json['goals'].append(goal_json)
 
     return model_json
-
 
 def fetch_models(model_name=None):
     models_json = {"qualityModels": []}
@@ -156,5 +173,6 @@ if __name__ == '__main__':
             show_report(model_json)
         except Exception:
             os.remove(args.file)
+            raise
 
     logging.debug("Total exporting time ... %.2f sec", time() - task_init)
