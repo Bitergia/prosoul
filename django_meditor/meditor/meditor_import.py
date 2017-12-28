@@ -92,7 +92,7 @@ def feed_models(models_json):
                 for metric in attribute['metrics']:
                     data_source_orm = None
                     metric_class = None
-                    if 'data_source_type' in metric:
+                    if 'data_source_type' in metric and metric['data_source_type']:
                         dsparams = {"name": metric['data_source_type']}
                         data_source_orm = add(DataSourceType, **dsparams)
                     if 'mclass' in metric:
@@ -105,7 +105,7 @@ def feed_models(models_json):
 
                 for factoid in attribute['factoids']:
                     data_source_orm = None
-                    if 'data_source_type' in factoid:
+                    if 'data_source_type' in factoid and factoid['data_source_type']:
                         dsparams = {"name": factoid['data_source_type']}
                         data_source_orm = add(DataSourceType, **dsparams)
                     fparams = {"name": factoid['name'],
