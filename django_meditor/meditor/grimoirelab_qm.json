@@ -1,0 +1,44 @@
+{
+  "qualityModels": [
+    {
+      "name": "Empty Quality Model",
+      "goals": []
+    },
+    {
+      "name": "Basic GrimoireLab Quality Model Sample",
+      "goals": [
+        {
+          "name": "Community",
+          "attributes":  [
+            {
+              "name": "Bugs Users",
+              "description": "User working with the issue tracking system",
+              "metrics" : [
+                {
+                 "data_source_type": "bugs",
+                 "mclass": "users",
+                 "name": "numberOfUsers"
+                },
+                {
+                 "data_source_type": "bugs",
+                 "mclass": "users",
+                 "name": "numberOfInactiveUsers"
+                },
+                {
+                 "data_source_type": "bugs",
+                 "mclass": "users",
+                 "name": "numberOfActiveUsers"
+                },
+                {
+                 "data_source_type": "bugs",
+                 "mclass": "newusers",
+                 "name": "numberOfNewUsers"
+                }
+             ]
+           }
+         ]
+       }
+     ]
+    }
+  ]
+}
