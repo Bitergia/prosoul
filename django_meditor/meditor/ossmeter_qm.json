@@ -1,7 +1,7 @@
 {
   "qualityModel": {
     "name": "Default OSSMETER quality model",
-    "qualityAspects ": [
+    "qualityAspects": [
       {
         "name": "code",
         "qualityAspects": [
@@ -147,7 +147,7 @@
 					"org.ossmeter.metricprovider.historic.bugs.responsetime",
 					"org.ossmeter.metricprovider.historic.bugs.comments",
 					"org.ossmeter.metricprovider.trans.bugs.dailycomments",
-					"org.ossmeter.metricprovider.trans.bugs.hourlycomments"				
+					"org.ossmeter.metricprovider.trans.bugs.hourlycomments"
 				]
               },
               {
@@ -214,7 +214,7 @@
                   "org.ossmeter.factoid.newsgroups.status"
                 ],
                 "metrics": [
-					"org.ossmeter.metricprovider.historic.newsgroups.requestsreplies"					
+					"org.ossmeter.metricprovider.historic.newsgroups.requestsreplies"
 				]
               },
               {
