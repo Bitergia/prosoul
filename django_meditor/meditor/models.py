@@ -21,14 +21,14 @@ class DataSourceType(MeditorModel):
 
 
 class Metric(MeditorModel):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     mclass = models.CharField(max_length=200, null=True)
 
     data_source_type = models.ForeignKey(DataSourceType,
                                          on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return self.data_source_type.name + " " + self.mclass + " " + self.name
+        return  self.name
 
 
 class Factoid(MeditorModel):
