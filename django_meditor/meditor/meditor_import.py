@@ -35,7 +35,7 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_meditor.settings'
 django.setup()
 
-from meditor.models import Attribute, DataSourceType, Goal, Metric, QualityModel
+from meditor.models import Attribute, DataSourceType, Factoid, Goal, Metric, QualityModel
 
 from meditor.meditor_export import show_report
 
@@ -90,13 +90,29 @@ def feed_models(models_json):
                 goal_orm.attributes.add(attribute_orm)
 
                 for metric in attribute['metrics']:
-                    dsparams = {"name": metric['data_source_type']}
-                    data_source_orm = add(DataSourceType, **dsparams)
+                    data_source_orm = None
+                    metric_class = None
+                    if 'data_source_type' in metric:
+                        dsparams = {"name": metric['data_source_type']}
+                        data_source_orm = add(DataSourceType, **dsparams)
+                    if 'mclass' in metric:
+                        metric_class =  metric['mclass']
                     metparams = {"name": metric['name'],
-                                 "mclass": metric['mclass'],
+                                 "mclass": metric_class,
                                  "data_source_type": data_source_orm}
                     metric_orm = add(Metric, **metparams)
                     attribute_orm.metrics.add(metric_orm)
+
+                for factoid in attribute['factoids']:
+                    data_source_orm = None
+                    if 'data_source_type' in factoid:
+                        dsparams = {"name": factoid['data_source_type']}
+                        data_source_orm = add(DataSourceType, **dsparams)
+                    fparams = {"name": factoid['name'],
+                               "data_source_type": data_source_orm}
+                    factoid_orm = add(Factoid, **fparams)
+                    attribute_orm.factoids.add(factoid_orm)
+
 
                 attribute_orm.save()
 
@@ -110,7 +126,37 @@ def ossmeter2gl(model_json):
 
     logging.debug('Converting from OSSMeter to GrimoireLab quality model')
 
-    raise
+    grimoirelab_json = {"qualityModels": []}
+
+    model_json = model_json['qualityModel']
+
+    gl_model_json = {"name": model_json["name"], "goals": []}
+
+    print(model_json.keys())
+
+    for qualityAspect in model_json['qualityAspects']:
+        # A qualityAspect is a Goal in GrimoireLab
+        goal_json = {"name": qualityAspect['name'], "attributes": []}
+
+        for attribute_om in qualityAspect['attributes']:
+            attribute_json = {"name": attribute_om['name'],
+                              "description": attribute_om['description'],
+                              "metrics": [], "factoids": []}
+            for metric_om in attribute_om['metrics']:
+                metrics_json = {"name": metric_om}
+                attribute_json['metrics'].append(metrics_json)
+            for factoid_om in attribute_om['factoids']:
+                factoid_json = {"name": factoid_om}
+                attribute_json['factoids'].append(factoid_json)
+
+            goal_json["attributes"].append(attribute_json)
+
+        gl_model_json["goals"].append(goal_json)
+
+
+    grimoirelab_json["qualityModels"].append(gl_model_json)
+
+    return grimoirelab_json
 
 
 def convert_to_grimoirelab(format_, model_json):

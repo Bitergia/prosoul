@@ -107,6 +107,7 @@ def show_report(models_json):
     ngoals = 0
     nattributes = 0
     nmetrics = 0
+    nfactoids = 0
 
     for model in models_json['qualityModels']:
         nmodels += 1
@@ -115,11 +116,13 @@ def show_report(models_json):
             for attribute in goal['attributes']:
                 nattributes += 1
                 nmetrics += len(attribute['metrics'])
+                nfactoids  += len(attribute['factoids'])
 
     print("Models:", nmodels)
     print("Goals:", ngoals)
     print("Attributes:", nattributes)
     print("Metrics:", nmetrics)
+    print("Factoids:", nfactoids)
 
 
 if __name__ == '__main__':
