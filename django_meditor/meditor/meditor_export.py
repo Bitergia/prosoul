@@ -147,7 +147,7 @@ def gl2ossmeter(gl_models_json, model_name=None):
                            }
             for metric in attribute['metrics']:
                 qa_attribute['metrics'].append(metric['name'])
-            for factoid in attribute['metrics']:
+            for factoid in attribute['factoids']:
                 qa_attribute['factoids'].append(factoid['name'])
 
             qaspect["attributes"].append(qa_attribute)
@@ -175,6 +175,8 @@ def gl2ossmeter(gl_models_json, model_name=None):
         if not gl_model_json:
             logging.error("Can not find model %s to export", model_name)
             raise RuntimeError("Can not find model %s to export" % model_name)
+
+    ossmodel_json["qualityModel"]['name'] = gl_model_json['name']
 
     for goal in gl_model_json['goals']:
         qualityAspect = goal2qa(goal)

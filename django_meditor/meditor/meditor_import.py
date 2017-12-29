@@ -27,6 +27,7 @@ import argparse
 import json
 import logging
 import os
+import sys
 
 from time import time
 
@@ -35,10 +36,11 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_meditor.settings'
 django.setup()
 
+from django.test import TestCase
+
 from meditor.models import Attribute, DataSourceType, Factoid, Goal, Metric, QualityModel
 
-from meditor.meditor_export import show_report
-
+from meditor.meditor_export import fetch_models, gl2ossmeter, show_report
 
 def get_params():
     parser = argparse.ArgumentParser(usage="usage: meditor_import.py [options]",
@@ -48,6 +50,9 @@ def get_params():
                         help="File path from which to load the Metrics Models")
     parser.add_argument('--format', default='grimoirelab',
                         help="Import file format (default grimoirelab)")
+    parser.add_argument('-c', '--check', action='store_true',
+                        help='Export the data and compare it with the imported')
+
 
     return parser.parse_args()
 
@@ -181,8 +186,6 @@ def ossmeter2gl(model_json):
 
     grimoirelab_json["qualityModels"].append(gl_model_json)
 
-    print(json.dumps(grimoirelab_json, indent=True))
-
     return grimoirelab_json
 
 
@@ -200,8 +203,20 @@ def convert_to_grimoirelab(format_, model_json):
         grimoirelab_json = ossmeter2gl(model_json)
     else:
         logging.error("Quality Model format not supported %s", format_)
+        sys.exit(1)
 
     return grimoirelab_json
+
+
+def compare_models(models_json, format_=None):
+    # The MEditor database must only contains the models imported
+    exported_models_json = fetch_models()
+    if format_ == 'ossmeter':
+        exported_models_json = gl2ossmeter(exported_models_json)
+    test = TestCase()
+    test.maxDiff = None
+    test.assertDictEqual(models_json, exported_models_json)
+    logging.info("Check completed")
 
 
 if __name__ == '__main__':
@@ -219,11 +234,16 @@ if __name__ == '__main__':
 
     logging.info("Importing models from file %s", args.file)
     with open(args.file) as fmodel:
-        models_json = json.load(fmodel)
+        import_models_json = json.load(fmodel)
+        models_json = import_models_json
         if args.format != "grimoirelab":
-            models_json = convert_to_grimoirelab(args.format, models_json)
+            models_json = convert_to_grimoirelab(args.format, import_models_json)
         feed_models(models_json)
 
-    show_report(models_json)
+        show_report(models_json)
 
-    logging.debug("Total importing time ... %.2f sec", time() - task_init)
+        logging.debug("Total importing time ... %.2f sec", time() - task_init)
+
+        if args.check:
+            logging.info('Checking data ...')
+            compare_models(import_models_json, "ossmeter")
