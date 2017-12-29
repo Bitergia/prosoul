@@ -46,6 +46,8 @@ def get_params():
                         help="File path in which to export the Metrics Models")
     parser.add_argument('-g', '--debug', action='store_true')
     parser.add_argument('-m', '--model', help='Model to be exported. If not provided all models will be exported.')
+    parser.add_argument('--format', default='grimoirelab',
+                        help="Import file format (default grimoirelab)")
 
     return parser.parse_args()
 
@@ -131,6 +133,56 @@ def fetch_models(model_name=None):
     return models_json
 
 
+def gl2ossmeter(gl_models_json, model_name=None):
+    """ Convert a GrimoireLab JSON quality model to OSSMeter format """
+
+    def goal2qa(goal):
+        qaspect = {"qualityAspects": [], "name": goal['name'], "attributes": []}
+
+        for attribute in goal['attributes']:
+            qa_attribute = {"name": attribute['name'],
+                            "description": attribute['description'],
+                            "metrics": [],
+                            "factoids": []
+                           }
+            for metric in attribute['metrics']:
+                qa_attribute['metrics'].append(metric['name'])
+            for factoid in attribute['metrics']:
+                qa_attribute['factoids'].append(factoid['name'])
+
+            qaspect["attributes"].append(qa_attribute)
+
+        if 'subgoals' in goal:
+            for subgoal in goal['subgoals']:
+                subqaspect = goal2qa(subgoal)
+                qaspect['qualityAspects'].append(subqaspect)
+
+        return qaspect
+
+
+    ossmodel_json = {"qualityModel": {"qualityAspects": []}}
+    gl_model_json = {}
+
+    gl_models_json = gl_models_json['qualityModels']
+
+    if not model_name:
+        gl_model_json = gl_models_json[0]
+    else:
+        for model in gl_models_json:
+            if gl_models_json['name'] == model_name:
+                gl_model_json = model
+                break
+        if not gl_model_json:
+            logging.error("Can not find model %s to export", model_name)
+            raise RuntimeError("Can not find model %s to export" % model_name)
+
+    for goal in gl_model_json['goals']:
+        qualityAspect = goal2qa(goal)
+        ossmodel_json['qualityModel']['qualityAspects'].append(qualityAspect)
+
+    return ossmodel_json
+
+
 def show_report(models_json):
 
     def report_goal(goal, nattributes, nmetrics, nfactoids, ngoals):
@@ -189,13 +241,17 @@ if __name__ == '__main__':
         try:
             if args.model:
                 logging.info("Exporting model %s to file %s", args.model, args.file)
-                model_json = fetch_models(args.model)
+                models_json = fetch_models(args.model)
             else:
                 logging.info("Exporting all models to file %s", args.file)
-                model_json = fetch_models()
+                models_json = fetch_models()
 
-            json.dump(model_json, fmodel, indent=True, sort_keys=True)
-            show_report(model_json)
+            show_report(models_json)
+
+            if args.format == 'ossmeter':
+                models_json = gl2ossmeter(models_json)
+
+            json.dump(models_json, fmodel, indent=True, sort_keys=True)
         except Exception:
             os.remove(args.file)
             raise
