@@ -22,10 +22,10 @@ class DataSourceType(MeditorModel):
 
 class Metric(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
-    mclass = models.CharField(max_length=200, null=True)
+    mclass = models.CharField(max_length=200, null=True, blank=True)
 
     data_source_type = models.ForeignKey(DataSourceType,
-                                         on_delete=models.CASCADE, null=True)
+                                         on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return  self.name
@@ -35,7 +35,7 @@ class Factoid(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
 
     data_source_type = models.ForeignKey(DataSourceType,
-                                         on_delete=models.CASCADE, null=True)
+                                         on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -43,10 +43,10 @@ class Factoid(MeditorModel):
 
 class Attribute(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
-    description = models.CharField(max_length=4096, null=True)
+    description = models.CharField(max_length=4096, null=True, blank=True)
     # Relations
-    metrics = models.ManyToManyField(Metric)
-    factoids = models.ManyToManyField(Factoid)
+    metrics = models.ManyToManyField(Metric, blank=True)
+    factoids = models.ManyToManyField(Factoid, blank=True)
     subattributes = models.ManyToManyField("Attribute", blank=True)
 
     def __str__(self):
