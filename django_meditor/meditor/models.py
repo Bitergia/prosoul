@@ -22,7 +22,8 @@ class DataSourceType(MeditorModel):
 
 class Metric(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
-    mclass = models.CharField(max_length=200, null=True, blank=True)
+    implementation = models.CharField(max_length=200, null=True, blank=True)
+    description = models.CharField(max_length=1024, null=True, blank=True)
 
     data_source_type = models.ForeignKey(DataSourceType,
                                          on_delete=models.CASCADE, null=True, blank=True)
