@@ -85,10 +85,12 @@ def fetch_metric(es_url, ds):
             metric_sample = {
                 "metric_id": m.id,
                 "metric_name": m.name,
+                "metric_es_name": m.name,
                 "metric_description": m.desc,
                 "metric_data_source": m.ds.name,
                 "metric_value": metric_ts['value'][i],
                 "metric_sample_datetime": metric_ts['date'][i],
+                "metric_implementation": str(m),
                 "project": None
             }
             metric_sample['id'] = uuid(metric_sample['metric_id'], metric_sample['metric_sample_datetime'])
