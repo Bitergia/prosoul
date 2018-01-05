@@ -1,0 +1,81 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": null,
+       "factoids": [],
+       "metrics": [
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "Bus factor"
+        },
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "Gender Diversity"
+        },
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "Organizations Diversity"
+        },
+        {
+         "data_source_type": null,
+         "mclass": null,
+         "name": "Commits by developer"
+        }
+       ],
+       "name": "Community"
+      },
+      {
+       "description": null,
+       "factoids": [],
+       "metrics": [
+        {
+         "data_source_type": "git",
+         "mclass": null,
+         "name": "slope of the commits trend"
+        },
+        {
+         "data_source_type": "git",
+         "mclass": null,
+         "name": "slope of the files trend"
+        }
+       ],
+       "name": "Activity"
+      },
+      {
+       "description": null,
+       "factoids": [],
+       "metrics": [
+        {
+         "data_source_type": "git",
+         "mclass": null,
+         "name": "Lines per commit"
+        },
+        {
+         "data_source_type": "git",
+         "mclass": null,
+         "name": "Merge vs Normal commits"
+        },
+        {
+         "data_source_type": "git",
+         "mclass": null,
+         "name": "Bugs in commits logs"
+        }
+       ],
+       "name": "Process"
+      }
+     ],
+     "name": "Maturity",
+     "subgoals": []
+    }
+   ],
+   "name": "Basic Maturity Model"
+  }
+ ]
+}

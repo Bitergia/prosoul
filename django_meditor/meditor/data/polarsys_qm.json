@@ -1,0 +1,758 @@
+  {
+    "name": "PolarSys Quality Model",
+    "version": "1.0.1",
+    "children": [
+      {
+        "mnemo": "QM_QUALITY",
+        "type": "attribute",
+        "active": "true",
+        "children": [
+          {
+            "mnemo": "QM_ECOSYSTEM",
+            "active": "true",
+            "type": "attribute",
+            "children": [
+              {
+                "mnemo": "QM_ACTIVITY",
+                "active": "true",
+                "type": "attribute",
+                "children": [
+                  {
+                    "mnemo": "MLS_DEV_ACTIVITY",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "MLS_DEV_VOL_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "MLS_USR_ACTIVITY",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "MLS_USR_VOL_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "SCM_ACTIVITY",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "SCM_COMMITS_3M",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "SCM_COMMITTED_FILES_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_DIVERSITY",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "MLS_DEV_DIVERSITY",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "MLS_DEV_AUTH_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "MLS_USR_DIVERSITY",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "MLS_USR_AUTH_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "SCM_DIVERSITY",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "SCM_COMMITTERS_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_RESPONSIVENESS",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "MLS_DEV_RESPONSIVENESS",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "MLS_DEV_RESP_TIME_MED_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "MLS_USR_RESPONSIVENESS",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "MLS_USR_RESP_TIME_MED_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_SUPPORT",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "MLS_DEV_SUPPORT",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "MLS_DEV_RESP_RATIO_3M",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "MLS_DEV_SUBJ_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "MLS_USR_SUPPORT",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "MLS_USR_RESP_RATIO_3M",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "MLS_USR_SUBJ_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_VISIBILITY",
+                "type": "attribute",
+                "active": "false",
+                "children": [
+                  {
+                    "mnemo": "PUB_CONF",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "PUB_CONF_VOL",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_USAGE",
+                "type": "attribute",
+                "active": "false",
+                "children": [
+                  {
+                    "mnemo": "DOWNLOADS",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "DL_REPO_1M",
+                        "type": "metric",
+                        "active": "false"
+                      },
+                      {
+                        "mnemo": "DL_UPDATE_SITE_1M",
+                        "type": "metric",
+                        "active": "false"
+                      }
+
+                    ]
+                  },
+                  {
+                    "mnemo": "INSTALL",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "SURVEY_INSTALL",
+                        "type": "metric",
+                        "active": "false"
+                      },
+                      {
+                        "mnemo": "MKT_INSTALL_SUCCESS_1M",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_FEEDBACK",
+                "type": "attribute",
+                "active": "false",
+                "children": [
+                  {
+                    "mnemo": "MKT_FEEDBACK",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "MKT_FAV",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "mnemo": "QM_PROCESS",
+            "type": "attribute",
+            "active": "true",
+            "children": [
+              {
+                "mnemo": "QM_SCM",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "PUB_SCM_INFO",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "PUB_SCM_INFO_PMI",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "SCM_USAGE",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "SCM_COMMITS_3M",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "SCM_COMMITTERS_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_ITS",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "PUB_ITS_INFO",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "PUB_ITS_INFO_PMI",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "ITS_USAGE",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "ITS_UPDATES_3M",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "ITS_AUTH_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "attribute",
+                "mnemo": "QM_IP",
+                "active": "false",
+                "children": [
+                  {
+                    "mnemo": "LIC",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "LIC_IDENT",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "IP_LOG",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "IP_LOG_COV",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "attribute",
+                "mnemo": "QM_PLAN",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "PLAN_ON_TIME",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "PLAN_NEXT_MILESTONE",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "PLAN_RELEASES",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "PLAN_MILESTONES_VOL",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "PLAN_REVIEWS_SUCCESS_RATE",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "attribute",
+                "mnemo": "QM_TST",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "TST_COV",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "LINE_COVERAGE",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "BRANCH_COVERAGE",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "TST_VOL",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "TST_VOL_IDX",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "TST_SUCCESS",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "TEST_SUCCESS_DENSITY",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "mnemo": "QM_PRODUCT",
+            "type": "attribute",
+            "active": "true",
+            "children": [
+              {
+                "mnemo": "QM_ANA",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "CODE_SIZE",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "NCLOC",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "ALL_DATA",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "ATTRS",
+                        "type": "metric",
+                        "active": "false"
+                      },
+                      {
+                        "mnemo": "METHS",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "CPX",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "FUNCTION_COMPLEXITY",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "MDIT",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "CODE_DOC",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "COMMENT_LINES_DENSITY",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "PRACTICES_ANA",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "NCC_ANA_IDX",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "ROKR_ANA",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_CHA",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "PUBLIC_DATA",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "PUBLIC_API",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "CPX",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "FUNCTION_COMPLEXITY",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "MDIT",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "CODE_CLONE",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "DUPLICATED_LINES_DENSITY",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "PRACTICES_CHA",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "NCC_CHA_IDX",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "ROKR_CHA",
+                        "active": "true",
+                        "type": "metric"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_REL",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "PUBLIC_DATA",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "PUBLIC_API",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "CPX",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "FUNCTION_COMPLEXITY",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "MDIT",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "SCM_STABILITY",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "SCM_STABILITY_3M",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "ITS_REL",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "ITS_FIX_MED_3M",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "ITS_BUGS_OPEN",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "ITS_BUGS_DENSITY",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "PRACTICES_REL",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "NCC_REL_IDX",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "ROKR_REL",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mnemo": "QM_REU",
+                "type": "attribute",
+                "active": "true",
+                "children": [
+                  {
+                    "mnemo": "PUBLIC_DATA",
+                    "type": "concept",
+                    "active": "false",
+                    "children": [
+                      {
+                        "mnemo": "PUBLIC_API",
+                        "type": "metric",
+                        "active": "false"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "TST_COV",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "LINE_COVERAGE",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "CODE_DOC",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "COMMENT_LINES_DENSITY",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "mnemo": "PRACTICES_REU",
+                    "type": "concept",
+                    "active": "true",
+                    "children": [
+                      {
+                        "mnemo": "NCC_REU_IDX",
+                        "type": "metric",
+                        "active": "true"
+                      },
+                      {
+                        "mnemo": "ROKR_REU",
+                        "type": "metric",
+                        "active": "true"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }

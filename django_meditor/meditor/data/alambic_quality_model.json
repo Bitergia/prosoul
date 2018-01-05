@@ -1,0 +1,127 @@
+{
+    "name": "Alambic Quality Model for Eclipse",
+    "version": "0.1",
+    "children": [
+        {
+            "mnemo": "QM_QUALITY",
+            "type": "attribute",
+            "active": "true",
+            "children": [
+                {
+                    "mnemo": "QM_ECOSYSTEM",
+                    "active": "true",
+                    "type": "attribute",
+                    "children": [
+                        {
+                            "mnemo": "QM_ACTIVITY",
+                            "active": "true",
+                            "type": "attribute",
+                            "children": [
+                                {
+                                    "mnemo": "CI_JOBS_FAILED_1W",
+                                    "type": "metric",
+                                    "active": "true"
+                                },
+                        				{
+                        				    "mnemo": "SCM_COMMITS_1M",
+                        				    "type": "metric",
+                        				    "active": "true"
+                        				},
+                        				{
+                        				    "mnemo": "SCM_MOD_LINES_1M",
+                        				    "type": "metric",
+                        				    "active": "true"
+                        				}
+                           ]
+		                    },
+                        {
+                            "mnemo": "QM_DIVERSITY",
+                            "type": "attribute",
+                            "active": "true",
+                            "children": [
+                                {
+                                    "mnemo": "SCM_AUTHORS_1M",
+                                    "type": "metric",
+                                    "active": "true"
+                                }
+                            ]
+                        },
+                        {
+                            "mnemo": "QM_SUPPORT",
+                            "type": "attribute",
+                            "active": "true",
+                            "children": [
+                                {
+                                    "mnemo": "PMI_DOC_INFO",
+                                    "type": "metric",
+                                    "active": "true"
+                                },
+                                {
+                                    "mnemo": "PMI_SCM_INFO",
+                                    "type": "metric",
+                                    "active": "true"
+                                },
+                                {
+                                    "mnemo": "PMI_ITS_INFO",
+                                    "type": "metric",
+                                    "active": "true"
+                                },
+                                {
+                                    "mnemo": "PMI_ACCESS_INFO",
+                                    "type": "metric",
+                                    "active": "true"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "mnemo": "QM_PROCESS",
+                    "type": "attribute",
+                    "active": "true",
+                    "children": [
+                        {
+                            "mnemo": "QM_SCM",
+                            "type": "attribute",
+                            "active": "true",
+                            "children": [
+                                {
+                                    "mnemo": "PMI_SCM_INFO",
+                                    "type": "metric",
+                                    "active": "true"
+                                },
+                                {
+                                    "mnemo": "SCM_COMMITS_1M",
+                                    "type": "metric",
+                                    "active": "true"
+                                },
+                                {
+                                    "mnemo": "SCM_AUTHORS_1M",
+                                    "type": "metric",
+                                    "active": "true"
+                                }
+                            ]
+                        },
+                        {
+                            "mnemo": "QM_REL_ENG",
+                            "type": "attribute",
+                            "active": "true",
+                            "children": [
+                                {
+                                    "mnemo": "PMI_REL_VOL",
+                                    "type": "metric",
+                                    "active": "true"
+                                },
+                                {
+                                    "mnemo": "CI_JOBS_GREEN_RATIO",
+                                    "type": "metric",
+                                    "active": "true"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
