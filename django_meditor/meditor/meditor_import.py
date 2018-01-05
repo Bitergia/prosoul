@@ -176,8 +176,7 @@ def alambic2gl(model_json):
 
     grimoirelab_json = {"qualityModels": []}
 
-    gl_model_json = {"name": model_json["name"], "goals": [],
-                     "version": model_json["version"]}
+    gl_model_json = {"name": model_json["name"], "goals": []}
 
     for child in model_json['children']:
         # In alambic all are attributes
