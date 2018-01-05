@@ -187,11 +187,22 @@ def gl2ossmeter(gl_models_json, model_name=None):
 
 def show_report(models_json):
 
+    def report_attribute(attribute, nattributes, nmetrics, nfactoids):
+        nmetrics += len(attribute['metrics'])
+        nfactoids += len(attribute['factoids'])
+
+        if 'subattributes' in attribute:
+            for subattribute in attribute['subattributes']:
+                nattributes += 1
+                (nattributes, nmetrics, nfactoids) = \
+                    report_attribute(subattribute, nattributes, nmetrics, nfactoids)
+        return (nattributes, nmetrics, nfactoids)
+
     def report_goal(goal, nattributes, nmetrics, nfactoids, ngoals):
         for attribute in goal['attributes']:
             nattributes += 1
-            nmetrics += len(attribute['metrics'])
-            nfactoids += len(attribute['factoids'])
+            (nattributes, nmetrics, nfactoids) = \
+                report_attribute(attribute, nattributes, nmetrics, nfactoids)
 
         if 'subgoals' in goal:
             for subgoal in goal['subgoals']:
