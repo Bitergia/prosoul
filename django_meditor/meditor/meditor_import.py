@@ -40,7 +40,7 @@ from django.test import TestCase
 
 from meditor.models import Attribute, DataSourceType, Factoid, Goal, Metric, QualityModel
 
-from meditor.meditor_export import fetch_models, gl2ossmeter, show_report
+from meditor.meditor_export import fetch_models, gl2alambic, gl2ossmeter, show_report
 
 def get_params():
     parser = argparse.ArgumentParser(usage="usage: meditor_import.py [options]",
@@ -266,6 +266,8 @@ def compare_models(models_json, format_=None):
     exported_models_json = fetch_models()
     if format_ == 'ossmeter':
         exported_models_json = gl2ossmeter(exported_models_json)
+    elif format_ == 'alambic':
+        exported_models_json = gl2alambic(exported_models_json)
     test = TestCase()
     test.maxDiff = None
     test.assertDictEqual(models_json, exported_models_json)
@@ -299,4 +301,4 @@ if __name__ == '__main__':
 
         if args.check:
             logging.info('Checking data ...')
-            compare_models(import_models_json, "ossmeter")
+            compare_models(import_models_json, args.format)
