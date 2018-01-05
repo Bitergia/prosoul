@@ -151,11 +151,13 @@ def alambic2gl(model_json):
         attribute_json = {"name": attribute['mnemo'], "subattributes": [],
                           "metrics": [], "factoids": []}
         for child in attribute['children']:
-            if child['type'] == 'attribute':
+            if child['type'] in ['attribute', 'concept']:
                 attribute_json['subattributes'].append(build_attribute(child))
             elif child['type'] == 'metric':
                 metric_json = {"name": child['mnemo']}
                 attribute_json['metrics'].append(metric_json)
+            else:
+                raise RuntimeError('Type of attribute not supported ' + child['type'])
 
         return attribute_json
 
