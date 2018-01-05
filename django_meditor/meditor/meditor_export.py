@@ -71,9 +71,7 @@ def fetch_model(model_name):
 
                 metric_json = {
                     "name": metric_orm.name,
-                    "data_source_type": data_source_type_name,
-                    "mclass": metric_orm.mclass
-
+                    "data_source_type": data_source_type_name
                 }
                 attribute_json['metrics'].append(metric_json)
 
@@ -133,6 +131,76 @@ def fetch_models(model_name=None):
     return models_json
 
 
+def select_model(gl_models_json, model_name=None):
+    """ Select a model from the list of avaialble models by model_name """
+
+    gl_model_json = None
+
+    gl_models_json = gl_models_json['qualityModels']
+
+    if not model_name:
+        gl_model_json = gl_models_json[0]
+    else:
+        for model in gl_models_json:
+            if gl_models_json['name'] == model_name:
+                gl_model_json = model
+                break
+        if not gl_model_json:
+            logging.error("Can not find model %s to export", model_name)
+            raise RuntimeError("Can not find model %s to export" % model_name)
+
+    return gl_model_json
+
+
+def gl2alambic(gl_models_json, model_name=None):
+    """ Convert a GrimoireLab JSON quality model to Alambic format """
+
+    def attribute2child(attribute):
+        """ Convert an Alambic child to an attribute """
+        al_attribute = {"active": "true", "type": "attribute",
+                        "mnemo": attribute['name'], "children": []}
+
+        for metric in attribute['metrics']:
+            al_metric = {"active": "true", "type": "metrics",
+                         "mnemo": metric['name']}
+            al_attribute['children'].append(al_metric)
+
+        if 'subattributes' in attribute:
+            for subattribute in attribute['subattributes']:
+                al_attribute['children'].append(attribute2child(subattribute))
+
+        return al_attribute
+
+
+    def goal2atributte(goal):
+        """ In Alambic goals are first level attributes """
+
+        goal_attribute = {"active": "true", "type": "attribute",
+                          "mnemo": goal['name'], "children": []}
+
+        for attribute in goal['attributes']:
+            goal_attribute["children"].append(attribute2child(attribute))
+
+        if 'subgoals' in goal:
+            for subgoal in goal['subgoals']:
+                goal_attribute["children"].append(goal2atributte(subgoal))
+
+        return goal_attribute
+
+
+    alambic_json = {"name": "", "version": "", "children": []}
+    gl_model_json = select_model(gl_models_json, model_name)
+
+    alambic_json['name'] = gl_model_json['name']
+    alambic_json['version'] = '0.1'  # Version exported
+
+    for goal in gl_model_json['goals']:
+        alambic_child = goal2atributte(goal)
+        alambic_json['children'].append(alambic_child)
+
+    return alambic_json
+
+
 def gl2ossmeter(gl_models_json, model_name=None):
     """ Convert a GrimoireLab JSON quality model to OSSMeter format """
 
@@ -161,20 +229,7 @@ def gl2ossmeter(gl_models_json, model_name=None):
 
 
     ossmodel_json = {"qualityModel": {"qualityAspects": []}}
-    gl_model_json = {}
-
-    gl_models_json = gl_models_json['qualityModels']
-
-    if not model_name:
-        gl_model_json = gl_models_json[0]
-    else:
-        for model in gl_models_json:
-            if gl_models_json['name'] == model_name:
-                gl_model_json = model
-                break
-        if not gl_model_json:
-            logging.error("Can not find model %s to export", model_name)
-            raise RuntimeError("Can not find model %s to export" % model_name)
+    gl_model_json = select_model(gl_models_json, model_name)
 
     ossmodel_json["qualityModel"]['name'] = gl_model_json['name']
 
@@ -264,7 +319,10 @@ if __name__ == '__main__':
             if args.format == 'ossmeter':
                 models_json = gl2ossmeter(models_json)
 
-            json.dump(models_json, fmodel, indent=True, sort_keys=True)
+            if args.format == 'alambic':
+                models_json = gl2alambic(models_json)
+
+            json.dump(models_json, fmodel, indent=True)
         except Exception:
             os.remove(args.file)
             raise
