@@ -80,20 +80,21 @@ def add(cls_orm, **params):
 def feed_models(models_json):
 
     def feed_attribute(attribute):
-        aparams = {"name": attribute['name'],
-                   "description": attribute['description']}
+        aparams = {"name": attribute['name']}
+        if 'description' in attribute:
+            aparams["description"] = attribute['description']
         attribute_orm = add(Attribute, **aparams)
+
+        for subattribute in attribute['subattributes']:
+            subattribute_orm = feed_attribute(subattribute)
+            attribute_orm.subattributes.add(subattribute_orm)
 
         for metric in attribute['metrics']:
             data_source_orm = None
-            metric_class = None
             if 'data_source_type' in metric and metric['data_source_type']:
                 dsparams = {"name": metric['data_source_type']}
                 data_source_orm = add(DataSourceType, **dsparams)
-            if 'mclass' in metric:
-                metric_class = metric['mclass']
             metparams = {"name": metric['name'],
-                         "mclass": metric_class,
                          "data_source_type": data_source_orm}
             metric_orm = add(Metric, **metparams)
             attribute_orm.metrics.add(metric_orm)
@@ -132,6 +133,8 @@ def feed_models(models_json):
 
     for model in models_json['qualityModels']:
         mparams = {"name": model['name']}
+        if 'version' in model:
+            mparams["version"] = model['version']
         model_orm = add(QualityModel, **mparams)
 
         for goal in model['goals']:
@@ -139,6 +142,55 @@ def feed_models(models_json):
             model_orm.goals.add(goal_orm)
 
         model_orm.save()
+
+def alambic2gl(model_json):
+    """ Convert a JSON from Alambic format to GrimoireLab """
+
+    def build_attribute(attribute):
+        """ The same attribute concept than in GrimoireLab """
+        attribute_json = {"name": attribute['mnemo'], "subattributes": [],
+                          "metrics": [], "factoids": []}
+        for child in attribute['children']:
+            if child['type'] == 'attribute':
+                attribute_json['subattributes'].append(build_attribute(child))
+            elif child['type'] == 'metric':
+                metric_json = {"name": child['mnemo']}
+                attribute_json['metrics'].append(metric_json)
+
+        return attribute_json
+
+    def build_goal(child):
+        """ The first level attribute is a Goal in GrimoireLab """
+        goal_json = {"name": child['mnemo'], "attributes": [],
+                     "subgoals": []}
+
+        for attribute in child['children']:
+            # All all attributes with subattributes until metrics are reached
+            attribute_json = build_attribute(attribute)
+            goal_json["attributes"].append(attribute_json)
+
+        return goal_json
+
+
+    logging.debug('Converting from Alambic to GrimoireLab quality model')
+
+    grimoirelab_json = {"qualityModels": []}
+
+    gl_model_json = {"name": model_json["name"], "goals": [],
+                     "version": model_json["version"]}
+
+    for child in model_json['children']:
+        # In alambic all are attributes
+        # Convert the first level attribute to a goal
+        goal_json = build_goal(child)
+
+        gl_model_json["goals"].append(goal_json)
+
+    grimoirelab_json["qualityModels"].append(gl_model_json)
+
+    print(json.dumps(grimoirelab_json, indent=True))
+
+    return grimoirelab_json
 
 
 def ossmeter2gl(model_json):
@@ -194,13 +246,15 @@ def convert_to_grimoirelab(format_, model_json):
 
     grimoirelab_json = {}
 
-    if format_ not in ['ossmeter', 'grimoirelab']:
+    if format_ not in ['alambic', 'grimoirelab', 'ossmeter']:
         grimoirelab_json = models_json
 
     if format_ == 'grimoirelab':
         return models_json
     elif format_ == 'ossmeter':
         grimoirelab_json = ossmeter2gl(model_json)
+    elif format_ == 'alambic':
+        grimoirelab_json = alambic2gl(model_json)
     else:
         logging.error("Quality Model format not supported %s", format_)
         sys.exit(1)
