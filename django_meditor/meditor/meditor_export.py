@@ -55,44 +55,50 @@ def get_params():
 def fetch_model(model_name):
     """ Fetch a data model from Meditor and convert it to JSON """
 
+    def fetch_attribute(attribute_orm):
+        attribute_json = {"name": attribute_orm.name,
+                          "description": attribute_orm.description,
+                          "metrics": [],
+                          "factoids": [],
+                          "subattributes": []}
+
+        for metric_orm in attribute_orm.metrics.all():
+            data_source_type_name = None
+            if metric_orm.data_source_type:
+                data_source_type_name = metric_orm.data_source_type.name
+
+            metric_json = {
+                "name": metric_orm.name,
+                "data_source_type": data_source_type_name
+            }
+            attribute_json['metrics'].append(metric_json)
+
+        for factoid_orm in attribute_orm.factoids.all():
+            data_source_type_name = None
+            if factoid_orm.data_source_type:
+                data_source_type_name = factoid_orm.data_source_type.name
+
+            factoid_json = {
+                "name": factoid_orm.name,
+                "data_source_type": data_source_type_name
+
+            }
+            attribute_json['factoids'].append(factoid_json)
+
+        for subattribute_orm in attribute_orm.subattributes.all():
+            attribute_json['subattributes'].append(fetch_attribute(subattribute_orm))
+
+        return attribute_json
+
+
     def fetch_goal(goal_orm):
         goal_json = {"name": goal_orm.name, "attributes": [], "subgoals": []}
 
         for attribute_orm in goal_orm.attributes.all():
-            attribute_json = {"name": attribute_orm.name,
-                              "description": attribute_orm.description,
-                              "metrics": [],
-                              "factoids": []}
-
-            for metric_orm in attribute_orm.metrics.all():
-                data_source_type_name = None
-                if metric_orm.data_source_type:
-                    data_source_type_name = metric_orm.data_source_type.name
-
-                metric_json = {
-                    "name": metric_orm.name,
-                    "data_source_type": data_source_type_name
-                }
-                attribute_json['metrics'].append(metric_json)
-
-            for factoid_orm in attribute_orm.factoids.all():
-                data_source_type_name = None
-                if factoid_orm.data_source_type:
-                    data_source_type_name = factoid_orm.data_source_type.name
-
-                factoid_json = {
-                    "name": factoid_orm.name,
-                    "data_source_type": data_source_type_name
-
-                }
-                attribute_json['factoids'].append(factoid_json)
-
-
-            goal_json['attributes'].append(attribute_json)
+            goal_json['attributes'].append(fetch_attribute(attribute_orm))
 
         for subgoal_orm in goal_orm.subgoals.all():
-            subgoal_json = fetch_goal(subgoal_orm)
-            goal_json['subgoals'].append(subgoal_json)
+            goal_json['subgoals'].append(fetch_goal(subgoal_orm))
 
         return goal_json
 
@@ -161,7 +167,7 @@ def gl2alambic(gl_models_json, model_name=None):
                         "mnemo": attribute['name'], "children": []}
 
         for metric in attribute['metrics']:
-            al_metric = {"active": "true", "type": "metrics",
+            al_metric = {"active": "true", "type": "metric",
                          "mnemo": metric['name']}
             al_attribute['children'].append(al_metric)
 
