@@ -67,7 +67,6 @@ class Goal(MeditorModel):
 class QualityModel(MeditorModel):
     """ Quality Model (maturity, Health ...)"""
     name = models.CharField(max_length=200, unique=True)
-    version = models.CharField(max_length=200, null=True, blank=True)
     # Relations
     goals = models.ManyToManyField("Goal")
 
