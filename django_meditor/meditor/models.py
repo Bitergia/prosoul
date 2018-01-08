@@ -6,6 +6,7 @@ class MeditorModel(models.Model):
     """ Basic metadata for Meditor objects """
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    active = models.BooleanField(default=True)
 
     created_by = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
