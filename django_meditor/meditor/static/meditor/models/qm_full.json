@@ -1,0 +1,105 @@
+{
+ "name": "Basic Maturity Model",
+ "version": "0.1",
+ "children": [
+  {
+   "description": "Maturity for the Tech Community",
+   "active": "true",
+   "type": "attribute",
+   "mnemo": "Maturity",
+   "name": "Maturity",
+   "children": [
+    {
+     "description": "",
+     "active": "true",
+     "type": "attribute",
+     "mnemo": "Community",
+     "name": "Community",
+     "children": [
+      {
+       "description": "The \"bus factor\" is the minimum number of team members that have to suddenly disappear from a project before the project stalls due to lack of knowledgeable or competent personnel.",
+       "mnemo": "Bus factor",
+       "active": "true",
+       "type": "metric",
+       "name": "Bus factor"
+      },
+      {
+       "description": "",
+       "mnemo": "Gender Diversity",
+       "active": "true",
+       "type": "metric",
+       "name": "Gender Diversity"
+      },
+      {
+       "description": "",
+       "mnemo": "Organizations Diversity",
+       "active": "true",
+       "type": "metric",
+       "name": "Organizations Diversity"
+      },
+      {
+       "description": "",
+       "mnemo": "Commits by developer",
+       "active": "true",
+       "type": "metric",
+       "name": "Commits by developer"
+      }
+     ]
+    },
+    {
+     "description": "Activity of the Community",
+     "active": "true",
+     "type": "attribute",
+     "mnemo": "Activity",
+     "name": "Activity",
+     "children": [
+      {
+       "description": "",
+       "mnemo": "slope of the commits trend",
+       "active": "true",
+       "type": "metric",
+       "name": "slope of the commits trend"
+      },
+      {
+       "description": "",
+       "mnemo": "slope of the files trend",
+       "active": "true",
+       "type": "metric",
+       "name": "slope of the files trend"
+      }
+     ]
+    },
+    {
+     "description": "",
+     "active": "true",
+     "type": "attribute",
+     "mnemo": "Process",
+     "name": "Process",
+     "children": [
+      {
+       "description": "",
+       "mnemo": "Lines per commit",
+       "active": "true",
+       "type": "metric",
+       "name": "Lines per commit"
+      },
+      {
+       "description": "",
+       "mnemo": "Merge vs Normal commits",
+       "active": "true",
+       "type": "metric",
+       "name": "Merge vs Normal commits"
+      },
+      {
+       "description": "",
+       "mnemo": "Bugs in commits logs",
+       "active": "true",
+       "type": "metric",
+       "name": "Bugs in commits logs"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

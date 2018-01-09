@@ -1,0 +1,24 @@
+{
+ "children": {
+  "Maturity": {
+   "description": "Maturity for the Tech Community",
+   "mnemo": "Maturity",
+   "name": "Maturity"
+  },
+  "Process": {
+   "description": "",
+   "mnemo": "Process",
+   "name": "Process"
+  },
+  "Activity": {
+   "description": "Activity of the Community",
+   "mnemo": "Activity",
+   "name": "Activity"
+  },
+  "Community": {
+   "description": "",
+   "mnemo": "Community",
+   "name": "Community"
+  }
+ }
+}

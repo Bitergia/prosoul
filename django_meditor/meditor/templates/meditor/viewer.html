@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% with active_page="viewer" %}
+
+{% block title %}Project{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    {% load static %}
+    <link rel="stylesheet" href="{% static "meditor/viewer.css" %}">
+{% endblock %}
+
+{% block body %}
+
+<!-- LEFT COLUMN -->
+<div style="float:left; width:70%; margin-right: 10px; height:90%; min-height: 600px;">
+
+<h1 style='display:inline'>Quality Models Viewer</h1>
+
+{% include 'meditor/viewer_js.html' %}
+
+</div>
+<!-- END LEFT COLUMN -->
+
+<!-- RIGHT COLUMN -->
+<div>
+    <div style="height:100px"></div>
+    Scope<br><br>
+    Quality Models: 1<br>
+    Attributes: {{attributes_data.children|length}}<br>
+    Metrics: {{metrics_data.children|length}}<br>
+    <div style="height:100px"></div>
+    <a href="?project={{project_selected}}&export_file=project.json" class="btn btn-success" role="button">Export Quality Models</a>
+    <div style="height:10px"></div>
+    <a href="?project={{project_selected}}&import_file=project.json" class="btn btn-success" role="button">Import Quality Models</a>
+</div>
+<!-- END RIGHT COLUMN -->
+{% endblock %}
+{% endwith  %}

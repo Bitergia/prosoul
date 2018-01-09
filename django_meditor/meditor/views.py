@@ -1,12 +1,23 @@
 import json
 
 from django.http import HttpResponse
-from meditor.meditor_export import fetch_models
+from django.template import loader
 
+from meditor.meditor_export import fetch_models, gl2viewer
 
 def index(request):
     """ Basic Models Viewer just dumping the JSON of all models """
-    render_index = "<h1>Metrics Model Viewer</h1>"
-    model = fetch_models()
-    render_index += "<pre>" + json.dumps(model, indent=True, sort_keys=True) + "</pre>"
+    models = fetch_models()
+    viewer_data = gl2viewer(models)
+    context = {'qm_data': viewer_data[0],
+               'qm_data_str': json.dumps(viewer_data[0]).replace('\"', '\\"'),
+               'attributes_data': viewer_data[1],
+               'attributes_data_str': json.dumps(viewer_data[1]).replace('\"', '\\"'),
+               'metrics_data': viewer_data[2],
+               'metrics_data_str': json.dumps(viewer_data[2]).replace('\"', '\\"')}
+
+    template = loader.get_template('meditor/viewer.html')
+
+    render_index = template.render(context, request)
+
     return HttpResponse(render_index)

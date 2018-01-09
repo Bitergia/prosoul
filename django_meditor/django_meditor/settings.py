@@ -55,7 +55,7 @@ ROOT_URLCONF = 'django_meditor.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['django_meditor/templates', 'meditor/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
