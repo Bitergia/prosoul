@@ -7,8 +7,9 @@ class MeditorModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
+    description = models.CharField(max_length=1024, default='', null=True, blank=True)
 
-    created_by = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -24,7 +25,6 @@ class DataSourceType(MeditorModel):
 class Metric(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
     implementation = models.CharField(max_length=200, null=True, blank=True)
-    description = models.CharField(max_length=1024, null=True, blank=True)
 
     data_source_type = models.ForeignKey(DataSourceType,
                                          on_delete=models.CASCADE, null=True, blank=True)
@@ -45,7 +45,6 @@ class Factoid(MeditorModel):
 
 class Attribute(MeditorModel):
     name = models.CharField(max_length=200, unique=True)
-    description = models.CharField(max_length=4096, null=True, blank=True)
     # Relations
     metrics = models.ManyToManyField(Metric, blank=True)
     factoids = models.ManyToManyField(Factoid, blank=True)
