@@ -69,6 +69,7 @@ def fetch_model(model_name):
 
             metric_json = {
                 "name": metric_orm.name,
+                "description": metric_orm.description,
                 "data_source_type": data_source_type_name
             }
             attribute_json['metrics'].append(metric_json)
@@ -80,6 +81,7 @@ def fetch_model(model_name):
 
             factoid_json = {
                 "name": factoid_orm.name,
+                "description": factoid_orm.description,
                 "data_source_type": data_source_type_name
 
             }
@@ -92,7 +94,8 @@ def fetch_model(model_name):
 
 
     def fetch_goal(goal_orm):
-        goal_json = {"name": goal_orm.name, "attributes": [], "subgoals": []}
+        goal_json = {"name": goal_orm.name, "description": goal_orm.description,
+                     "attributes": [], "subgoals": []}
 
         for attribute_orm in goal_orm.attributes.all():
             goal_json['attributes'].append(fetch_attribute(attribute_orm))
@@ -158,17 +161,66 @@ def select_model(gl_models_json, model_name=None):
     return gl_model_json
 
 
+def gl2viewer(gl_models_json, model_name=None):
+    """ Convert a GrimoireLab JSON quality model to Alambic Viewer format """
+
+    def extract_attributes(alambic_children):
+        attributes = {}
+        for child in alambic_children:
+            if child['type'] == 'attribute':
+                attributes[child['mnemo']] = {
+                    "description": child['description'],
+                    "mnemo": child['mnemo'],
+                    "name": child['mnemo']
+                }
+                if 'children' in child:
+                    attributes.update(extract_attributes(child['children']))
+
+        return attributes
+
+    def extract_metrics(alambic_children):
+        metrics = {}
+        for child in alambic_children:
+            if child['type'] == 'metric':
+                metrics[child['mnemo']] = {
+                    "description": child['description'],
+                    "mnemo": child['mnemo'],
+                    "name": child['mnemo']
+                }
+            if 'children' in child and child['children']:
+                metrics.update(extract_metrics(child['children']))
+
+        return metrics
+
+
+    viewer_json = {}
+    alambic_json = gl2alambic(gl_models_json)
+
+    attributes_json = {"children": extract_attributes(alambic_json['children'])}
+    metrics_json = {"children": extract_metrics(alambic_json['children'])}
+
+    viewer_json = [alambic_json]
+    viewer_json.append(attributes_json)
+    viewer_json.append(metrics_json)
+
+    return viewer_json
+
+
 def gl2alambic(gl_models_json, model_name=None):
     """ Convert a GrimoireLab JSON quality model to Alambic format """
+
 
     def attribute2child(attribute):
         """ Convert an Alambic child to an attribute """
         al_attribute = {"active": "true", "type": "attribute",
-                        "mnemo": attribute['name'], "children": []}
+                        "description": attribute['description'],
+                        "mnemo": attribute['name'], "name": attribute['name'],
+                        "children": []}
 
         for metric in attribute['metrics']:
             al_metric = {"active": "true", "type": "metric",
-                         "mnemo": metric['name']}
+                         "description": metric['description'],
+                         "mnemo": metric['name'], "name": metric['name']}
             al_attribute['children'].append(al_metric)
 
         if 'subattributes' in attribute:
@@ -182,6 +234,8 @@ def gl2alambic(gl_models_json, model_name=None):
         """ In Alambic goals are first level attributes """
 
         goal_attribute = {"active": "true", "type": "attribute",
+                          "description": goal['description'],
+                          "name": goal['name'],
                           "mnemo": goal['name'], "children": []}
 
         for attribute in goal['attributes']:
@@ -324,11 +378,29 @@ if __name__ == '__main__':
 
             if args.format == 'ossmeter':
                 models_json = gl2ossmeter(models_json)
-
-            if args.format == 'alambic':
+            elif args.format == 'alambic':
                 models_json = gl2alambic(models_json)
+            elif args.format == 'viewer':
+                models_json = gl2viewer(models_json)
+            elif args.format == 'grimoirelab':
+                models_json = models_json
+            else:
+                raise RuntimeError('Export format not supported ' + args.format)
 
-            json.dump(models_json, fmodel, indent=True)
+            if args.format != 'viewer':
+                json.dump(models_json, fmodel, indent=True)
+            else:
+                json.dump(models_json[0], fmodel, indent=True)
+                logging.info('Generating extra files for attributes and metrics')
+                # attributes_full.json
+                attributes_file = os.path.join(os.path.dirname(fmodel.name), "attributes_full.json")
+                with open(attributes_file, "w") as fattrs:
+                    json.dump(models_json[1], fattrs, indent=True)
+                # metrics_full.json
+                metrics_file = os.path.join(os.path.dirname(fmodel.name), "metrics_full.json")
+                with open(metrics_file, "w") as fmetrics:
+                    json.dump(models_json[2], fmetrics, indent=True)
+
         except Exception:
             os.remove(args.file)
             raise
