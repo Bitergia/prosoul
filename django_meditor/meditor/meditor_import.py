@@ -85,9 +85,10 @@ def feed_models(models_json):
             aparams["description"] = attribute['description']
         attribute_orm = add(Attribute, **aparams)
 
-        for subattribute in attribute['subattributes']:
-            subattribute_orm = feed_attribute(subattribute)
-            attribute_orm.subattributes.add(subattribute_orm)
+        if 'subattributes' in attribute:
+            for subattribute in attribute['subattributes']:
+                subattribute_orm = feed_attribute(subattribute)
+                attribute_orm.subattributes.add(subattribute_orm)
 
         for metric in attribute['metrics']:
             data_source_orm = None
