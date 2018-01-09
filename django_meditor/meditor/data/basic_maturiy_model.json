@@ -5,7 +5,6 @@
     {
      "attributes": [
       {
-       "description": null,
        "factoids": [],
        "metrics": [
         {
@@ -32,7 +31,6 @@
        "name": "Community"
       },
       {
-       "description": null,
        "factoids": [],
        "metrics": [
         {
@@ -49,7 +47,6 @@
        "name": "Activity"
       },
       {
-       "description": null,
        "factoids": [],
        "metrics": [
         {
