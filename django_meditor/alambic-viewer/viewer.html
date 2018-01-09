@@ -226,11 +226,9 @@ function click(d) {
       pdesct.classed("details-title", true);
       pdesct.text("Description:");
 
-      for (desc_idx = 0 ; desc_idx < mynode.description.length ; desc_idx++) {
-          var pdesc = mydiv.append('p');
-          pdesc.classed("details", true);
-          pdesc.html(mynode.description[desc_idx]);
-      }
+      var pdesc = mydiv.append('p');
+      pdesc.classed("details", true);
+      pdesc.html(mynode.description);
     } else if (d.type == "attribute") {
       mynode = d;
       mynode.description = myattrs[d.mnemo]["description"];
@@ -255,12 +253,9 @@ function click(d) {
       pdesct = mydiv.append('p');
       pdesct.classed("details-title", true);
       pdesct.html("<b>Description:</b>")
-      for (desc_idx = 0 ; desc_idx < mynode.description.length ; desc_idx++) {
-          var pdesc = mydiv.append('p');
-          pdesc.classed("details", true);
-          pdesc.text(mynode.description[desc_idx]);
-      }
-
+      var pdesc = mydiv.append('p');
+      pdesc.classed("details", true);
+      pdesc.text(mynode.description);
     }
   }
 }
