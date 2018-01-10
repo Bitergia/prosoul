@@ -151,7 +151,7 @@ def select_model(gl_models_json, model_name=None):
         gl_model_json = gl_models_json[0]
     else:
         for model in gl_models_json:
-            if gl_models_json['name'] == model_name:
+            if model['name'] == model_name:
                 gl_model_json = model
                 break
         if not gl_model_json:
@@ -194,7 +194,7 @@ def gl2viewer(gl_models_json, model_name=None):
 
 
     viewer_json = {}
-    alambic_json = gl2alambic(gl_models_json)
+    alambic_json = gl2alambic(gl_models_json, model_name=model_name)
 
     attributes_json = {"children": extract_attributes(alambic_json['children'])}
     metrics_json = {"children": extract_metrics(alambic_json['children'])}
