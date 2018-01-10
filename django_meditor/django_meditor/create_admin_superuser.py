@@ -39,4 +39,8 @@ admin_user = 'admin'
 admin_pass = 'admin'
 
 db_manager = get_user_model()._default_manager.db_manager(admin_db)
-db_manager.create_superuser(username=admin_user, email='', password=admin_pass)
+try:
+    db_manager.create_superuser(username=admin_user, email='', password=admin_pass)
+    print("User for django admin created: admin/admin as login")
+except django.db.utils.IntegrityError:
+    print("User for django admin already exists")
