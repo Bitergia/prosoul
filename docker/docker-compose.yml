@@ -1,0 +1,4 @@
+meditor:
+  image: acs/meditor
+  ports:
+        - 8000:8000

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+echo "Running MEditor"
+
+git clone https://github.com/acs/meditor.git
+cd meditor/django_meditor/
+
+# Create the data models
+python3 manage.py makemigrations
+python3 manage.py migrate
+
+# Import some quality models as samples
+PYTHONPATH=. meditor/meditor_import.py -f meditor/data/ossmeter_qm.json --format ossmeter
+PYTHONPATH=. meditor/meditor_import.py -f meditor/data/alambic_quality_model.json --format alambic
+PYTHONPATH=. meditor/meditor_import.py -f meditor/data/basic_maturiy_model.json --format grimoirelab
+
+
+# Run the MEditor service
+python3 manage.py runserver 0.0.0.0:8000
