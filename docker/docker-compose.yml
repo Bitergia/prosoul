@@ -1,4 +1,4 @@
 meditor:
-  image: acs/meditor
+  image: acsdocker/meditor
   ports:
         - 8000:8000
