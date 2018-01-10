@@ -2,3 +2,6 @@ meditor:
   image: acsdocker/meditor
   ports:
         - 8000:8000
+  # volumes:
+    # The stage for this mordred load raw items, waits for ES ...
+    # - ./stage:/home/meditor/stage
