@@ -9,6 +9,9 @@ cd meditor/django_meditor/
 python3 manage.py makemigrations
 python3 manage.py migrate
 
+# Create the initial admin user: admin/admin
+PYTHONPATH=. django_meditor/create_admin_superuser.py
+
 # Import some quality models as samples
 PYTHONPATH=. meditor/meditor_import.py -f meditor/data/ossmeter_qm.json --format ossmeter
 PYTHONPATH=. meditor/meditor_import.py -f meditor/data/alambic_quality_model.json --format alambic
