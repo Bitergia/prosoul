@@ -8,8 +8,13 @@ from meditor.meditor_export import fetch_models, gl2viewer
 def index(request):
     """ Basic Models Viewer just dumping the JSON of all models """
     models = fetch_models()
-    viewer_data = gl2viewer(models)
-    context = {'qm_data': viewer_data[0],
+    model_selected = models['qualityModels'][0]['name']
+    if request.method == 'GET' and 'qmodel_selected' in request.GET:
+        model_selected = request.GET['qmodel_selected']
+    viewer_data = gl2viewer(models, model_name=model_selected)
+    context = {'qmodel_selected': model_selected,
+               'qmodels': models['qualityModels'],
+               'qm_data': viewer_data[0],
                'qm_data_str': json.dumps(viewer_data[0]).replace('\"', '\\"'),
                'attributes_data': viewer_data[1],
                'attributes_data_str': json.dumps(viewer_data[1]).replace('\"', '\\"'),
