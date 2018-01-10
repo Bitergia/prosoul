@@ -190,8 +190,6 @@ def alambic2gl(model_json):
 
     grimoirelab_json["qualityModels"].append(gl_model_json)
 
-    print(json.dumps(grimoirelab_json, indent=True))
-
     return grimoirelab_json
 
 
