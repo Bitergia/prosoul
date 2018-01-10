@@ -9,7 +9,7 @@ class MeditorModel(models.Model):
     active = models.BooleanField(default=True)
     description = models.CharField(max_length=1024, default='', null=True, blank=True)
 
-    created_by = models.ForeignKey(User, null=True, blank=True)
+    created_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         abstract = True
