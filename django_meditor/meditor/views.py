@@ -5,7 +5,10 @@ from django.template import loader
 
 from meditor.meditor_export import fetch_models, gl2viewer
 
-def index(request):
+def editor(request):
+    return HttpResponse("<h1>EDITOR</h1>")
+
+def viewer(request):
     """ Basic Models Viewer just dumping the JSON of all models """
     models = fetch_models()
     model_selected = models['qualityModels'][0]['name']
