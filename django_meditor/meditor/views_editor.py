@@ -32,13 +32,13 @@ class EditorState():
         self.metrics = metrics
 
         if form:
-            # The form includes the state not chnaged to be propagated
+            # The form includes the state not changed to be propagated
             goals_state = form.cleaned_data['goals_state']
             attributes = form.cleaned_data['attributes_state']
             metrics = form.cleaned_data['metrics_state']
 
             if not self.qmodel_name:
-                self.qmodel_name = form.cleaned_data['qmodel_name_state']
+                self.qmodel_name = form.cleaned_data['qmodel_state']
             if not self.goals:
                 self.goals = [goals_state] if goals_state else []
             if not self.attributes:
@@ -58,7 +58,7 @@ class EditorState():
         """
 
         initial = {
-            'qmodel_name_state': self.qmodel_name,
+            'qmodel_state': self.qmodel_name,
             'goals_state': ";".join(self.goals),
             'attributes_state': ";".join(self.attributes),
             "metrics_state": ";".join([str(repo_view_id) for repo_view_id in self.metrics])
@@ -211,39 +211,21 @@ def add_metric(request):
     if request.method == 'POST':
         form = forms_editor.MetricForm(request.POST)
         if form.is_valid():
-            metric = form.cleaned_data['metric']
-            params = form.cleaned_data['params']
-            attribute = form.cleaned_data['attribute']
-            # Don't support multiselect in goals yet
-            goal = form.cleaned_data['goals_state']
-            # Adding a new metric view
-            try:
-                attribute_orm = Attribute.objects.get(name=attribute)
-            except Attribute.DoesNotExist:
-                attribute_orm = Attribute(name=attribute)
-                attribute_orm.save()
+            name = form.cleaned_data['metric_name']
+            attribute = form.cleaned_data['attributes']
+
+            attribute_orm = Attribute.objects.get(name=attribute)
 
             # Try to find a metric already created
             try:
-                metric_orm = Metric.objects.get(name=metric, attribute=attribute_orm)
+                metric_orm = Metric.objects.get(name=name, attribute=attribute_orm)
             except Metric.DoesNotExist:
                 # Create a new metric
-                metric_orm = Metric(name=metric, attribute=attribute_orm)
+                metric_orm = Metric(name=name, attribute=attribute_orm)
                 metric_orm.save()
-            # Try to find a metric view already created
-            try:
-                metric_orm = Metric.objects.get(params=params, metric=metric_orm)
-            except Metric.DoesNotExist:
-                metric_orm = Metric(params=params,
-                                                     metric=metric_orm)
-                metric_orm.save()
-            # If there is a goal defined, add the metric view to the goal
-            if goal:
-                goal_orm = Goal.objects.get(name=goal)
-                goal_orm.metrics.add(metric_orm)
-                goal_orm.save()
 
-            metric_orm.save()
+            attribute_orm.metrics.add(metric_orm)
+            attribute_orm.save()
 
             form.cleaned_data['metrics_state'] = []
             state = EditorState(form=form)
@@ -265,25 +247,24 @@ def update_metric(request):
 
         if form.is_valid():
             metric_id = form.cleaned_data['metric_id']
-            metric = form.cleaned_data['metric']
-            params = form.cleaned_data['params']
-            attribute = form.cleaned_data['attribute']
+            name = form.cleaned_data['metric_name']
+            attribute = form.cleaned_data['attributes']
+            old_attribute = form.cleaned_data['old_attribute']
 
             metric_orm = Metric.objects.get(id=metric_id)
-
-            try:
-                metric_orm = Metric.objects.get(name=metric)
-                metric_orm.metric = metric_orm
-            except Metric.DoesNotExist:
-                # Create a new metric
-                attribute_orm = Attribute.objects.get(name=attribute)
-                metric_orm = Metric(name=metric, attribute=attribute_orm)
-                metric_orm.save()
-
-            metric_orm.metric = metric_orm
-            metric_orm.params = params
-
+            metric_orm.name = name
             metric_orm.save()
+
+            # Add the metric to the new attribute
+            if attribute != old_attribute:
+                attribute = Attribute.objects.get(name=attribute)
+                attribute.metrics.add(metric_orm)
+                attribute.save()
+                print("**** OLD ATTR ***", old_attribute)
+                attribute = Attribute.objects.get(name=old_attribute)
+                attribute.metrics.remove(metric_orm)
+                attribute.save()
+
 
             state = EditorState(metrics=[metric_id], form=form)
             return shortcuts.render(request, 'meditor/editor.html',
@@ -341,7 +322,7 @@ def add_attribute(request):
     if request.method == 'POST':
         form = forms_editor.AttributeForm(request.POST)
         if form.is_valid():
-            qmodel_name = form.cleaned_data['qmodel_name_state']
+            qmodel_name = form.cleaned_data['qmodel_state']
             qmodel_orm = None
             goal_name = form.cleaned_data['goals_state']
             goal_orm = None
@@ -408,7 +389,7 @@ def add_goal(request):
     if request.method == 'POST':
         form = forms_editor.GoalForm(request.POST)
         if form.is_valid():
-            qmodel_name = form.cleaned_data['qmodel_name_state']
+            qmodel_name = form.cleaned_data['qmodel_state']
             qmodel_orm = None
             goal_name = form.cleaned_data['goal_name']
             goal_orm = Goal(name=goal_name)

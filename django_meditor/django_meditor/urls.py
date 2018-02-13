@@ -21,6 +21,5 @@ from django.views.generic import RedirectView
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url='/meditor')),
     url(r'^admin/', admin.site.urls),
-    url(r'^meditor/', include('meditor.urls')),
-    url(r'^$', include('meditor.urls'))
+    url(r'^meditor/', include('meditor.urls'))
 ]

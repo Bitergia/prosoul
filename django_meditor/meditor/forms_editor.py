@@ -5,7 +5,7 @@ from time import time
 from django import forms
 
 
-from meditor.models import Goal, Metric
+from meditor.models import Attribute, Goal, Metric
 
 from . import data_editor
 
@@ -29,8 +29,8 @@ class BestiaryEditorForm(forms.Form):
     widget = forms.Select(attrs={'size': SELECT_LINES, 'class': 'form-control'})
 
     # Hidden widgets to store the state of the BestiaryEditorForm
-    eco_name_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
-    projects_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
+    qmodel_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
+    goals_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
     attributes_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
     metrics_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
 
@@ -48,8 +48,8 @@ class BestiaryEditorForm(forms.Form):
 
         # The state includes the names of objects except for metrics
         # in which ids are included because there is no name
-        self.state_fields = [self['eco_name_state'],
-                             self['projects_state'],
+        self.state_fields = [self['qmodel_state'],
+                             self['goals_state'],
                              self['attributes_state'],
                              self['metrics_state']
                              ]
@@ -89,8 +89,8 @@ class GoalForm(BestiaryEditorForm):
     def __init__(self, *args, **kwargs):
         super(GoalForm, self).__init__(*args, **kwargs)
 
-        self.fields['project_name'] = forms.CharField(label='Goal name', max_length=100)
-        self.fields['project_name'].widget = forms.TextInput(attrs={'class': 'form-control'})
+        self.fields['goal_name'] = forms.CharField(label='Goal name', max_length=100)
+        self.fields['goal_name'].widget = forms.TextInput(attrs={'class': 'form-control'})
 
 
 class GoalsForm(BestiaryEditorForm):
@@ -101,9 +101,9 @@ class GoalsForm(BestiaryEditorForm):
 
         choices = ()
 
-        for project in data_editor.GoalsData(self.state).fetch():
-            if (project.name, project.name) not in choices:
-                choices += ((project.name, project.name),)
+        for goal in data_editor.GoalsData(self.state).fetch():
+            if (goal.name, goal.name) not in choices:
+                choices += ((goal.name, goal.name),)
 
         choices = sorted(choices, key=lambda x: x[1])
         self.fields['name'] = forms.ChoiceField(label='Goals',
@@ -171,10 +171,11 @@ class MetricForm(BestiaryEditorForm):
         if self.state and self.state.metrics:
             self.metric_id = self.state.metrics[0]
 
-        if self.state and self.state.projects:
-            project_orm = Goal.objects.get(name=self.state.projects[0])
+        if self.state and self.state.attributes:
+            attribute_orm = Attribute.objects.get(name=self.state.attributes[0])
             kwargs['initial'].update({
-                'project': project_orm.name
+                'attributes': attribute_orm.name,
+                'old_attribute': attribute_orm.name
             })
 
         if self.metric_id:
@@ -182,8 +183,7 @@ class MetricForm(BestiaryEditorForm):
                 metric_orm = Metric.objects.get(id=self.metric_id)
                 kwargs['initial'].update({
                     'metric_id': self.metric_id,
-                    'repository': metric_orm.repository.name,
-                    'params': metric_orm.params
+                    'metric_name': metric_orm.name
                 })
             except Metric.DoesNotExist:
                 print(self.__class__, "Received metric which does not exists", self.metric_id)
@@ -192,11 +192,8 @@ class MetricForm(BestiaryEditorForm):
         self.fields['metric_id'] = forms.CharField(label='metric_id', required=False, max_length=100)
         self.fields['metric_id'].widget = forms.HiddenInput()
 
-        self.fields['repository'] = forms.CharField(label='repository', max_length=100, required=False)
-        self.fields['repository'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'URL'})
-
-        self.fields['params'] = forms.CharField(label='params', max_length=100, required=False)
-        self.fields['params'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Params'})
+        self.fields['metric_name'] = forms.CharField(label='name', max_length=100, required=False)
+        self.fields['metric_name'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'metric name'})
 
         choices = ()
 
@@ -207,8 +204,8 @@ class MetricForm(BestiaryEditorForm):
         choices = empty_choice + sorted(choices, key=lambda x: x[1])
 
         self.widget = forms.Select(attrs={'class': 'form-control'})
-        self.fields['attribute'] = forms.ChoiceField(label='Data Source', required=True,
-                                                       widget=self.widget, choices=choices)
+        self.fields['attributes'] = forms.ChoiceField(label='Attributes', required=True,
+                                                      widget=self.widget, choices=choices)
 
-        self.fields['project'] = forms.CharField(label='project', max_length=100, required=False)
-        self.fields['project'].widget = forms.HiddenInput(attrs={'class': 'form-control', 'readonly': 'True'})
+        self.fields['old_attribute'] = forms.CharField(label='old_attribute', max_length=100, required=False)
+        self.fields['old_attribute'].widget = forms.HiddenInput(attrs={'class': 'form-control', 'readonly': 'True'})

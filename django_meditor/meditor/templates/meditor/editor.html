@@ -133,27 +133,21 @@
       <!-- Modal content-->
           <div class="modal-content">
             <form method="post">
-                <fieldset id="add-data-source">
+                <fieldset id="add-attribute">
                     {% csrf_token %}
                     {% for field in metric_form.state_fields %}
                       {{ field }}
                     {% endfor %}
+                    {{ metric_form.old_attribute }}
                     {{ metric_form.metric_id }}
                     {{ metric_form.name.errors }}
                 <div class="modal-header">
-                  <div class="modal-title">Data source for <strong>{{ goals_form.initial.name }}</strong> in <strong>{{ qmodels_form.initial.name }}</strong></div>
+                  <div class="modal-title">Metric for <strong>{{ attributes_form.initial.name }}</strong> in <strong>{{ goals_form.initial.name }}</strong> in <strong>{{ qmodels_form.initial.name }}</strong></div>
                   <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="input-group"><span class="input-group-addon">Data source type</span>{{ metric_form.attribute }}</div>
-                    <div class="input-group">
-                      <span class="input-group-addon"><i class="fa fa-external-link"></i></span>
-                      {{ metric_form.repository }}
-                    </div>
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="fa fa-cogs"></i></span>
-                        {{ metric_form.params }}
-                    </div>
+                    <div class="input-group"><span class="input-group-addon">Name</span>{{ metric_form.metric_name }}</div>
+                    <div class="input-group"><span class="input-group-addon">Attribute</span>{{ metric_form.attributes }}</div>
                     <div class="input-group"> <!-- Hidden field with selected goal -->
                         {{ metric_form.goal }}
                     </div>
@@ -299,7 +293,7 @@
           <div class="row">
             <div class="col-sm-4">
                 <form action="./select_attribute" method="post">
-                    <fieldset id="select-data-source">
+                    <fieldset id="select-attribute">
                       {% csrf_token %}
                       {% for field in attributes_form.state_fields %}
                         {{ field }}
@@ -398,11 +392,14 @@
         {% endif %}
         <script>
             disableElement("add-goal");
+            disableElement("add-goal-btn");
             disableElement("select-goal");
             disableElement("remove-goal");
-            disableElement("select-data-source");
-            disableElement("select-metric-data");
-            disableElement("add-data-source");
+            disableElement("add-attribute");
+            disableElement("select-attribute");
+            disableElement("select-metric");
+            disableElement("add-metric-btn");
+            disableElement("edit-metric-btn");
         </script>
     {% elif not goals_form.initial.name %}
         {% if goals_form.name|length == 0 %}
@@ -414,15 +411,15 @@
         {% endif %}
         <script>
             disableElement("remove-goal");
-            disableElement("select-data-source");
-            disableElement("select-metric-data");
-            disableElement("add-data-source");
+            disableElement("select-attribute");
+            disableElement("select-metric");
+            disableElement("add-attribute");
         </script>
-    {% elif not metric_form.initial.repository %}
+    {% elif not metric_form.initial.attributes %}
         {% if metrics_form.id|length == 0 %}
             <script>
-                disableElement("select-data-source");
-                disableElement("select-metric-data");
+                disableElement("select-attribute");
+                disableElement("select-metric");
                 // If there are no attributes, open `add` modal
                 showAddButtons();
             </script>
