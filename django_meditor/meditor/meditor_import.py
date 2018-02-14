@@ -42,6 +42,9 @@ from meditor.models import Attribute, DataSourceType, Factoid, Goal, Metric, Qua
 
 from meditor.meditor_export import fetch_models, gl2alambic, gl2ossmeter, show_report
 
+SUPPORTED_FORMATS = ['alambic', 'grimoirelab', 'ossmeter']
+
+
 def get_params():
     parser = argparse.ArgumentParser(usage="usage: meditor_import.py [options]",
                                      description="Import Metrics Models in Meditor")
@@ -100,15 +103,16 @@ def feed_models(models_json):
             metric_orm = add(Metric, **metparams)
             attribute_orm.metrics.add(metric_orm)
 
-        for factoid in attribute['factoids']:
-            data_source_orm = None
-            if 'data_source_type' in factoid and factoid['data_source_type']:
-                dsparams = {"name": factoid['data_source_type']}
-                data_source_orm = add(DataSourceType, **dsparams)
-            fparams = {"name": factoid['name'],
-                       "data_source_type": data_source_orm}
-            factoid_orm = add(Factoid, **fparams)
-            attribute_orm.factoids.add(factoid_orm)
+        if 'factoids' in attribute:
+            for factoid in attribute['factoids']:
+                data_source_orm = None
+                if 'data_source_type' in factoid and factoid['data_source_type']:
+                    dsparams = {"name": factoid['data_source_type']}
+                    data_source_orm = add(DataSourceType, **dsparams)
+                fparams = {"name": factoid['name'],
+                           "data_source_type": data_source_orm}
+                factoid_orm = add(Factoid, **fparams)
+                attribute_orm.factoids.add(factoid_orm)
 
         attribute_orm.save()
 
@@ -119,9 +123,10 @@ def feed_models(models_json):
         gparams = {"name": goal['name']}
         goal_orm = add(Goal, **gparams)
 
-        for subgoal in goal['subgoals']:
-            subgoal_orm = feed_goal(subgoal)
-            goal_orm.subgoals.add(subgoal_orm)
+        if 'subgoals' in goal:
+            for subgoal in goal['subgoals']:
+                subgoal_orm = feed_goal(subgoal)
+                goal_orm.subgoals.add(subgoal_orm)
 
         for attribute in goal['attributes']:
             attribute_orm = feed_attribute(attribute)
@@ -246,18 +251,15 @@ def convert_to_grimoirelab(format_, model_json):
 
     grimoirelab_json = {}
 
-    if format_ not in ['alambic', 'grimoirelab', 'ossmeter']:
-        grimoirelab_json = models_json
+    if format_ not in SUPPORTED_FORMATS:
+        raise RuntimeError("Quality Model format not supported %s" % format_)
 
     if format_ == 'grimoirelab':
-        return models_json
+        return model_json
     elif format_ == 'ossmeter':
         grimoirelab_json = ossmeter2gl(model_json)
     elif format_ == 'alambic':
         grimoirelab_json = alambic2gl(model_json)
-    else:
-        logging.error("Quality Model format not supported %s", format_)
-        sys.exit(1)
 
     return grimoirelab_json
 
