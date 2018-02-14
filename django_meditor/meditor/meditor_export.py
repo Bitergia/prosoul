@@ -304,7 +304,8 @@ def show_report(models_json):
 
     def report_attribute(attribute, nattributes, nmetrics, nfactoids):
         nmetrics += len(attribute['metrics'])
-        nfactoids += len(attribute['factoids'])
+        if 'factoids' in attribute:
+            nfactoids += len(attribute['factoids'])
 
         if 'subattributes' in attribute:
             for subattribute in attribute['subattributes']:
