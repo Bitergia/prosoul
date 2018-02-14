@@ -21,19 +21,15 @@
             {% csrf_token %}
             <div class="modal-header">
                 <div class="modal-title">
-                    Import goals file
+                    Import quality model file
                 </div>
               <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                    <div class="input-group">
-                       <span class="input-group-addon"><i class="fa fa-globe"></i></span>
-                           {{ qmodels_form.name }}
-                     </div>
-                     <div class="input-group">
-                       <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up"></i></span>
-                       <input type="file" name="imported_file" placeholder="Select JSON file" accept="application/json" required=True class="form-control">
-                     </div>
+               <div class="input-group">
+                 <span class="input-group-addon"><i class="fa fa-arrow-circle-o-up"></i></span>
+                 <input type="file" name="imported_file" placeholder="Select JSON file" accept="application/json" required=True class="form-control">
+               </div>
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary">Import</button>
@@ -50,7 +46,7 @@
           <div class="modal-content">
             <form id="qmodel_download" method="POST" action="./export/" enctype="multipart/form-data">{% csrf_token %}
             <div class="modal-header">
-              <div class="modal-title">Download goals file</div>
+              <div class="modal-title">Download quality model file</div>
               <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
@@ -75,7 +71,7 @@
               <form action="./add_qmodel" method="post">
                   {% csrf_token %}
               <div class="modal-header">
-                <div class="modal-title">Add qmodel</div>
+                <div class="modal-title">Add Quality Model</div>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
               </div>
               <div class="modal-body">
@@ -127,7 +123,7 @@
       </div>
   </div>
 
-  <!-- Modal: Add attribute -->
+  <!-- Modal: Add metric -->
   <div class="modal fade" id="DSModal" role="dialog">
       <div class="modal-dialog">
       <!-- Modal content-->
@@ -148,9 +144,6 @@
                 <div class="modal-body">
                     <div class="input-group"><span class="input-group-addon">Name</span>{{ metric_form.metric_name }}</div>
                     <div class="input-group"><span class="input-group-addon">Attribute</span>{{ metric_form.attributes }}</div>
-                    <div class="input-group"> <!-- Hidden field with selected goal -->
-                        {{ metric_form.goal }}
-                    </div>
                     </div>
                 <div class="modal-footer">
                     <div class="form-actions pull-right">
