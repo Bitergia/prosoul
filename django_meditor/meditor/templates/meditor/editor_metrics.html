@@ -1,0 +1,31 @@
+<div class="row">
+  <div class="col-sm-8">
+    <h2>Metrics</h2>
+  </div>
+  <div class="col-sm-4">
+    <div class="button-group">
+      <button type="submit" class="btn btn-primary" id="add-metric-btn" onclick="showAddButtons();"><span><i class="fa fa-plus"></i></span> Add<span class="sr-only"> metric data</span></button>
+      <button type="submit" class="btn btn-primary" id="edit-metric-btn" onclick="showEditButtons();"><span><i class="fa fa-pencil"></i> Edit<span class="sr-only"> metric data</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+      <form action="./select_metric" method="post">
+          <fieldset id="select-metric">
+            {% csrf_token %}
+            {% for field in metrics_form.state_fields %}
+              {{ field }}
+            {% endfor %}
+            {{ metrics_form.name.errors }}
+            <div class="form-group">
+              {{ metrics_form.id }}
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary" id="select-metric-btn"><span><i class="fa fa-check"></i></span> Select<span class="sr-only"> Metric<span></button>
+            </div>
+          </fieldset>
+      </form>
+  </div>
+</div>

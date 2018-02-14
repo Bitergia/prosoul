@@ -1,0 +1,51 @@
+<div class="row">
+  <div class="col-sm-8">
+    <h2>Goals</h2>
+  </div>
+  <div class="col-sm-4">
+    <button type="submit" class="btn btn-primary" id="add-goal-btn" data-toggle="modal" data-target="#addGoalModal">
+      <i class="fa fa-plus"></i> Add<span class="sr-only"> goal</span>
+    </button>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+    <form action="./editor_select_goal" method="post">
+      <fieldset id="select-goal">
+          {% csrf_token %}
+          {% for field in goals_form.state_fields %}
+            {{ field }}
+          {% endfor %}
+          {{ goals_form.name.errors }}
+          <div class="form-group form-group-lg">
+            {{ goals_form.name }}
+          </div>
+          <div class="form-group">
+              <button type="submit" class="btn btn-primary" id="select-goal-btn">
+                <i class="fa fa-check"></i> Select <span class="sr-only"> goal</span>
+              </button>
+          </div>
+      </fieldset>
+    </form>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+    <h3>Remove goal</h3>
+      <form action="./remove_goal" method="post">
+          <fieldset id="remove-goal">
+            {% csrf_token %}
+            {% for field in goal_remove_form.state_fields %}
+              {{ field }}
+            {% endfor %}
+            {{ goal_remove_form.name.errors }}
+              <div class="input-group">
+                  {{ goal_remove_form.goal_name }}
+                  <button type="submit" class="btn btn-danger" id="remove-goal-btn"><span><i class="fa fa-trash-o"></i></span> Remove<span class="sr-only"> goal</span></button>
+              </div>
+          </fieldset>
+      </form>
+  </div>
+</div>
