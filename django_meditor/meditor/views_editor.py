@@ -10,12 +10,11 @@ from django.template import loader
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-from meditor.meditor_export import fetch_model
-
 from django import shortcuts
 from django.http import Http404
 
-from meditor.meditor_import import feed_models
+from meditor.meditor_export import fetch_models
+from meditor.meditor_import import convert_to_grimoirelab, feed_models, SUPPORTED_FORMATS
 from meditor.models import Attribute, DataSourceType, Goal, Metric, Metric, QualityModel
 
 from . import forms_editor
@@ -475,24 +474,37 @@ def import_from_file(request):
 
     if request.method == "POST":
         myfile = request.FILES["imported_file"]
-        qmodel = request.POST["name"]
         cur_dt = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        file_name = "%s_%s.json" % (qmodel, cur_dt)
+        file_name = "%s_%s.json" % (myfile, cur_dt)
         fpath = '.imported/' + file_name  # FIXME Define path where all these files must be saved
         save_path = default_storage.save(fpath, ContentFile(myfile.read()))
 
         task_init = time()
-        try:
-            (ngoals, nrepos) = load_goals(save_path, qmodel)
-        except Exception:
-            error_msg = "File %s couldn't be imported." % myfile.name
-            return return_error(error_msg)
+
+        with open(save_path) as fmodel:
+            models_json = {}
+            import_models_json = json.load(fmodel)
+
+            # Detect the format automatically
+            for fmt in SUPPORTED_FORMATS:
+                try:
+                    models_json = convert_to_grimoirelab(fmt, import_models_json)
+                except Exception as ex:
+                    print("%s is not in format %s" % (myfile, fmt))
+                    continue
+
+                try:
+                    feed_models(models_json)
+                    break
+                except Exception as ex:
+                    pass
+
+            if not models_json:
+                raise RuntimeError("File %s couldn't be imported." % myfile.name)
 
         print("Total loading time ... %.2f sec", time() - task_init)
-        print("Goals loaded", ngoals)
-        print("Metrics loaded", nrepos)
 
-    return editor_select_qmodel(request)
+    return shortcuts.redirect("/")
 
 
 def export_to_file(request, qmodel=None):
@@ -503,11 +515,12 @@ def export_to_file(request, qmodel=None):
     if request.method == "POST":
         qmodel = request.POST["name"]
 
-    file_name = "goals_%s.json" % qmodel
+    file_name = "qmodel_%s.json" % qmodel
     task_init = time()
     try:
-        goals = fetch_goals(qmodel)
-    except (QualityModel.DoesNotExist, Exception):
+        models_json = fetch_models(qmodel)
+    except (QualityModel.DoesNotExist, Exception) as ex:
+        print(ex)
         error_msg = "Goals from qmodel \"%s\" couldn't be exported." % qmodel
         if request.method == "POST":
             # If request comes from web UI and fails, return error page
@@ -517,9 +530,9 @@ def export_to_file(request, qmodel=None):
             return HttpResponse(status=404)
 
     print("Total loading time ... %.2f sec", time() - task_init)
-    if goals:
-        goals_json = json.dumps(goals, indent=True, sort_keys=True)
-        response = HttpResponse(goals_json, content_type="application/json")
+    if models_json:
+        models = json.dumps(models_json, indent=True, sort_keys=True)
+        response = HttpResponse(models, content_type="application/json")
         response['Content-Disposition'] = 'attachment; filename=' + file_name
         return response
     else:
