@@ -116,8 +116,8 @@ class AttributeForm(BestiaryEditorForm):
     def __init__(self, *args, **kwargs):
         super(AttributeForm, self).__init__(*args, **kwargs)
 
-        ds_attrs = {'class': 'form-control', 'placeholder': 'Data source type'}
-        self.fields['attribute_name'] = forms.CharField(label='Data source name', max_length=100)
+        ds_attrs = {'class': 'form-control', 'placeholder': 'Attribute'}
+        self.fields['attribute_name'] = forms.CharField(label='Attribute name', max_length=100)
         self.fields['attribute_name'].widget = forms.TextInput(attrs=ds_attrs)
 
 

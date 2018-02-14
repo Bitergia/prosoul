@@ -60,7 +60,7 @@ class EditorState():
             'qmodel_state': self.qmodel_name,
             'goals_state': ";".join(self.goals),
             'attributes_state': ";".join(self.attributes),
-            "metrics_state": ";".join([str(repo_view_id) for repo_view_id in self.metrics])
+            "metrics_state": ";".join([str(metric_id) for metric_id in self.metrics])
         }
 
         return initial
@@ -137,8 +137,9 @@ def build_forms_context(state=None):
     goals_form = forms_editor.GoalsForm(state=state)
     goal_form = forms_editor.GoalForm(state=state)
     goal_remove_form = forms_editor.GoalForm(state=state)
-    attribute_form = forms_editor.AttributeForm(state=state)
     attributes_form = forms_editor.AttributesForm(state=state)
+    attribute_form = forms_editor.AttributeForm(state=state)
+    attribute_remove_form = forms_editor.AttributeForm(state=state)
     metrics_form = forms_editor.MetricsForm(state=state)
     metric_form = forms_editor.MetricForm(state=state)
 
@@ -146,18 +147,19 @@ def build_forms_context(state=None):
         qmodel_form.initial['name'] = state.qmodel_name
         if state.goals:
             goals_form.initial['name'] = state.goals[0]
-            goal_remove_form = forms_editor.GoalForm(state=state)
             goal_remove_form.initial['goal_name'] = state.goals[0]
         if state.attributes:
             attributes_form.initial['name'] = state.attributes[0]
+            attribute_remove_form.initial['attribute_name'] = state.attributes[0]
 
     context = {"qmodels_form": qmodel_form,
                "qmodel_form": add_qmodel_form,
                "goals_form": goals_form,
                "goal_form": goal_form,
                "goal_remove_form": goal_remove_form,
-               "attribute_form": attribute_form,
                "attributes_form": attributes_form,
+               "attribute_form": attribute_form,
+               "attribute_remove_form": attribute_remove_form,
                "metrics_form": metrics_form,
                "metric_form": metric_form
                }
@@ -321,18 +323,17 @@ def add_attribute(request):
     if request.method == 'POST':
         form = forms_editor.AttributeForm(request.POST)
         if form.is_valid():
-            qmodel_name = form.cleaned_data['qmodel_state']
-            qmodel_orm = None
             goal_name = form.cleaned_data['goals_state']
             goal_orm = None
-            if qmodel_name:
-                qmodel_orm = QualityModel.objects.get(name=qmodel_name)
-                goals_orm = qmodel_orm.goals.all()
-                qmodel_orm.save()
 
             attribute_name = form.cleaned_data['attribute_name']
             attribute_orm = Attribute(name=attribute_name)
             attribute_orm.save()
+
+            if goal_name:
+                goal_orm = Goal.objects.get(name=goal_name)
+                goal_orm.attributes.add(attribute_orm)
+                goal_orm.save()
 
             return shortcuts.render(request, 'meditor/editor.html',
                                     build_forms_context(EditorState(form=form)))
@@ -356,6 +357,23 @@ def select_attribute(request):
                                     build_forms_context(EditorState(form=form, attributes=attributes)))
         else:
             # TODO: Show error
+            raise Http404
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # TODO: Show error
+        return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+
+
+def remove_attribute(request):
+    if request.method == 'POST':
+        form = forms_editor.AttributeForm(request.POST)
+        if form.is_valid():
+            attribute_name = form.cleaned_data['attribute_name']
+            Attribute.objects.get(name=attribute_name).delete()
+            return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+        else:
+            # TODO: Show error
+            print("attribute_goal", form.errors)
             raise Http404
     # if a GET (or any other method) we'll create a blank form
     else:
