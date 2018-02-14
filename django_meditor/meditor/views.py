@@ -4,13 +4,13 @@ from django.http import HttpResponse
 from django.template import loader
 
 from meditor.meditor_export import fetch_models, gl2viewer
-
-def editor(request):
-    return HttpResponse("<h1>EDITOR</h1>")
+from . import views_editor
 
 def viewer(request):
     """ Basic Models Viewer just dumping the JSON of all models """
     models = fetch_models()
+    if not models['qualityModels']:
+        return views_editor.editor(request)
     model_selected = models['qualityModels'][0]['name']
     if request.method == 'GET' and 'qmodel_selected' in request.GET:
         model_selected = request.GET['qmodel_selected']
