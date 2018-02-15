@@ -13,8 +13,15 @@
           {{ metric_form.metric_id }}
           {{ metric_form.name.errors }}
           <div class="modal-header">
-            <div class="modal-title">Metric for <strong>{{ attributes_form.initial.name }}</strong> in
-              <strong>{{ goals_form.initial.name }}</strong> in <strong>{{ qmodels_form.initial.name }}</strong></div>
+            <div class="modal-title">
+              {% if not metric_form.initial.metric_name %}
+              Add
+              {% else %}
+              Edit
+              {% endif %}
+              metric for <strong>{{ attributes_form.initial.name }}</strong> in
+              <strong>{{ goals_form.initial.name }}</strong> in <strong>{{ qmodels_form.initial.name }}</strong>
+            </div>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
           <div class="modal-body">
