@@ -13,6 +13,8 @@ class AttributesData():
                 for subattr in attribute.subattributes.all():
                     # TODO: only one level of subattributes is supported
                     yield subattr
+            for attribute in self.__find_goals_attributes(goal.subgoals.all()):
+                yield attribute
 
     def fetch(self):
         if not self.state or self.state.is_empty():
@@ -77,12 +79,22 @@ class GoalsData():
             goals = qmodel.goals.all()
             for goal in goals:
                 yield goal
+                for subgoal in goal.subgoals.all():
+                    yield subgoal
 
 
 class MetricsData():
 
     def __init__(self, state=None):
         self.state = state
+
+    def __find_goals_metrics(self, goals):
+        for goal in goals:
+            for attribute in goal.attributes.all():
+                for metric in attribute.metrics.all():
+                    yield metric
+            for metric in self.__find_goals_metrics(goal.subgoals.all()):
+                yield metric
 
     def fetch(self):
         if not self.state or self.state.is_empty():
@@ -99,13 +111,9 @@ class MetricsData():
                     yield metric
         elif self.state.goals:
             goals = Goal.objects.filter(name__in=self.state.goals)
-            for goal in goals:
-                for attribute in goal.attributes.all():
-                    for metric in attribute.metrics.all():
-                        yield metric
+            for metric in self.__find_goals_metrics(goals):
+                yield metric
         elif self.state.qmodel_name:
             qmodel = QualityModel.objects.get(name=self.state.qmodel_name)
-            for goal in qmodel.goals.all():
-                for attribute in goal.attributes.all():
-                    for metric in attribute.metrics.all():
-                        yield metric
+            for metric in self.__find_goals_metrics(qmodel.goals.all()):
+                yield metric
