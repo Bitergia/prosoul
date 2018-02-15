@@ -96,7 +96,6 @@ function disableElement(element_id) {
         </script>
     {% endif %}
     <script>
-        disableElement("remove-goal");
         disableElement("add-attribute");
         disableElement("select-attribute");
         disableElement("select-metric");
@@ -110,7 +109,6 @@ function disableElement(element_id) {
         </script>
     {% endif %}
     <script>
-      disableElement("remove-attribute");
       disableElement("select-metric");
     </script>
 {% elif not metrics_form.initial.name %}
