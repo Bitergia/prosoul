@@ -13,7 +13,8 @@
           {{ metric_form.metric_id }}
           {{ metric_form.name.errors }}
           <div class="modal-header">
-            <div class="modal-title">Metric for <strong>{{ attributes_form.initial.name }}</strong> in <strong>{{ goals_form.initial.name }}</strong> in <strong>{{ qmodels_form.initial.name }}</strong></div>
+            <div class="modal-title">Metric for <strong>{{ attributes_form.initial.name }}</strong> in
+              <strong>{{ goals_form.initial.name }}</strong> in <strong>{{ qmodels_form.initial.name }}</strong></div>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
           <div class="modal-body">
@@ -23,13 +24,16 @@
           <div class="modal-footer">
             <div class="form-actions pull-right">
               <div class="input-group">
-                <div id="add-btn-group-rv_modal" class="button-group">
+                {% if not metric_form.initial.metric_name %}
+                <div id="metric-add-btn" class="button-group">
                   <button type="submit" formaction='./add_metric' class="btn"><i class="fa fa-plus"></i> Add</button>
                 </div>
-                <div id="edit-btn-group-rv_modal" class="button-group">
+                {% else %}
+                <div id="metric-edit-btn" class="button-group">
                   <button type="submit" formaction="./update_metric" class="btn"><i class="fa fa-save"></i> Save</button>
                   <button type="submit" formaction='./remove_metric' class="btn"><i class="fa fa-trash-o"></i> Remove</button>
                 </div>
+                {% endif %}
               </div>
             </div>
           </div>

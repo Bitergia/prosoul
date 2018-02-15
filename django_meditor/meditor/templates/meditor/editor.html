@@ -25,20 +25,23 @@
 
   <div class="row">
     <div class="col-md-3">
-      <!-- Start: Goals column -->
+      <!-- Start: Goals block -->
       {% include "meditor/editor_goal.html" %}
       {% include "meditor/editor_goals.html" %}
     </div>
-    <!-- End: Goals block -->
-    <!-- Start: Attributes + Metrics block ... to be splitted -->
+    <!-- End: Goals -->
+    <!-- Start: Attributes block -->
     <div class="col-md-3">
       {% include "meditor/editor_attribute.html" %}
       {% include "meditor/editor_attributes.html" %}
     </div>
+    <!-- End: Attributes -->
+    <!-- Start: Metrics block -->
     <div class="col-md-3">
       {% include "meditor/editor_metric.html" %}
       {% include "meditor/editor_metrics.html" %}
     </div>
+    <!-- End: Metrics -->
     <!-- Start: Scope block -->
     <div class="col-md-3">
       {% include "meditor/editor_scope.html" %}
@@ -56,19 +59,6 @@ eco_download_form = document.getElementById("qmodel_download");
 eco_download_form["name"].removeAttribute("onclick");
 eco_download_form = document.getElementById("qmodel_import");
 eco_download_form["name"].removeAttribute("onclick");
-
-// Functions to show/hide buttons on modals depending on the action.
-function showAddButtons() {
-    document.getElementById("add-btn-group-rv_modal").style.display = "block";
-    document.getElementById("edit-btn-group-rv_modal").style.display = "none";
-    $('#addMetricModal').modal('show');
-}
-
-function showEditButtons(){
-    document.getElementById("add-btn-group-rv_modal").style.display = "none";
-    document.getElementById("edit-btn-group-rv_modal").style.display = "block";
-    $('#addMetricModal').modal('show');
-}
 
 // Disable element
 function disableElement(element_id) {
