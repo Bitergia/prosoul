@@ -6,8 +6,15 @@ class AttributesData():
     def __init__(self, state):
         self.state = state
 
-    def fetch(self):
+    def __find_goals_attributes(self, goals):
+        for goal in goals:
+            for attribute in goal.attributes.all():
+                yield attribute
+                for subattr in attribute.subattributes.all():
+                    # TODO: only one level of subattributes is supported
+                    yield subattr
 
+    def fetch(self):
         if not self.state or self.state.is_empty():
             attributes = Attribute.objects.all()
             for attribute in attributes:
@@ -22,15 +29,13 @@ class AttributesData():
                 yield attribute
         elif self.state.goals:
             goals = Goal.objects.filter(name__in=self.state.goals)
-            for goal in goals:
-                for attribute in goal.attributes.all():
-                    yield attribute
+            for attribute in self.__find_goals_attributes(goals):
+                yield attribute
         elif self.state.qmodel_name:
             qmodel = QualityModel.objects.get(name=self.state.qmodel_name)
             goals = qmodel.goals.all()
-            for goal in goals:
-                for attribute in goal.attributes.all():
-                    yield attribute
+            for attribute in self.__find_goals_attributes(goals):
+                yield attribute
 
 
 class QualityModelsData():

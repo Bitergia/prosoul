@@ -133,15 +133,25 @@ class AttributeForm(MeditorEditorForm):
         self.fields['current_name'] = forms.CharField(required=False, max_length=50,
                                                       widget=forms.HiddenInput(),
                                                       initial=current_name)
+        choices = (('', ''),)
+
+        widget = forms.Select(attrs={'class': 'form-control'})
+
+        for attribute in data_editor.AttributesData(state=None).fetch():
+            if (attribute.name, attribute.name) not in choices and \
+                attribute.name != current_name:
+                choices += ((attribute.name, attribute.name),)
+
+        choices = sorted(choices, key=lambda x: x[1])
+
+        self.fields['parent'] = forms.ChoiceField(label='Parent', required=False,
+                                                  widget=widget, choices=choices)
 
 
 
 class AttributesForm(MeditorEditorForm):
 
-    @perfdata
-    def __init__(self, *args, **kwargs):
-        super(AttributesForm, self).__init__(*args, **kwargs)
-
+    def list_choices(self):
         choices = ()
 
         for attribute in data_editor.AttributesData(self.state).fetch():
@@ -149,8 +159,15 @@ class AttributesForm(MeditorEditorForm):
                 choices += ((attribute.name, attribute.name),)
 
         choices = sorted(choices, key=lambda x: x[1])
+
+        return choices
+
+    @perfdata
+    def __init__(self, *args, **kwargs):
+        super(AttributesForm, self).__init__(*args, **kwargs)
+
         self.fields['name'] = forms.ChoiceField(label='Attributes',
-                                                widget=self.widget, choices=choices)
+                                                widget=self.widget, choices=self.list_choices())
 
 
 class MetricsForm(MeditorEditorForm):

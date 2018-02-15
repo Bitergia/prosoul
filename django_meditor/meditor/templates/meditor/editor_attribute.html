@@ -5,7 +5,13 @@
     <div class="modal-content">
       <div class="modal-header">
         <form>
-          <div class="modal-title">Attribute for <strong>{{ goals_form.initial.name }}</strong></div>
+          <div class="modal-title">
+            {% if not attributes_form.initial.name %}
+            Add
+            {% else %}
+            Edit
+            {% endif %}
+            attribute for <strong>{{ goals_form.initial.name }}</strong></div>
         </form>
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
@@ -20,9 +26,15 @@
               {{ attribute_form.current_name }}
               {{ attribute_form.name.errors }}
               <div class="input-group">
-                <span class="input-group-addon"><i class="fa fa-suitcase"></i></span>
+                <span class="input-group-addon">Name</span>
                 {{ attribute_form.attribute_name }}
               </div>
+              {% if not attributes_form.initial.name %}
+              <div class="input-group">
+                  <span class="input-group-addon">Parent</span>
+                {{ attribute_form.parent }}
+              </div>
+              {% endif %}
             </div>
             <div class="modal-footer">
               <div class="form-actions pull-right">

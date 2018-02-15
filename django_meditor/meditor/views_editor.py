@@ -308,13 +308,19 @@ def add_attribute(request):
         form = forms_editor.AttributeForm(request.POST)
         if form.is_valid():
             goal_name = form.cleaned_data['goals_state']
+            parent_name = form.cleaned_data['parent']
             goal_orm = None
 
             attribute_name = form.cleaned_data['attribute_name']
             attribute_orm = Attribute(name=attribute_name)
             attribute_orm.save()
 
-            if goal_name:
+            if parent_name:
+                # If there is an attribute parent use it instead of goal
+                parent_orm = Attribute.objects.get(name=parent_name)
+                parent_orm.subattributes.add(attribute_orm)
+                parent_orm.save()
+            elif goal_name:
                 goal_orm = Goal.objects.get(name=goal_name)
                 goal_orm.attributes.add(attribute_orm)
                 goal_orm.save()
@@ -372,8 +378,7 @@ def update_attribute(request):
         if form.is_valid():
             name = form.cleaned_data['attribute_name']
             current_name = form.cleaned_data['current_name']
-
-            print("CURRENT NAME", current_name)
+            parent_name = form.cleaned_data['parent']
 
             attribute_orm = Attribute.objects.get(name=current_name)
             attribute_orm.name = name
