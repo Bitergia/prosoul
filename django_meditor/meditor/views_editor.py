@@ -362,6 +362,33 @@ def remove_attribute(request):
         # TODO: Show error
         return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
+def update_attribute(request):
+    if request.method == 'POST':
+        form = forms_editor.AttributeForm(request.POST)
+
+        if form.is_valid():
+            name = form.cleaned_data['attribute_name']
+            current_name = form.cleaned_data['current_name']
+
+            print("CURRENT NAME", current_name)
+
+            attribute_orm = Attribute.objects.get(name=current_name)
+            attribute_orm.name = name
+            attribute_orm.save()
+
+            state = EditorState(attributes=[name], form=form)
+            return shortcuts.render(request, 'meditor/editor.html',
+                                    build_forms_context(state))
+        else:
+            # TODO: Show error
+            print(form.errors)
+            raise Http404
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # TODO: Show error
+        return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+
+
 #
 # Goal logic
 #

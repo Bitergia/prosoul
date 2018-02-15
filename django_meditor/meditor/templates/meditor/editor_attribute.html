@@ -1,34 +1,51 @@
 <!-- Modal: Add attribute -->
 <div class="modal fade" id="addAttributeModal" role="dialog">
-    <div class="modal-dialog">
+  <div class="modal-dialog">
     <!-- Modal content-->
-        <div class="modal-content">
-              <div class="modal-header">
-                  <form>
-                      <div class="modal-title">Add attribute for <strong>{{ goals_form.initial.name }}</strong></div>
-                  </form>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <div class="modal-content">
+      <div class="modal-header">
+        <form>
+          <div class="modal-title">Attribute for <strong>{{ goals_form.initial.name }}</strong></div>
+        </form>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="container">
+        <form action="./add_attribute" method="post">
+          <fieldset id="add-attribute">
+            <div class="modal-body">
+              {% csrf_token %}
+              {% for field in attribute_form.state_fields %}
+              {{ field }}
+              {% endfor %}
+              {{ attribute_form.current_name }}
+              {{ attribute_form.name.errors }}
+              <div class="input-group">
+                <span class="input-group-addon"><i class="fa fa-suitcase"></i></span>
+                {{ attribute_form.attribute_name }}
               </div>
-              <div class="container">
-                  <form action="./add_attribute" method="post">
-                      <fieldset id="add-attribute">
-                          <div class="modal-body">
-                              {% csrf_token %}
-                              {% for field in attribute_form.state_fields %}
-                                {{ field }}
-                              {% endfor %}
-                              {{ attribute_form.name.errors }}
-                              <div class="input-group">
-                                  <span class="input-group-addon"><i class="fa fa-suitcase"></i></span>
-                                  {{ attribute_form.attribute_name }}
-                              </div>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">Add attribute</button>
-                          </div>
-                      </fieldset>
-                  </form>
+            </div>
+            <div class="modal-footer">
+              <div class="form-actions pull-right">
+                <div class="input-group">
+                  {% if not attributes_form.initial.name %}
+                  <div id="attribute-add-btn" class="button-group">
+                    <button type="submit" formaction='./add_attribute' class="btn">
+                      <i class="fa fa-plus"></i> Add</button>
+                  </div>
+                  {% else %}
+                  <div id="attribute-edit-btn" class="button-group">
+                    <button type="submit" formaction="./update_attribute" class="btn">
+                      <i class="fa fa-save"></i> Save</button>
+                      <button type="submit" formaction='./remove_attribute' class="btn">
+                        <i class="fa fa-trash-o"></i> Remove</button>
+                  </div>
+                  {% endif %}
+                </div>
               </div>
-        </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
     </div>
+  </div>
 </div>

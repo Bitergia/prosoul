@@ -1,49 +1,37 @@
 <div class="row">
-  <div class="col-sm-8">
+  <div class="col-sm-6">
     <h2>Attributes</h2>
   </div>
-  <div class="col-sm-4">
-    <button type="submit" class="btn btn-primary" id="add-attribute-btn" data-toggle="modal" data-target="#addAttributeModal">
-      <i class="fa fa-plus"></i> Add<span class="sr-only"> goal</span>
-    </button>
+  <div class="col-sm-6">
+    <div class="button-group">
+      <button type="submit" class="btn btn-primary" id="add-attribute-btn" data-toggle="modal" data-target="#addAttributeModal">
+        <i class="fa fa-plus"></i> Add<span class="sr-only"> goal</span>
+      </button>
+      <button type="submit" class="btn btn-primary" id="edit-attribute-btn" data-toggle="modal" data-target="#addAttributeModal">
+        <i class="fa fa-pencil"></i> Edit<span class="sr-only"> goal</span>
+      </button>
+    </div>
   </div>
 </div>
 
 <div class="row">
   <div class="col-sm-12">
-      <form action="./select_attribute" method="post">
-          <fieldset id="select-attribute">
-            {% csrf_token %}
-            {% for field in attributes_form.state_fields %}
-              {{ field }}
-            {% endfor %}
-            {{ attributes_form.name.errors }}
-            <div class="form-group">
-              {{ attributes_form.name }}
-            </div>
-            <div class="form-group">
-              <button type="submit" class="btn btn-primary" id="select-dataSource-btn"><span><i class="fa fa-check"></i></span> Select<span class="sr-only"> attribute type</span></button>
-            </div>
-        </fieldset>
-      </form>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-sm-12">
-    <h3>Remove attribute</h3>
-      <form action="./remove_attribute" method="post">
-          <fieldset id="remove-attribute">
-            {% csrf_token %}
-            {% for field in attribute_remove_form.state_fields %}
-              {{ field }}
-            {% endfor %}
-            {{ attribute_remove_form.name.errors }}
-              <div class="input-group">
-                  {{ attribute_remove_form.attribute_name }}
-                  <button type="submit" class="btn btn-danger" id="remove-attribute-btn"><span><i class="fa fa-trash-o"></i></span> Remove<span class="sr-only"> attribute</span></button>
-              </div>
-          </fieldset>
-      </form>
+    <form action="./select_attribute" method="post">
+      <fieldset id="select-attribute">
+        {% csrf_token %}
+        {% for field in attributes_form.state_fields %}
+        {{ field }}
+        {% endfor %}
+        {{ attributes_form.name.errors }}
+        <div class="form-group">
+          {{ attributes_form.name }}
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary" id="select-attribute-btn">
+            <span><i class="fa fa-check"></i></span> Select<span class="sr-only"> attribute type</span>
+          </button>
+        </div>
+      </fieldset>
+    </form>
   </div>
 </div>

@@ -127,6 +127,14 @@ class AttributeForm(MeditorEditorForm):
         self.fields['attribute_name'] = forms.CharField(label='Attribute name', max_length=100)
         self.fields['attribute_name'].widget = forms.TextInput(attrs=ds_attrs)
 
+        current_name = None
+        if self.state and self.state.attributes:
+            current_name = self.state.attributes[0]
+        self.fields['current_name'] = forms.CharField(required=False, max_length=50,
+                                                      widget=forms.HiddenInput(),
+                                                      initial=current_name)
+
+
 
 class AttributesForm(MeditorEditorForm):
 
