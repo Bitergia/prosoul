@@ -132,6 +132,9 @@ def build_forms_context(state=None):
             attributes_form.initial['name'] = state.attributes[0]
             attribute_form.initial['attribute_name'] = state.attributes[0]
             attribute_remove_form.initial['attribute_name'] = state.attributes[0]
+        if state.metrics:
+            metrics_form.initial['id'] = state.metrics[0]
+            attribute_form.initial['metric_id'] = state.metrics[0]
 
     context = {"qmodels_form": qmodel_form,
                "qmodel_form": add_qmodel_form,
