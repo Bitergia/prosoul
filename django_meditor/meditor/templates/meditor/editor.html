@@ -79,9 +79,11 @@ function disableElement(element_id) {
     <script>
         disableElement("add-goal");
         disableElement("add-goal-btn");
+        disableElement("edit-goal-btn");
         disableElement("select-goal");
         disableElement("add-attribute");
         disableElement("add-attribute-btn");
+        disableElement("edit-attribute-btn");
         disableElement("select-attribute");
         disableElement("select-metric");
         disableElement("add-metric-btn");
@@ -96,9 +98,14 @@ function disableElement(element_id) {
         </script>
     {% endif %}
     <script>
-        disableElement("add-attribute");
-        disableElement("select-attribute");
-        disableElement("select-metric");
+      disableElement("edit-goal-btn");
+      disableElement("add-attribute");
+      disableElement("add-attribute-btn");
+      disableElement("edit-attribute-btn");
+      disableElement("select-attribute");
+      disableElement("select-metric");
+      disableElement("add-metric-btn");
+      disableElement("edit-metric-btn");
     </script>
 {% elif not attributes_form.initial.name %}
     {% if attributes_form.name|length == 0 %}
@@ -109,9 +116,12 @@ function disableElement(element_id) {
         </script>
     {% endif %}
     <script>
+      disableElement("edit-attribute-btn");
       disableElement("select-metric");
+      disableElement("add-metric-btn");
+      disableElement("edit-metric-btn");
     </script>
-{% elif not metrics_form.initial.name %}
+{% elif not metrics_form.initial.id %}
     {% if metrics_form.id|length == 0 %}
         <script>
             disableElement("select-metric");
@@ -119,6 +129,9 @@ function disableElement(element_id) {
             $('#addMetricModal').modal('show');
         </script>
     {% endif %}
+    <script>
+      disableElement("edit-metric-btn");
+    </script>
 {% endif %}
 <!-- End of element disabling control-->
 
