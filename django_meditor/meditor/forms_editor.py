@@ -92,6 +92,13 @@ class GoalForm(BestiaryEditorForm):
         self.fields['goal_name'] = forms.CharField(label='Goal name', max_length=100)
         self.fields['goal_name'].widget = forms.TextInput(attrs={'class': 'form-control'})
 
+        current_goal = None
+        if self.state and self.state.goals:
+            current_goal = self.state.goals[0]
+        self.fields['current_name'] = forms.CharField(required=False, max_length=50,
+                                                      widget=forms.HiddenInput(),
+                                                      initial=current_goal)
+
 
 class GoalsForm(BestiaryEditorForm):
 

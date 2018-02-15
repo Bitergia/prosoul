@@ -83,27 +83,6 @@ def return_error(message):
     return HttpResponse(render_error)
 
 
-def select_goal(request, template, context=None):
-    if request.method == 'POST':
-        form = forms_editor.GoalsForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['name']
-            goals = [name]
-            state = EditorState(goals=goals, form=form)
-            if context:
-                context.update(build_forms_context(state))
-            else:
-                context = build_forms_context(state)
-            return shortcuts.render(request, template, context)
-        else:
-            # TODO: Show error
-            raise Http404
-    # if a GET (or any other method) we'll create a blank form
-    else:
-        # TODO: Show error
-        return shortcuts.render(request, template, build_forms_context())
-
-
 @perfdata
 def select_qmodel(request, template, context=None):
     if request.method == 'POST':
@@ -147,9 +126,11 @@ def build_forms_context(state=None):
         qmodel_form.initial['name'] = state.qmodel_name
         if state.goals:
             goals_form.initial['name'] = state.goals[0]
+            goal_form.initial['goal_name'] = state.goals[0]
             goal_remove_form.initial['goal_name'] = state.goals[0]
         if state.attributes:
             attributes_form.initial['name'] = state.attributes[0]
+            attribute_form.initial['attribute_name'] = state.attributes[0]
             attribute_remove_form.initial['attribute_name'] = state.attributes[0]
 
     context = {"qmodels_form": qmodel_form,
@@ -261,7 +242,6 @@ def update_metric(request):
                 attribute = Attribute.objects.get(name=attribute)
                 attribute.metrics.add(metric_orm)
                 attribute.save()
-                print("**** OLD ATTR ***", old_attribute)
                 attribute = Attribute.objects.get(name=old_attribute)
                 attribute.metrics.remove(metric_orm)
                 attribute.save()
@@ -302,12 +282,13 @@ def remove_metric(request):
 
 
 def select_metric(request):
+    template = 'meditor/editor.html'
     if request.method == 'POST':
         form = forms_editor.MetricsForm(request.POST)
         if form.is_valid():
             metric_id = int(form.cleaned_data['id'])
             state = EditorState(form=form, metrics=[metric_id])
-            return shortcuts.render(request, 'meditor/editor.html',
+            return shortcuts.render(request, template,
                                     build_forms_context(state))
         else:
             # TODO: Show error
@@ -315,7 +296,7 @@ def select_metric(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         # TODO: Show error
-        return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+        return shortcuts.render(request, template, build_forms_context())
 
 
 def add_attribute(request):
@@ -347,13 +328,14 @@ def add_attribute(request):
 
 
 def select_attribute(request):
+    template = 'meditor/editor.html'
     if request.method == 'POST':
         form = forms_editor.AttributesForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
             attributes = [name] if name else []
 
-            return shortcuts.render(request, 'meditor/editor.html',
+            return shortcuts.render(request, template,
                                     build_forms_context(EditorState(form=form, attributes=attributes)))
         else:
             # TODO: Show error
@@ -361,7 +343,7 @@ def select_attribute(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         # TODO: Show error
-        return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+        return shortcuts.render(request, template, build_forms_context())
 
 
 def remove_attribute(request):
@@ -380,26 +362,9 @@ def remove_attribute(request):
         # TODO: Show error
         return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
-
-def editor_select_goal(request):
-    return select_goal(request, "meditor/editor.html")
-
-
-def remove_goal(request):
-    if request.method == 'POST':
-        form = forms_editor.GoalForm(request.POST)
-        if form.is_valid():
-            goal_name = form.cleaned_data['goal_name']
-            Goal.objects.get(name=goal_name).delete()
-            return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
-        else:
-            # TODO: Show error
-            print("remove_goal", form.errors)
-            raise Http404
-    # if a GET (or any other method) we'll create a blank form
-    else:
-        # TODO: Show error
-        return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+#
+# Goal logic
+#
 
 
 def add_goal(request):
@@ -420,6 +385,69 @@ def add_goal(request):
                                     build_forms_context(context))
         else:
             # TODO: Show error
+            raise Http404
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # TODO: Show error
+        return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+
+
+def remove_goal(request):
+    if request.method == 'POST':
+        form = forms_editor.GoalForm(request.POST)
+        if form.is_valid():
+            goal_name = form.cleaned_data['goal_name']
+            Goal.objects.get(name=goal_name).delete()
+            return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+        else:
+            # TODO: Show error
+            print("remove_goal", form.errors)
+            raise Http404
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # TODO: Show error
+        return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+
+def select_goal(request, context=None):
+    template = 'meditor/editor.html'
+    if request.method == 'POST':
+        form = forms_editor.GoalsForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            goals = [name]
+            state = EditorState(goals=goals, form=form)
+            if context:
+                context.update(build_forms_context(state))
+            else:
+                context = build_forms_context(state)
+            return shortcuts.render(request, template, context)
+        else:
+            # TODO: Show error
+            raise Http404
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        # TODO: Show error
+        return shortcuts.render(request, template, build_forms_context())
+
+def update_goal(request):
+    if request.method == 'POST':
+        form = forms_editor.GoalForm(request.POST)
+
+        if form.is_valid():
+            name = form.cleaned_data['goal_name']
+            current_name = form.cleaned_data['current_name']
+            print("CURRENT", current_name)
+
+            goal_orm = Goal.objects.get(name=current_name)
+            goal_orm.name = name
+            goal_orm.save()
+
+            state = EditorState(goals=[name], form=form)
+            return shortcuts.render(request, 'meditor/editor.html',
+                                    build_forms_context(state))
+        else:
+            # TODO: Show error
+            print(form.errors)
             raise Http404
     # if a GET (or any other method) we'll create a blank form
     else:
