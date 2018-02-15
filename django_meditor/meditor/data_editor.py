@@ -6,13 +6,18 @@ class AttributesData():
     def __init__(self, state):
         self.state = state
 
+    def __find_attribute_subattributes(self, attribute):
+        for subattr in attribute.subattributes.all():
+            yield subattr
+            for subsubattr in self.__find_attribute_subattributes(subattr):
+                yield subsubattr
+
     def __find_goals_attributes(self, goals):
         for goal in goals:
             for attribute in goal.attributes.all():
                 yield attribute
-                for subattr in attribute.subattributes.all():
-                    # TODO: only one level of subattributes is supported
-                    yield subattr
+                for subattribute in self.__find_attribute_subattributes(attribute):
+                    yield subattribute
             for attribute in self.__find_goals_attributes(goal.subgoals.all()):
                 yield attribute
 
