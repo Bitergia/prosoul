@@ -24,11 +24,11 @@ def perfdata(func):
     return decorator
 
 
-class BestiaryEditorForm(forms.Form):
+class MeditorEditorForm(forms.Form):
 
     widget = forms.Select(attrs={'size': SELECT_LINES, 'class': 'form-control'})
 
-    # Hidden widgets to store the state of the BestiaryEditorForm
+    # Hidden widgets to store the state of the MeditorEditorForm
     qmodel_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
     goals_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
     attributes_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
@@ -44,7 +44,7 @@ class BestiaryEditorForm(forms.Form):
                 kwargs['initial'].update(self.state.initial_state())
             else:
                 kwargs['initial'] = self.state.initial_state()
-        super(BestiaryEditorForm, self).__init__(*args, **kwargs)
+        super(MeditorEditorForm, self).__init__(*args, **kwargs)
 
         # The state includes the names of objects except for metrics
         # in which ids are included because there is no name
@@ -55,7 +55,7 @@ class BestiaryEditorForm(forms.Form):
                              ]
 
 
-class QualityModelForm(BestiaryEditorForm):
+class QualityModelForm(MeditorEditorForm):
 
     @perfdata
     def __init__(self, *args, **kwargs):
@@ -66,7 +66,7 @@ class QualityModelForm(BestiaryEditorForm):
         self.fields['qmodel_name'].widget = forms.TextInput(attrs=eco_attrs)
 
 
-class QualityModelsForm(BestiaryEditorForm):
+class QualityModelsForm(MeditorEditorForm):
 
     widget = forms.Select(attrs={'class': 'form-control', 'onclick': 'this.form.submit()'})
 
@@ -83,7 +83,7 @@ class QualityModelsForm(BestiaryEditorForm):
                                                 widget=self.widget, choices=choices)
 
 
-class GoalForm(BestiaryEditorForm):
+class GoalForm(MeditorEditorForm):
 
     @perfdata
     def __init__(self, *args, **kwargs):
@@ -100,7 +100,7 @@ class GoalForm(BestiaryEditorForm):
                                                       initial=current_goal)
 
 
-class GoalsForm(BestiaryEditorForm):
+class GoalsForm(MeditorEditorForm):
 
     @perfdata
     def __init__(self, *args, **kwargs):
@@ -117,7 +117,7 @@ class GoalsForm(BestiaryEditorForm):
                                                 widget=self.widget, choices=choices)
 
 
-class AttributeForm(BestiaryEditorForm):
+class AttributeForm(MeditorEditorForm):
 
     @perfdata
     def __init__(self, *args, **kwargs):
@@ -128,7 +128,7 @@ class AttributeForm(BestiaryEditorForm):
         self.fields['attribute_name'].widget = forms.TextInput(attrs=ds_attrs)
 
 
-class AttributesForm(BestiaryEditorForm):
+class AttributesForm(MeditorEditorForm):
 
     @perfdata
     def __init__(self, *args, **kwargs):
@@ -145,7 +145,7 @@ class AttributesForm(BestiaryEditorForm):
                                                 widget=self.widget, choices=choices)
 
 
-class MetricsForm(BestiaryEditorForm):
+class MetricsForm(MeditorEditorForm):
 
     @perfdata
     def __init__(self, *args, **kwargs):
@@ -162,7 +162,7 @@ class MetricsForm(BestiaryEditorForm):
                                               widget=self.widget, choices=choices)
 
 
-class MetricForm(BestiaryEditorForm):
+class MetricForm(MeditorEditorForm):
 
     @perfdata
     def __init__(self, *args, **kwargs):
