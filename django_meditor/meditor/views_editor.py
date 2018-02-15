@@ -4,14 +4,16 @@ import json
 from datetime import datetime
 from time import time
 
+from django import shortcuts
+from django.http import Http404
+
 from django.http import HttpResponse
 from django.template import loader
 
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-from django import shortcuts
-from django.http import Http404
+from django.db.utils import IntegrityError
 
 from meditor.meditor_export import fetch_models
 from meditor.meditor_import import convert_to_grimoirelab, feed_models, SUPPORTED_FORMATS
@@ -235,9 +237,7 @@ class QualityModelView():
             else:
                 # Ignore when the empty option is selected
                 return shortcuts.render(request, template, build_forms_context())
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, template, build_forms_context())
 
     @staticmethod
@@ -261,9 +261,7 @@ class QualityModelView():
                 # TODO: Show error
                 print("FORM errors", form.errors)
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
 
@@ -299,9 +297,7 @@ class MetricView():
                 # TODO: Show error
                 print(form.errors)
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
     @staticmethod
@@ -320,9 +316,7 @@ class MetricView():
                 # TODO: Show error
                 print(form.errors)
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
     @staticmethod
@@ -338,9 +332,7 @@ class MetricView():
             else:
                 # TODO: Show error
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, template, build_forms_context())
 
     @staticmethod
@@ -375,18 +367,15 @@ class MetricView():
                 # TODO: Show error
                 print(form.errors)
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
-
 
 
 class AttributeView():
 
     @staticmethod
     def add_attribute(request):
-
+        error = None
         if request.method == 'POST':
             form = forms_editor.AttributeForm(request.POST)
             if form.is_valid():
@@ -396,26 +385,29 @@ class AttributeView():
 
                 attribute_name = form.cleaned_data['attribute_name']
                 attribute_orm = Attribute(name=attribute_name)
-                attribute_orm.save()
+                try:
+                    attribute_orm.save()
 
-                if parent_name:
-                    # If there is an attribute parent use it instead of goal
-                    parent_orm = Attribute.objects.get(name=parent_name)
-                    parent_orm.subattributes.add(attribute_orm)
-                    parent_orm.save()
-                elif goal_name:
-                    goal_orm = Goal.objects.get(name=goal_name)
-                    goal_orm.attributes.add(attribute_orm)
-                    goal_orm.save()
+                    if parent_name:
+                        # If there is an attribute parent use it instead of goal
+                        parent_orm = Attribute.objects.get(name=parent_name)
+                        parent_orm.subattributes.add(attribute_orm)
+                        parent_orm.save()
+                    elif goal_name:
+                        goal_orm = Goal.objects.get(name=goal_name)
+                        goal_orm.attributes.add(attribute_orm)
+                        goal_orm.save()
+                except IntegrityError:
+                    error = "Attribute %s alredy exists" % (attribute_name)
 
-                return shortcuts.render(request, 'meditor/editor.html',
-                                        build_forms_context(EditorState(form=form)))
+                context = EditorState(attributes=[attribute_name], form=form)
+                send_context = build_forms_context(context)
+                send_context.update({"errors": error})
+                return shortcuts.render(request, 'meditor/editor.html', send_context)
             else:
                 # TODO: Show error
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
     @staticmethod
@@ -432,26 +424,28 @@ class AttributeView():
             else:
                 # TODO: Show error
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, template, build_forms_context())
 
     @staticmethod
     def remove_attribute(request):
+        error = None
         if request.method == 'POST':
             form = forms_editor.AttributeForm(request.POST)
             if form.is_valid():
                 attribute_name = form.cleaned_data['attribute_name']
-                Attribute.objects.get(name=attribute_name).delete()
-                return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+                try:
+                    Attribute.objects.get(name=attribute_name).delete()
+                except Attribute.DoesNotExist:
+                    error = "Can't remove %s. Attribute does not exists." % attribute_name
+                send_context = build_forms_context(EditorState(form=form))
+                send_context.update({"errors": error})
+                return shortcuts.render(request, 'meditor/editor.html', send_context)
             else:
                 # TODO: Show error
                 print("attribute_goal", form.errors)
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
     @staticmethod
@@ -475,9 +469,7 @@ class AttributeView():
                 # TODO: Show error
                 print(form.errors)
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
 
@@ -485,6 +477,7 @@ class GoalView():
 
     @staticmethod
     def add_goal(request):
+        error = None
         if request.method == 'POST':
             form = forms_editor.GoalForm(request.POST)
             if form.is_valid():
@@ -492,41 +485,49 @@ class GoalView():
                 qmodel_orm = None
                 goal_name = form.cleaned_data['goal_name']
                 goal_orm = Goal(name=goal_name)
-                goal_orm.save()
-                if qmodel_name:
-                    qmodel_orm = QualityModel.objects.get(name=qmodel_name)
-                    qmodel_orm.goals.add(goal_orm)
-                    qmodel_orm.save()
+                try:
+                    goal_orm.save()
+                    if qmodel_name:
+                        qmodel_orm = QualityModel.objects.get(name=qmodel_name)
+                        qmodel_orm.goals.add(goal_orm)
+                        qmodel_orm.save()
+                except IntegrityError:
+                    error = "Goal %s alredy exists" % (goal_name)
+
                 context = EditorState(goals=[goal_name], form=form)
-                return shortcuts.render(request, 'meditor/editor.html',
-                                        build_forms_context(context))
+                send_context = build_forms_context(context)
+                send_context.update({"errors": error})
+                return shortcuts.render(request, 'meditor/editor.html', send_context)
             else:
                 # TODO: Show error
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
     @staticmethod
     def remove_goal(request):
+        error = None
         if request.method == 'POST':
             form = forms_editor.GoalForm(request.POST)
             if form.is_valid():
                 goal_name = form.cleaned_data['goal_name']
-                Goal.objects.get(name=goal_name).delete()
-                return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+                try:
+                    Goal.objects.get(name=goal_name).delete()
+                except Goal.DoesNotExist:
+                    error = "Can't remove %s. Goal does not exists." % goal_name
+                send_context = build_forms_context(EditorState(form=form))
+                send_context.update({"errors": error})
+                return shortcuts.render(request, 'meditor/editor.html', send_context)
             else:
                 # TODO: Show error
                 print("remove_goal", form.errors)
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
     @staticmethod
     def select_goal(request, context=None):
+        error = None
         template = 'meditor/editor.html'
         if request.method == 'POST':
             form = forms_editor.GoalsForm(request.POST)
@@ -534,17 +535,18 @@ class GoalView():
                 name = form.cleaned_data['name']
                 goals = [name]
                 state = EditorState(goals=goals, form=form)
-                if context:
-                    context.update(build_forms_context(state))
-                else:
-                    context = build_forms_context(state)
-                return shortcuts.render(request, template, context)
             else:
-                # TODO: Show error
-                raise Http404
-        # if a GET (or any other method) we'll create a blank form
+                state = EditorState()
+                error = form.errors
+
+            if context:
+                context.update(build_forms_context(state))
+            else:
+                context = build_forms_context(state)
+
+            context.update({"errors": error})
+            return shortcuts.render(request, template, context)
         else:
-            # TODO: Show error
             return shortcuts.render(request, template, build_forms_context())
 
     @staticmethod
@@ -568,7 +570,5 @@ class GoalView():
                 # TODO: Show error
                 print(form.errors)
                 raise Http404
-        # if a GET (or any other method) we'll create a blank form
         else:
-            # TODO: Show error
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())

@@ -9,6 +9,15 @@
 
 {% block body %}
 
+{% if errors %}
+<div class="container-fluid">
+    <div class="alert alert-danger">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Errors:</strong> {{ errors }}
+    </div>
+</div>
+{% endif %}
+
 
 <!-- Start: Quality Models Editor -->
 <div class="container-fluid">
@@ -22,7 +31,6 @@
 
 <!-- Start: Editor body -->
 <div class="container-fluid">
-
   <div class="row">
     <div class="col-md-3">
       <!-- Start: Goals block -->

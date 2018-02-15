@@ -61,9 +61,9 @@ class QualityModelForm(MeditorEditorForm):
     def __init__(self, *args, **kwargs):
         super(QualityModelForm, self).__init__(*args, **kwargs)
 
-        eco_attrs = {'class': 'form-control', 'placeholder': 'QualityModel name'}
+        qm_attrs = {'class': 'form-control', 'placeholder': 'QualityModel name'}
         self.fields['qmodel_name'] = forms.CharField(label='QualityModel name', max_length=100)
-        self.fields['qmodel_name'].widget = forms.TextInput(attrs=eco_attrs)
+        self.fields['qmodel_name'].widget = forms.TextInput(attrs=qm_attrs)
 
 
 class QualityModelsForm(MeditorEditorForm):
