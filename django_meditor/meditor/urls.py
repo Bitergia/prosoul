@@ -8,9 +8,9 @@ from . import views_editor
 
 urlpatterns_edit = [
     url(r'^editor$', views_editor.editor, name='editor'),
-    url(r'^import/$', views_editor.import_from_file),
+    url(r'^import$', views_editor.import_from_file),
     url(r'^export/qmodel=(?P<qmodel>[\w ]+)', views_editor.export_to_file),
-    url(r'^export/$', views_editor.export_to_file),
+    url(r'^export$', views_editor.export_to_file),
     url(r'^add_qmodel$', views_editor.QualityModelView.add_qmodel),
     url(r'^editor_select_qmodel$', views_editor.QualityModelView.select_qmodel),
     url(r'^add_goal$', views_editor.GoalView.add_goal),

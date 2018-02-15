@@ -4,7 +4,7 @@
     <div class="modal-dialog">
     <!-- Modal content-->
         <div class="modal-content">
-          <form id="qmodel_download" method="POST" action="./export/" enctype="multipart/form-data">{% csrf_token %}
+          <form id="qmodel_download" method="POST" action="export" enctype="multipart/form-data">{% csrf_token %}
           <div class="modal-header">
             <div class="modal-title">Download quality model file</div>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
