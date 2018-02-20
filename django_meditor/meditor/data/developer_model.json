@@ -1,0 +1,59 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfCommits"
+        },
+        {
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssues"
+        }
+       ],
+       "name": "Vitality",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Product",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesAttended"
+        },
+        {
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesClosed"
+        }
+       ],
+       "name": "Attention",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Community",
+     "subgoals": []
+    }
+   ],
+   "name": "Developer Quality Model"
+  }
+ ]
+}
