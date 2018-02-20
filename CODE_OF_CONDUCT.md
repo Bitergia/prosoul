@@ -1,4 +1,4 @@
-# Contributor Covenant Code of Conduct
+# Meditor Contributor Code of Conduct
 
 ## Our Pledge
 
