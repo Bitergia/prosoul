@@ -54,9 +54,10 @@ def get_params():
     return parser.parse_args()
 
 
-def compute_metric(es_url, es_index, metric_name):
+def compute_metric_per_project(es_url, es_index, metric_name):
     # Get the total aggregated value for a metric in the CROSSMINER
     # Elasticsearch index with metrics
+    project_metrics = []
     es_query = """
     {
       "size": 0,
@@ -72,9 +73,20 @@ def compute_metric(es_url, es_index, metric_name):
         }
       },
       "aggs": {
-        "2": {
-          "max": {
-            "field": "metric_es_value"
+        "3": {
+          "terms": {
+            "field": "project.keyword",
+            "size": 5,
+            "order": {
+              "2": "desc"
+            }
+          },
+          "aggs": {
+            "2": {
+              "max": {
+                "field": "metric_es_value"
+              }
+            }
           }
         }
       }
@@ -83,15 +95,17 @@ def compute_metric(es_url, es_index, metric_name):
 
     res = requests.post(es_url + "/" + es_index + "/_search", data=es_query)
     res.raise_for_status()
-    metric = res.json()["aggregations"]["2"]["value"]
 
-    return metric
+    project_buckets = res.json()["aggregations"]["3"]["buckets"]
+    for pb in project_buckets:
+        project_metrics.append({"project": pb['key'], "metric": pb["2"]["value"]})
+
+    return project_metrics
 
 def assess_attribute(es_url, es_index, model_name, attribute):
     logging.debug('Doing the assessment for attribute: %s', attribute.name)
     # Collect all metrics that are included in the models
     metrics_with_data = []
-    metrics_with_data_scores = []
 
     for metric in attribute.metrics.all():
         # We need the metric values and the metric indicators
@@ -104,23 +118,25 @@ def assess_attribute(es_url, es_index, model_name, attribute):
 
     for metric in metrics_with_data:
         metric_data = metric.data.implementation
-        metric_value = compute_metric(es_url, es_index, metric_data)
+        metric_value = compute_metric_per_project(es_url, es_index, metric_data)
         if metric_value:
-            logging.debug("Metric %s value %i", metric_data, metric_value)
-            logging.debug("Doing the assesment ...")
-            if metric.thresholds:
-                score = 0
-                for threshold in metric.thresholds.split(","):
-                    if metric_value > float(threshold):
-                        score += 1
-            logging.debug("Score for %s: %i (%s)", metric_data, score, THRESHOLDS[score-1])
-            metrics_with_data_scores.append(score)
+            for project_metric in metric_value:
+                logging.debug("Project %s metric %s value %i", project_metric['project'],
+                              metric_data, project_metric['metric'])
+                logging.debug("Doing the assesment ...")
+                if metric.thresholds:
+                    score = 0
+                    for threshold in metric.thresholds.split(","):
+                        if project_metric['metric'] > float(threshold):
+                            score += 1
+                logging.debug("Score %s for %s: %i (%s)",  project_metric['project'],
+                              metric_data, score, THRESHOLDS[score-1])
         else:
             logging.debug("Can't find value for for %s", metric)
 
 
 def assess(es_url, es_index, model_name):
-    logging.debug('Building the assessment for projects ... %s')
+    logging.debug('Building the assessment for projects ...')
 
     # Check that the model exists
     model_orm = None
