@@ -3,7 +3,7 @@
 #
 # Create a Kibana Dashboard to show a Quality Model
 #
-# Copyright (C) 2017 Bitergia
+# Copyright (C) Bitergia
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ django.setup()
 
 from meditor.models import QualityModel
 
-from grimoire_elk.panels import search_dashboards, fetch_dashboard, feed_dashboard
+from kidash.kidash import search_dashboards, fetch_dashboard, feed_dashboard
 
 
 def get_params():
@@ -97,27 +97,21 @@ def build_filters(metrics, index):
 
     return filter_json
 
-
-def build_dashboard(es_url, es_index, template_dashboard, model_name):
-    logging.debug('Building the dashboard ... %s')
+def build_dashboard(es_url, es_index, template_dashboard, goal, attribute):
+    logging.debug('Building the dashboard for the attribute: %s (goal %s)', attribute, goal)
 
     # Check that the model and the template dashboard exists
-    model_orm = None
-    try:
-        metric_params = {"name": model_name}
-        model_orm = QualityModel.objects.get(**metric_params)
-    except QualityModel.DoesNotExist:
-        logging.error('Can not find the metrics model %s', model_name)
-        sys.exit(1)
 
-    # Collect all metrics that are included in the models
-    metrics = []
-    for goal in model_orm.goals.all():
-        for attribute in goal.attributes.all():
-            for metric in attribute.metrics.all():
-                metrics.append(metric.name)
+    # Collect metrics to be included in this attribute
+    metrics_data = []
 
-    logging.debug("Metrics to be included: %s", metrics)
+    for metric in attribute.metrics.all():
+        if metric.data:
+            metrics_data.append(metric.data.implementation)
+        else:
+            logging.warning("The metric %s does not have data", metric.name)
+
+    logging.debug("Metrics to be included: %s", metrics_data)
 
     # Get the dashboard template to add to it the metric filters
     template_dashboard_id = find_dash_id(es_url, template_dashboard)
@@ -128,14 +122,31 @@ def build_dashboard(es_url, es_index, template_dashboard, model_name):
     # Add the filters to the template dashboard and export it to Kibana
     dashboard = fetch_dashboard(es_url, template_dashboard_id)
     search_json = json.loads(dashboard['dashboard']['value']['kibanaSavedObjectMeta']['searchSourceJSON'])
-    search_json['filter'] = build_filters(metrics, es_index)
+    search_json['filter'] = build_filters(metrics_data, es_index)
     dashboard['dashboard']['value']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(search_json)
-    dashboard['dashboard']['value']['title'] = dashboard['dashboard']['value']['title'] + "_" + model_name
-    dashboard['dashboard']['id'] = dashboard['dashboard']['id'] + "_" + model_name
+    dashboard['dashboard']['value']['title'] = goal.name + "_" + attribute.name
+    dashboard['dashboard']['id'] = goal.name + "_" + attribute.name
 
     feed_dashboard(dashboard, es_url)
 
-    logging.info('Created Metrics Model dashboard %s', dashboard['dashboard']['value']['title'])
+    logging.info('Created the attribute dashboard %s', dashboard['dashboard']['value']['title'])
+
+
+def build_dashboards(es_url, es_index, template_dashboard, model_name):
+    logging.debug('Building the dashboards for the model: %s', model_name)
+
+    # Check that the model and the template dashboard exists
+    model_orm = None
+    try:
+        model_orm = QualityModel.objects.get(name=model_name)
+    except QualityModel.DoesNotExist:
+        logging.error('Can not find the metrics model %s', model_name)
+        sys.exit(1)
+
+    # Build a new dashboard for each attribute in the quality model
+    for goal in model_orm.goals.all():
+        for attribute in goal.attributes.all():
+            build_dashboard(es_url, es_index, template_dashboard, goal, attribute)
 
 
 if __name__ == '__main__':
@@ -150,5 +161,5 @@ if __name__ == '__main__':
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
 
-    dashboard_json = build_dashboard(args.elastic_url, args.index,
-                                     args.template, args.model)
+    build_dashboards(args.elastic_url, args.index,
+                     args.template, args.model)

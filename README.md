@@ -64,6 +64,7 @@ meditor/django_meditor $ PYTHONPATH=. meditor/meditor_export.py -f meditor/data/
 
 * Python >=3.4
 * Django 2
+* grimoire-kidash
 
 ## License
 
