@@ -17,7 +17,7 @@ from django.db.utils import IntegrityError
 
 from meditor.meditor_export import fetch_models
 from meditor.meditor_import import convert_to_grimoirelab, feed_models, SUPPORTED_FORMATS
-from meditor.models import Attribute, DataSourceType, Goal, Metric, Metric, QualityModel
+from meditor.models import Attribute, DataSourceType, Goal, Metric, MetricData, QualityModel
 
 from . import forms_editor
 from . import data
@@ -50,6 +50,7 @@ def build_forms_context(state=None):
     attribute_remove_form = forms_editor.AttributeForm(state=state)
     metrics_form = forms_editor.MetricsForm(state=state)
     metric_form = forms_editor.MetricForm(state=state)
+    metric_data_form = forms_editor.MetricDataForm(state=state)
 
     if state:
         qmodel_form.initial['name'] = state.qmodel_name
@@ -63,6 +64,8 @@ def build_forms_context(state=None):
             attribute_remove_form.initial['attribute_name'] = state.attributes[0]
         if state.metrics:
             metrics_form.initial['id'] = state.metrics[0]
+            metric_name = Metric.objects.get(id=state.metrics[0]).name
+            metrics_form.initial['name'] = metric_name
             attribute_form.initial['metric_id'] = state.metrics[0]
 
     context = {"qmodels_form": qmodel_form,
@@ -74,7 +77,8 @@ def build_forms_context(state=None):
                "attribute_form": attribute_form,
                "attribute_remove_form": attribute_remove_form,
                "metrics_form": metrics_form,
-               "metric_form": metric_form
+               "metric_form": metric_form,
+               "metric_data_form": metric_data_form
                }
     return context
 
@@ -265,6 +269,41 @@ class QualityModelView():
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
 
+class MetricDataView():
+
+    @staticmethod
+    def add_metric_data(request):
+        if request.method == 'POST':
+            form = forms_editor.MetricDataForm(request.POST)
+            if form.is_valid():
+                state = EditorState(form=form)
+                metric_id = state.metrics[0]
+                implementation = form.cleaned_data['implementation']
+
+                # Try to find a metric data already created
+                try:
+                    metric_data_orm = MetricData.objects.get(implementation=implementation)
+                except MetricData.DoesNotExist:
+                    # Create a new metric
+                    metric_data_orm = MetricData(implementation=implementation)
+                    metric_data_orm.save()
+
+                metric_orm = Metric.objects.get(id=metric_id)
+                metric_orm.data = metric_data_orm
+                metric_orm.save()
+
+                # form.cleaned_data['metrics_state'] = []
+                state = EditorState(form=form)
+                return shortcuts.render(request, 'meditor/editor.html',
+                                        build_forms_context(state))
+            else:
+                # TODO: Show error
+                print(form.errors)
+                raise Http404
+        else:
+            return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
+
+
 
 class MetricView():
 
@@ -344,10 +383,15 @@ class MetricView():
                 metric_id = form.cleaned_data['metric_id']
                 name = form.cleaned_data['metric_name']
                 attribute = form.cleaned_data['attributes']
+                metric_data = form.cleaned_data['metrics_data']
                 old_attribute = form.cleaned_data['old_attribute']
 
                 metric_orm = Metric.objects.get(id=metric_id)
                 metric_orm.name = name
+                metric_orm.data = None
+                if metric_data:
+                    metric_data_orm = MetricData.objects.get(implementation=metric_data)
+                    metric_orm.data = metric_data_orm
                 metric_orm.save()
 
                 # Add the metric to the new attribute

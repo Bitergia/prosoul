@@ -46,6 +46,7 @@
     <!-- End: Attributes -->
     <!-- Start: Metrics block -->
     <div class="col-md-3">
+      {% include "meditor/editor_metric_data.html" %}
       {% include "meditor/editor_metric.html" %}
       {% include "meditor/editor_metrics.html" %}
     </div>
@@ -63,10 +64,10 @@
 
 // Disable "onclick" event when selecting a qmodel on
 // Import and Download modals.
-eco_download_form = document.getElementById("qmodel_download");
-eco_download_form["name"].removeAttribute("onclick");
-eco_download_form = document.getElementById("qmodel_import");
-eco_download_form["name"].removeAttribute("onclick");
+qmodel_download_form = document.getElementById("qmodel_download");
+qmodel_download_form["name"].removeAttribute("onclick");
+qmodel_download_form = document.getElementById("qmodel_import");
+qmodel_download_form["name"].removeAttribute("onclick");
 
 // Disable element
 function disableElement(element_id) {
@@ -96,6 +97,7 @@ function disableElement(element_id) {
         disableElement("select-metric");
         disableElement("add-metric-btn");
         disableElement("edit-metric-btn");
+        disableElement("add-metric-data-btn");
     </script>
 {% elif not goals_form.initial.name %}
     {% if goals_form.name|length == 0 %}
@@ -114,6 +116,7 @@ function disableElement(element_id) {
       disableElement("select-metric");
       disableElement("add-metric-btn");
       disableElement("edit-metric-btn");
+      disableElement("add-metric-data-btn");
     </script>
 {% elif not attributes_form.initial.name %}
     {% if attributes_form.name|length == 0 %}
@@ -128,6 +131,7 @@ function disableElement(element_id) {
       disableElement("select-metric");
       disableElement("add-metric-btn");
       disableElement("edit-metric-btn");
+      disableElement("add-metric-data-btn");
     </script>
 {% elif not metrics_form.initial.id %}
     {% if metrics_form.id|length == 0 %}
@@ -139,6 +143,7 @@ function disableElement(element_id) {
     {% endif %}
     <script>
       disableElement("edit-metric-btn");
+      disableElement("add-metric-data-btn");
     </script>
 {% endif %}
 <!-- End of element disabling control-->

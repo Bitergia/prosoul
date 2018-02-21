@@ -170,6 +170,15 @@ class AttributesForm(MeditorEditorForm):
                                                 widget=self.widget, choices=self.list_choices())
 
 
+class MetricDataForm(MeditorEditorForm):
+    def __init__(self, *args, **kwargs):
+        super(MetricDataForm, self).__init__(*args, **kwargs)
+
+        ds_attrs = {'class': 'form-control', 'placeholder': 'Implementation'}
+        self.fields['implementation'] = forms.CharField(label='Attribute name', max_length=100)
+        self.fields['implementation'].widget = forms.TextInput(attrs=ds_attrs)
+
+
 class MetricsForm(MeditorEditorForm):
 
     @perfdata
@@ -187,7 +196,9 @@ class MetricsForm(MeditorEditorForm):
                                               widget=self.widget, choices=choices)
 
 
+
 class MetricForm(MeditorEditorForm):
+    # This implementation needs to be revisited and simplified
 
     @perfdata
     def __init__(self, *args, **kwargs):
@@ -215,8 +226,11 @@ class MetricForm(MeditorEditorForm):
                 metric_orm = Metric.objects.get(id=self.metric_id)
                 kwargs['initial'].update({
                     'metric_id': self.metric_id,
-                    'metric_name': metric_orm.name
+                    'metric_name': metric_orm.name,
+
                 })
+                if metric_orm.data:
+                    kwargs['initial'].update({'metrics_data': metric_orm.data.implementation})
             except Metric.DoesNotExist:
                 print(self.__class__, "Received metric which does not exists", self.metric_id)
         super(MetricForm, self).__init__(*args, **kwargs)
@@ -238,6 +252,18 @@ class MetricForm(MeditorEditorForm):
         self.widget = forms.Select(attrs={'class': 'form-control'})
         self.fields['attributes'] = forms.ChoiceField(label='Attributes', required=True,
                                                       widget=self.widget, choices=choices)
+
+        choices = ()
+
+        for metric_data in data_editor.MetricsDataData(state=None).fetch():
+            choices += ((metric_data.implementation, metric_data.implementation),)
+
+        empty_choice = [('', '')]
+        choices = empty_choice + sorted(choices, key=lambda x: x[1])
+
+        self.fields['metrics_data'] = forms.ChoiceField(label='Metrics Data', required=False,
+                                                        widget=self.widget, choices=choices)
+
 
         self.fields['old_attribute'] = forms.CharField(label='old_attribute', max_length=100, required=False)
         self.fields['old_attribute'].widget = forms.HiddenInput(attrs={'class': 'form-control', 'readonly': 'True'})

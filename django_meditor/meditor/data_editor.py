@@ -1,4 +1,4 @@
-from meditor.models import Attribute, QualityModel, Goal, Metric, Metric
+from meditor.models import Attribute, QualityModel, Goal, Metric, Metric, MetricData
 
 
 class AttributesData():
@@ -122,3 +122,12 @@ class MetricsData():
             qmodel = QualityModel.objects.get(name=self.state.qmodel_name)
             for metric in self.__find_goals_metrics(qmodel.goals.all()):
                 yield metric
+
+class MetricsDataData():
+
+    def __init__(self, state=None):
+        self.state = state
+
+    def fetch(self):
+        for metric_data in MetricData.objects.all():
+            yield metric_data

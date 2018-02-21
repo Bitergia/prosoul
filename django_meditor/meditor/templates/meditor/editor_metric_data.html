@@ -1,46 +1,44 @@
 <!-- Modal: Add metric -->
-<div class="modal fade" id="addMetricModal" role="dialog">
+<div class="modal fade" id="addMetricDataModal" role="dialog">
   <div class="modal-dialog">
     <!-- Modal content-->
     <div class="modal-content">
       <form method="post">
         <fieldset id="add-metric">
           {% csrf_token %}
-          {% for field in metric_form.state_fields %}
+          {% for field in metric_data_form.state_fields %}
           {{ field }}
           {% endfor %}
-          {{ metric_form.old_attribute }}
-          {{ metric_form.metric_id }}
-          {{ metric_form.name.errors }}
+          {{ metric_data_form.metric_id }}
+          {{ metric_data_form.name.errors }}
           <div class="modal-header">
             <div class="modal-title">
-              {% if not metric_form.initial.metric_name %}
+              {% if not metric_data_form.initial.metric_data_name %}
               Add
               {% else %}
               Edit
               {% endif %}
-              metric for <strong>{{ attributes_form.initial.name }}</strong> in
+              metric data for <strong>{{ metrics_form.initial.name }}</strong> in
+              <strong>{{ attributes_form.initial.name }}</strong> in
               <strong>{{ goals_form.initial.name }}</strong> in <strong>{{ qmodels_form.initial.name }}</strong>
             </div>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
           <div class="modal-body">
-            <div class="input-group"><span class="input-group-addon">Name</span>{{ metric_form.metric_name }}</div>
-            <div class="input-group"><span class="input-group-addon">Data</span>{{ metric_form.metrics_data }}
+            <div class="input-group"><span class="input-group-addon">Implementation</span>{{ metric_data_form.implementation }}
             </div>
-            <div class="input-group"><span class="input-group-addon">Attribute</span>{{ metric_form.attributes }}</div>
           </div>
           <div class="modal-footer">
             <div class="form-actions pull-right">
               <div class="input-group">
-                {% if not metric_form.initial.metric_name %}
+                {% if not metric_data_form.initial.metric_data_name %}
                 <div id="metric-add-btn" class="button-group">
-                  <button type="submit" formaction='./add_metric' class="btn"><i class="fa fa-plus"></i> Add</button>
+                  <button type="submit" formaction='./add_metric_data' class="btn"><i class="fa fa-plus"></i> Add</button>
                 </div>
                 {% else %}
                 <div id="metric-edit-btn" class="button-group">
-                  <button type="submit" formaction="./update_metric" class="btn"><i class="fa fa-save"></i> Save</button>
-                  <button type="submit" formaction='./remove_metric' class="btn"><i class="fa fa-trash-o"></i> Remove</button>
+                  <button type="submit" formaction="./update_metric_data" class="btn"><i class="fa fa-save"></i> Save</button>
+                  <button type="submit" formaction='./remove_metric_data' class="btn"><i class="fa fa-trash-o"></i> Remove</button>
                 </div>
                 {% endif %}
               </div>

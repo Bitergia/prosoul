@@ -24,7 +24,8 @@ urlpatterns_edit = [
     url(r'^add_metric$', views_editor.MetricView.add_metric),
     url(r'^remove_metric$', views_editor.MetricView.remove_metric),
     url(r'^select_metric$', views_editor.MetricView.select_metric),
-    url(r'^update_metric$', views_editor.MetricView.update_metric)
+    url(r'^update_metric$', views_editor.MetricView.update_metric),
+    url(r'^add_metric_data$', views_editor.MetricDataView.add_metric_data)
 ]
 
 urlpatterns = [
