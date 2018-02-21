@@ -227,7 +227,7 @@ class MetricForm(MeditorEditorForm):
                 kwargs['initial'].update({
                     'metric_id': self.metric_id,
                     'metric_name': metric_orm.name,
-
+                    'metric_thresholds': metric_orm.thresholds
                 })
                 if metric_orm.data:
                     kwargs['initial'].update({'metrics_data': metric_orm.data.implementation})
@@ -240,6 +240,9 @@ class MetricForm(MeditorEditorForm):
 
         self.fields['metric_name'] = forms.CharField(label='name', max_length=100, required=False)
         self.fields['metric_name'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'metric name'})
+
+        self.fields['metric_thresholds'] = forms.CharField(label='Thresholds', max_length=100, required=False)
+        self.fields['metric_thresholds'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': '1,2,3,4,5'})
 
         choices = ()
 

@@ -313,17 +313,22 @@ class MetricView():
             form = forms_editor.MetricForm(request.POST)
             if form.is_valid():
                 name = form.cleaned_data['metric_name']
+                thresholds = form.cleaned_data['metric_thresholds']
                 attribute = form.cleaned_data['attributes']
 
                 attribute_orm = Attribute.objects.get(name=attribute)
 
                 # Try to find a metric already created
                 try:
-                    metric_orm = Metric.objects.get(name=name, attribute=attribute_orm)
+                    metric_orm = Metric.objects.get(name=name)
+                    metric_orm.attribute = attribute_orm
+                    metric_orm.thresholds = thresholds
                 except Metric.DoesNotExist:
                     # Create a new metric
-                    metric_orm = Metric(name=name, attribute=attribute_orm)
-                    metric_orm.save()
+                    metric_orm = Metric(name=name, attribute=attribute_orm,
+                                        thresholds = thresholds)
+
+                metric_orm.save()
 
                 attribute_orm.metrics.add(metric_orm)
                 attribute_orm.save()
@@ -385,10 +390,12 @@ class MetricView():
                 attribute = form.cleaned_data['attributes']
                 metric_data = form.cleaned_data['metrics_data']
                 old_attribute = form.cleaned_data['old_attribute']
+                thresholds = form.cleaned_data['metric_thresholds']
 
                 metric_orm = Metric.objects.get(id=metric_id)
                 metric_orm.name = name
                 metric_orm.data = None
+                metric_orm.thresholds = thresholds
                 if metric_data:
                     metric_data_orm = MetricData.objects.get(implementation=metric_data)
                     metric_orm.data = metric_data_orm

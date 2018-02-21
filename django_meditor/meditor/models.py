@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import validate_comma_separated_integer_list
 
 
 class MeditorModel(models.Model):
@@ -36,6 +37,9 @@ class Metric(MeditorModel):
 
     data_source_type = models.ForeignKey(DataSourceType,
                                          on_delete=models.CASCADE, null=True, blank=True)
+
+    thresholds = models.CharField(max_length=200, default=None, null=True, blank=True,
+                                  validators=[validate_comma_separated_integer_list])
 
     def __str__(self):
         return  self.name
