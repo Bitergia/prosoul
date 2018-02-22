@@ -80,6 +80,7 @@ def build_forms_context(state=None):
                "metric_form": metric_form,
                "metric_data_form": metric_data_form
                }
+    context['active_page'] = 'editor'
     return context
 
 

@@ -15,7 +15,8 @@ def viewer(request):
     if request.method == 'GET' and 'qmodel_selected' in request.GET:
         model_selected = request.GET['qmodel_selected']
     viewer_data = gl2viewer(models, model_name=model_selected)
-    context = {'qmodel_selected': model_selected,
+    context = {'active_page': "viewer",
+               'qmodel_selected': model_selected,
                'qmodels': models['qualityModels'],
                'qm_data': viewer_data[0],
                'qm_data_str': json.dumps(viewer_data[0]).replace('\"', '\\"'),
