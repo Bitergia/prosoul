@@ -45,7 +45,8 @@ meditor/docker $ docker-compose up
 There is two introductory videos: showing the import and view feature, and howto use the editor for adding a new quality model:
 
 * Import and view of quality models: [meditor-intro.webm](https://raw.githubusercontent.com/Bitergia/meditor/master/meditor-intro.webm)
-* Adding a new quality model: [meditor-editor.web](https://raw.githubusercontent.com/Bitergia/meditor/master/meditor-editor.webm)
+* Adding a new quality model: [meditor-editor.webm](https://raw.githubusercontent.com/Bitergia/meditor/master/meditor-editor.webm)
+* Creating a viz and an assessment based on a quality model: [meditor-viz-assess.webm](https://raw.githubusercontent.com/Bitergia/meditor/master/meditor-viz-assess.webm)
 
 ## Import / Export
 
