@@ -25,6 +25,8 @@ to the project.
 **meditor** is a Django application so to run it you need django installed.
 
 ```
+meditor/django_meditor $ python3 manage.py makemigrations
+meditor/django_meditor $ python3 manage.py migrate
 meditor/django_meditor $ python3 manage.py runserver
 ```
 
@@ -63,8 +65,10 @@ meditor/django_meditor $ PYTHONPATH=. meditor/meditor_export.py -f meditor/data/
 ## Requirements
 
 * Python >=3.4
-* Django 2
-* grimoire-kidash
+* setuptools
+* django
+* kidash
+* requests
 
 ## License
 
