@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Assess Quality Models{% endblock %}
+{% block title %}Quality Models Assessment{% endblock %}
 
 {% block head %}
     {{ block.super }}
@@ -16,5 +16,12 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Start: Assessment Config Editor -->
+<div class="container-fluid">
+  {% include "meditor/assessment_config.html" %}
+</div>
+<!-- End: Assessment Config Editor -->
+
 
 {% endblock %}

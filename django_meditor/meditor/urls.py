@@ -33,7 +33,8 @@ urlpatterns = [
     url(r'^viewer$', views.Viewer.viewer, name='viewer'),
     url(r'^visualize$', views.Visualize.visualize),
     url(r'^create_visualization$', views.Visualize.create),
-    url(r'^assess$', views.Assess.assess)
+    url(r'^assess$', views.Assessment.assess),
+    url(r'^create_assessment$', views.Assessment.create)
 ]
 
 urlpatterns += urlpatterns_edit

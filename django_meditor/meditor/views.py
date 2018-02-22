@@ -5,9 +5,10 @@ from django.http import HttpResponse
 from django.template import loader
 
 from meditor.meditor_export import fetch_models, gl2viewer
-from . import views_editor
-from . import forms
-from . import meditor_vis
+from meditor.meditor_assess import assess
+from meditor.meditor_vis import build_dashboards
+from meditor.views_editor import editor
+from meditor.forms import AssessmentForm, VisualizationForm
 
 class Viewer():
     @staticmethod
@@ -15,7 +16,7 @@ class Viewer():
         """ Basic Models Viewer just dumping the JSON of all models """
         models = fetch_models()
         if not models['qualityModels']:
-            return views_editor.editor(request)
+            return editor(request)
         model_selected = models['qualityModels'][0]['name']
         if request.method == 'GET' and 'qmodel_selected' in request.GET:
             model_selected = request.GET['qmodel_selected']
@@ -40,7 +41,7 @@ class Visualize():
     @staticmethod
     def visualize(request):
         template = loader.get_template('meditor/visualize.html')
-        context = {'active_page': "visualize", "vis_config_form": forms.VisualizationForm()}
+        context = {'active_page': "visualize", "vis_config_form": VisualizationForm()}
         render_index = template.render(context, request)
         return HttpResponse(render_index)
 
@@ -48,7 +49,7 @@ class Visualize():
     def create(request):
         error = None
         if request.method == 'POST':
-            form = forms.VisualizationForm(request.POST)
+            form = VisualizationForm(request.POST)
             context = {'active_page': "visualize", "vis_config_form": form}
             if form.is_valid():
                 qmodel_name = form.cleaned_data['quality_model']
@@ -59,7 +60,7 @@ class Visualize():
 
                 # Time to execute the visualization creation
                 try:
-                    meditor_vis.build_dashboards(es_url, es_index, attribute_template, qmodel_name)
+                    build_dashboards(es_url, es_index, attribute_template, qmodel_name)
                 except Exception as ex:
                     error = "Problem creating the visualization " + str(ex)
 
@@ -74,11 +75,39 @@ class Visualize():
             return shortcuts.render(request, 'meditor/visualize.html', {"error": "Use GET method to send data"})
 
 
-class Assess():
+class Assessment():
 
     @staticmethod
     def assess(request):
-        template = loader.get_template('meditor/assess.html')
-        context = {'active_page': "assess"}
+        template = loader.get_template('meditor/assessment.html')
+        context = {'active_page': "assess", "assess_config_form": AssessmentForm()}
         render_index = template.render(context, request)
         return HttpResponse(render_index)
+
+    @staticmethod
+    def create(request):
+        error = None
+        if request.method == 'POST':
+            form = AssessmentForm(request.POST)
+            context = {'active_page': "assess", "assess_config_form": form}
+            if form.is_valid():
+                qmodel_name = form.cleaned_data['quality_model']
+                es_url = form.cleaned_data['es_url']
+                es_index = form.cleaned_data['es_index']
+
+                # Time to execute the assessment creation
+                try:
+                    assessment = assess(es_url, es_index, qmodel_name)
+                    print(assessment)
+                except Exception as ex:
+                    error = "Problem creating the assessment " + str(ex)
+
+                context.update({"errors": error})
+                if not error:
+                    context.update({"assessment": assessment})
+                return shortcuts.render(request, 'meditor/assessment.html', context)
+            else:
+                context.update({"errors": form.errors})
+                return shortcuts.render(request, 'meditor/assessment.html', context)
+        else:
+            return shortcuts.render(request, 'meditor/assessment.html', {"error": "Use GET method to send data"})
