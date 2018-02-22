@@ -2,8 +2,15 @@
 {% if assessment %}
 <div class="row">
   <div class="col-sm-12">
-    The assessment is ready! {{ assessment }}
+    <h1>Projects Assessment</h1>
+    {{ assessment | safe}}
   </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+          Each metric assess has 5 levels according to thresholds defined
+          in the quality model.
+    </div>
 </div>
 {% endif %}
 
@@ -11,7 +18,7 @@
 <div class="row">
   <div class="col-sm-12">
       <form action="./create_assessment" method="post">
-          <fieldset id="config-vis" {% if kibana_url %} assessment {% endif %}>
+          <fieldset id="config-vis" {% if assessment %} hidden {% endif %}>
             {% csrf_token %}
             <div class="modal-body">
               <div class="input-group"><span class="input-group-addon">

@@ -84,6 +84,51 @@ class Assessment():
         render_index = template.render(context, request)
         return HttpResponse(render_index)
 
+    def render_tables(assessment):
+        """ Convert the JSON with the assessmet in an HTML table
+
+        Sample format:
+
+        {'Vitality': {'numberOfCommits': {'perceval': 2, 'GrimoireELK': 3},
+                      'numberOfBugs':    {'perceval': 3, 'GrimoireELK': 3}},
+         'Attention': {}}
+        """
+
+        projects_data = {}
+        metrics = []
+
+        for attribute in assessment:
+            for metric in assessment[attribute]:
+                metrics.append(metric)
+                for project in assessment[attribute][metric]:
+                    if project not in projects_data:
+                        projects_data[project] = {}
+                        projects_data[project][attribute] = {}
+                    projects_data[project][attribute][metric] = assessment[attribute][metric][project]
+
+
+        metrics = list(set(metrics))
+        # TODO: move this table rendering to Django templates
+        tables = ""
+        for project in projects_data:
+            tables += "<h4>" + project + "</h4>"
+            tables += "<table class='table'>"
+            # Headers
+            tables += "<thead><th scope='col'>Attribute</th>"
+            for metric in metrics:
+                tables += "<th>%s</th>" % metric
+            tables += "</thead>"
+            for attribute in projects_data[project]:
+                # One row per atribute with its metrics
+                tables += "<tr><th scope='row'>%s</td>" % attribute
+                for metric in projects_data[project][attribute]:
+                    tables += "<td>%s</td>" % projects_data[project][attribute][metric]
+                tables += "</tr>"
+            tables += "</table>"
+
+        return tables
+
+
     @staticmethod
     def create(request):
         error = None
@@ -98,13 +143,12 @@ class Assessment():
                 # Time to execute the assessment creation
                 try:
                     assessment = assess(es_url, es_index, qmodel_name)
-                    print(assessment)
                 except Exception as ex:
                     error = "Problem creating the assessment " + str(ex)
 
                 context.update({"errors": error})
                 if not error:
-                    context.update({"assessment": assessment})
+                    context.update({"assessment": Assessment.render_tables(assessment)})
                 return shortcuts.render(request, 'meditor/assessment.html', context)
             else:
                 context.update({"errors": form.errors})
