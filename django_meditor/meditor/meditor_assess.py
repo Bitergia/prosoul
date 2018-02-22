@@ -37,8 +37,9 @@ django.setup()
 
 from meditor.models import QualityModel, Metric
 
-
 THRESHOLDS = ["Very Poor", "Poor", "Fair", "Good", "Very Good"]
+HEADERS_JSON = {"Content-Type": "application/json"}
+
 
 def get_params():
     parser = argparse.ArgumentParser(usage="usage: mdashboard.py [options]",
@@ -92,7 +93,7 @@ def compute_metric_per_project(es_url, es_index, metric_name):
     }
     """ % metric_name
 
-    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query)
+    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, headers=HEADERS_JSON)
     res.raise_for_status()
 
     project_buckets = res.json()["aggregations"]["3"]["buckets"]
