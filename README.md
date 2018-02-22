@@ -79,6 +79,13 @@ A draft diagram for the architecture is:
 
 ![](meditor-arch.png?raw=true)
 
+## Meditor in CROSSMINER
+
+There is a specific guide for [using meditor in CROSSMINER](meditor-crossminer.md) for creating the visualization for a quality model and generating the assessment of the projects in CROSSMINER.
+
+There is a [demo online of meditor for CROSSMINER](http://meditor.castalia.camp).
+
+
 ## License
 
 Licensed under GNU General Public License (GPL), version 3 or later.
