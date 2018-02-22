@@ -10,8 +10,10 @@ The goal of this project is to create a web editor and viewer for [software qual
 
 In the initial version the metrics supported will be the [CROSSMINER ones](https://github.com/crossminer/crossminer/tree/dev/web-dashboards/ossmeter-metrics).
 
-Based on the models, visualizations for metrics are generated. In the inital version
+Based on the models, visualizations and assessment for the projects are generated. In the inital version
 Kibana dashoards will be created using [GrimoireLab](http://grimoirelab.github.io/).
+
+The final goal is to have a tool for "Automatic Project Assessment and Visualization based on Quality Models".
 
 ## Source code and contributions
 
@@ -69,6 +71,12 @@ meditor/django_meditor $ PYTHONPATH=. meditor/meditor_export.py -f meditor/data/
 * django
 * kidash
 * requests
+
+## Architecture
+
+A draft diagram for the architecture is:
+
+![](meditor-arch.png?raw=true)
 
 ## License
 
