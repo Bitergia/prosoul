@@ -1,0 +1,35 @@
+
+{% if kibana_url %}
+<div class="row">
+  <div class="col-sm-12">
+    Your <a href="{{ kibana_url }}">Quality Model dashboard</a>. Enjoy it!
+  </div>
+</div>
+{% endif %}
+
+
+<div class="row">
+  <div class="col-sm-12">
+      <form action="./create_visualization" method="post">
+          <fieldset id="config-vis" {% if kibana_url %} disabled {% endif %}>
+            {% csrf_token %}
+            <div class="modal-body">
+              <div class="input-group"><span class="input-group-addon">
+                {{ vis_config_form.quality_model.label }}</span>{{ vis_config_form.quality_model }}</div>
+              <div class="input-group"><span class="input-group-addon">
+                {{ vis_config_form.es_url.label }}</span>{{ vis_config_form.es_url }}</div>
+              <div class="input-group"><span class="input-group-addon">
+                {{ vis_config_form.kibana_url.label }}</span>{{ vis_config_form.kibana_url }}</div>
+              <div class="input-group"><span class="input-group-addon">
+                {{ vis_config_form.es_index.label }}</span>{{ vis_config_form.es_index }}</div>
+              <div class="input-group"><span class="input-group-addon">
+                {{ vis_config_form.attribute_template.label }}</span>{{ vis_config_form.attribute_template }}</div>
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-primary" id="create-vis-btn"><span>
+                <i class="fa fa-check"></i></span> Create<span class="sr-only"> Visualization<span></button>
+            </div>
+          </fieldset>
+      </form>
+  </div>
+</div>

@@ -30,7 +30,10 @@ urlpatterns_edit = [
 
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url='viewer')),
-    url(r'^viewer$', views.viewer, name='viewer'),
+    url(r'^viewer$', views.Viewer.viewer, name='viewer'),
+    url(r'^visualize$', views.Visualize.visualize),
+    url(r'^create_visualization$', views.Visualize.create),
+    url(r'^assess$', views.Assess.assess)
 ]
 
 urlpatterns += urlpatterns_edit

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Visualize Quality Models{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+{% endblock %}
+
+{% block body %}
+
+{% if errors %}
+<div class="container-fluid">
+    <div class="alert alert-danger">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Errors:</strong> {{ errors }}
+    </div>
+</div>
+{% endif %}
+
+<!-- Start: Visualization Config Editor -->
+<div class="container-fluid">
+  {% include "meditor/visualization_config.html" %}
+</div>
+<!-- End: Quality Models Editor -->
+
+
+
+{% endblock %}

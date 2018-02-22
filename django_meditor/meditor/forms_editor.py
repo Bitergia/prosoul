@@ -76,8 +76,8 @@ class QualityModelsForm(MeditorEditorForm):
 
         choices = [('', '')]  # Initial empty choice
 
-        for eco in data_editor.QualityModelsData(self.state).fetch():
-            choices += ((eco.name, eco.name),)
+        for qmodel in data_editor.QualityModelsData(self.state).fetch():
+            choices += ((qmodel.name, qmodel.name),)
 
         self.fields['name'] = forms.ChoiceField(label='QualityModels', required=True,
                                                 widget=self.widget, choices=choices)

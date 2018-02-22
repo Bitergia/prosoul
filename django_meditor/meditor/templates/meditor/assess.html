@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Assess Quality Models{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+{% endblock %}
+
+{% block body %}
+
+{% if errors %}
+<div class="container-fluid">
+    <div class="alert alert-danger">
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <strong>Errors:</strong> {{ errors }}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

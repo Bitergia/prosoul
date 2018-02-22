@@ -117,7 +117,7 @@ def build_dashboard(es_url, es_index, template_dashboard, goal, attribute):
     template_dashboard_id = find_dash_id(es_url, template_dashboard)
     if not template_dashboard_id:
         logging.error('Can not find the template dashboard %s', template_dashboard)
-        sys.exit(1)
+        raise RuntimeError("Can not find the template dashboard" + template_dashboard)
 
     # Add the filters to the template dashboard and export it to Kibana
     dashboard = fetch_dashboard(es_url, template_dashboard_id)
@@ -133,6 +133,7 @@ def build_dashboard(es_url, es_index, template_dashboard, goal, attribute):
 
 
 def build_dashboards(es_url, es_index, template_dashboard, model_name):
+
     logging.debug('Building the dashboards for the model: %s', model_name)
 
     # Check that the model and the template dashboard exists
@@ -141,7 +142,7 @@ def build_dashboards(es_url, es_index, template_dashboard, model_name):
         model_orm = QualityModel.objects.get(name=model_name)
     except QualityModel.DoesNotExist:
         logging.error('Can not find the metrics model %s', model_name)
-        sys.exit(1)
+        raise RuntimeError("Can not find the metrics model " + model_name)
 
     # Build a new dashboard for each attribute in the quality model
     for goal in model_orm.goals.all():
