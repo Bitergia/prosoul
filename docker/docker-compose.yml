@@ -1,7 +1,20 @@
-meditor:
-  image: acsdocker/meditor
+elasticsearch:
+  image: bitergia/elasticsearch:6.1.0
+  command: /elasticsearch/bin/elasticsearch -E network.bind_host=0.0.0.0
   ports:
-        - 8000:8000
-  # volumes:
-    # The stage for this mordred load raw items, waits for ES ...
-    # - ./stage:/home/meditor/stage
+    - "9200:9200"
+  environment:
+    - ES_JAVA_OPTS=-Xms2g -Xmx2g
+
+kibiter:
+  image: bitergia/kibiter:6.1.0-optimized
+  links:
+    - elasticsearch
+  ports:
+   - "5601:5601"
+
+meditor:
+  # image: acsdocker/meditor
+  image: acs/meditor
+  ports:
+   - "8000:8000"

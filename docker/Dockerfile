@@ -39,7 +39,11 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG C.UTF-8
 
 # Install pip packages needed
+RUN pip3 install setuptools
 RUN pip3 install django
+RUN pip3 install gunicorn
+RUN pip3 install requests
+RUN pip3 install kidash
 
 ADD stage ${DEPLOY_USER_DIR}/stage
 RUN chmod 755 ${DEPLOY_USER_DIR}/stage

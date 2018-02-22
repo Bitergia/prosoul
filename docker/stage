@@ -2,7 +2,7 @@
 
 echo "Running MEditor"
 
-git clone https://github.com/acs/meditor.git
+git clone https://github.com/Bitergia/meditor.git
 cd meditor/django_meditor/
 
 # Create the data models
@@ -20,3 +20,5 @@ PYTHONPATH=. meditor/meditor_import.py -f meditor/data/basic_maturiy_model.json 
 
 # Run the MEditor service
 python3 manage.py runserver 0.0.0.0:8000
+# There is an issue with gunicorn finding static contents
+# gunicorn django_meditor.wsgi --bind 0.0.0.0:8000
