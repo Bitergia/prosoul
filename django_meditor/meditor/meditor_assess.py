@@ -27,7 +27,6 @@ import argparse
 import json
 import logging
 import os
-import sys
 
 import requests
 
@@ -102,10 +101,11 @@ def compute_metric_per_project(es_url, es_index, metric_name):
 
     return project_metrics
 
-def assess_attribute(es_url, es_index, model_name, attribute):
+def assess_attribute(es_url, es_index, attribute):
     logging.debug('Doing the assessment for attribute: %s', attribute.name)
     # Collect all metrics that are included in the models
     metrics_with_data = []
+    atribute_assessment = {}  # Includes the assessment for each metric per project
 
     for metric in attribute.metrics.all():
         # We need the metric values and the metric indicators
@@ -118,11 +118,13 @@ def assess_attribute(es_url, es_index, model_name, attribute):
 
     for metric in metrics_with_data:
         metric_data = metric.data.implementation
+        atribute_assessment[metric_data] = {}
         metric_value = compute_metric_per_project(es_url, es_index, metric_data)
         if metric_value:
             for project_metric in metric_value:
-                logging.debug("Project %s metric %s value %i", project_metric['project'],
-                              metric_data, project_metric['metric'])
+                pname = project_metric['project']
+                pmetric = project_metric['metric']
+                logging.debug("Project %s metric %s value %i", pname, metric_data, pmetric)
                 logging.debug("Doing the assesment ...")
                 if metric.thresholds:
                     score = 0
@@ -131,12 +133,17 @@ def assess_attribute(es_url, es_index, model_name, attribute):
                             score += 1
                 logging.debug("Score %s for %s: %i (%s)",  project_metric['project'],
                               metric_data, score, THRESHOLDS[score-1])
+                atribute_assessment[metric_data][pname] = score
         else:
             logging.debug("Can't find value for for %s", metric)
+
+    return atribute_assessment
 
 
 def assess(es_url, es_index, model_name):
     logging.debug('Building the assessment for projects ...')
+
+    assessment = {}  # Includes the assessment for each attribute
 
     # Check that the model exists
     model_orm = None
@@ -145,11 +152,14 @@ def assess(es_url, es_index, model_name):
         model_orm = QualityModel.objects.get(name=model_name)
     except QualityModel.DoesNotExist:
         logging.error('Can not find the metrics model %s', model_name)
-        sys.exit(1)
+        RuntimeError('Can not find the metrics model %s' + model_name)
 
     for goal in model_orm.goals.all():
         for attribute in goal.attributes.all():
-            assess_attribute(es_url, es_index, model_name, attribute)
+            res = assess_attribute(es_url, es_index, attribute)
+            assessment[attribute.name] = res
+
+    return assessment
 
 if __name__ == '__main__':
 
@@ -163,4 +173,6 @@ if __name__ == '__main__':
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
 
-    assess(args.elastic_url, args.index, args.model)
+    assessment = assess(args.elastic_url, args.index, args.model)
+
+    print(assessment)
