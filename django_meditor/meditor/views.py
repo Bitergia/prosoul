@@ -103,6 +103,7 @@ class Assessment():
                 for project in assessment[attribute][metric]:
                     if project not in projects_data:
                         projects_data[project] = {}
+                    if attribute not in projects_data[project]:
                         projects_data[project][attribute] = {}
                     projects_data[project][attribute][metric] = assessment[attribute][metric][project]
 
@@ -121,8 +122,16 @@ class Assessment():
             for attribute in projects_data[project]:
                 # One row per atribute with its metrics
                 tables += "<tr><th scope='row'>%s</td>" % attribute
-                for metric in projects_data[project][attribute]:
-                    tables += "<td>%s</td>" % projects_data[project][attribute][metric]
+                # Let's find the metrics to fill the metrics columns
+                for metric_col in metrics:
+                    metric_col_found = False
+                    for metric in projects_data[project][attribute]:
+                        if metric == metric_col:
+                            tables += "<td>%s</td>" % projects_data[project][attribute][metric]
+                            metric_col_found = True
+                            break
+                    if not metric_col_found:
+                        tables += "<td></td>"
                 tables += "</tr>"
             tables += "</table>"
 
