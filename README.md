@@ -1,4 +1,4 @@
-# meditor
+# meditor [![Build Status](https://travis-ci.org/Bitergia/meditor.svg?branch=master)](https://travis-ci.org/Bitergia/meditor)
 
 **meditor** is a software quality models manager to create, import/export, view and edit
 models.
