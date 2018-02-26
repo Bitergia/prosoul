@@ -28,7 +28,7 @@ class MetricData(MeditorModel):
     implementation = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
-        return  self.implementation
+        return self.implementation
 
 
 class Metric(MeditorModel):
@@ -42,7 +42,7 @@ class Metric(MeditorModel):
                                   validators=[validate_comma_separated_integer_list])
 
     def __str__(self):
-        return  self.name
+        return self.name
 
 
 class Factoid(MeditorModel):

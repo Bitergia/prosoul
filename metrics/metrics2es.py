@@ -34,6 +34,7 @@ from grimoire_elk.elk.elastic import ElasticSearch
 from report.metrics.git import Git
 from report.report import Report
 
+
 # From perceval
 def uuid(*args):
     """Generate a UUID based on the given parameters.
@@ -100,6 +101,7 @@ def fetch_metric(es_url, ds):
         # print("TS: ", m.get_ts())
         # print("Trend:", m.get_trend())
 
+
 def get_params():
     parser = argparse.ArgumentParser(usage="usage: metrics2es.py [options]",
                                      description="Feed GrimoireLab Metrics into Elasticsearch")
@@ -110,6 +112,7 @@ def get_params():
     parser.add_argument('-d', '--data-source', required=True, help="Get metrics for data source")
 
     return parser.parse_args()
+
 
 if __name__ == '__main__':
 
@@ -132,6 +135,5 @@ if __name__ == '__main__':
 
     elastic.bulk_upload_sync(fetch_metric(args.elastic_url, data_source), "id")
 
-
-    #for metric in fetch_metric(es_url, data_source):
+    # for metric in fetch_metric(es_url, data_source):
     #    print(metric)

@@ -24,7 +24,6 @@
 #
 
 import argparse
-import json
 import logging
 import os
 
@@ -35,7 +34,7 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_meditor.settings'
 django.setup()
 
-from meditor.models import QualityModel, Metric
+from meditor.models import QualityModel
 
 THRESHOLDS = ["Very Poor", "Poor", "Fair", "Good", "Very Good"]
 HEADERS_JSON = {"Content-Type": "application/json"}
@@ -102,6 +101,7 @@ def compute_metric_per_project(es_url, es_index, metric_name):
 
     return project_metrics
 
+
 def assess_attribute(es_url, es_index, attribute):
     logging.debug('Doing the assessment for attribute: %s', attribute.name)
     # Collect all metrics that are included in the models
@@ -132,8 +132,8 @@ def assess_attribute(es_url, es_index, attribute):
                     for threshold in metric.thresholds.split(","):
                         if project_metric['metric'] > float(threshold):
                             score += 1
-                logging.debug("Score %s for %s: %i (%s)",  project_metric['project'],
-                              metric_data, score, THRESHOLDS[score-1])
+                logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
+                              metric_data, score, THRESHOLDS[score - 1])
                 atribute_assessment[metric_data][pname] = score
         else:
             logging.debug("Can't find value for for %s", metric)
@@ -161,6 +161,7 @@ def assess(es_url, es_index, model_name):
             assessment[attribute.name] = res
 
     return assessment
+
 
 if __name__ == '__main__':
 

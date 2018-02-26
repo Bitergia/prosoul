@@ -10,6 +10,7 @@ from meditor.meditor_vis import build_dashboards
 from meditor.views_editor import editor
 from meditor.forms import AssessmentForm, VisualizationForm
 
+
 class Viewer():
     @staticmethod
     def viewer(request):
@@ -36,6 +37,7 @@ class Viewer():
         render_index = template.render(context, request)
 
         return HttpResponse(render_index)
+
 
 class Visualize():
     @staticmethod
@@ -107,7 +109,6 @@ class Assessment():
                         projects_data[project][attribute] = {}
                     projects_data[project][attribute][metric] = assessment[attribute][metric][project]
 
-
         metrics = list(set(metrics))
         # TODO: move this table rendering to Django templates
         tables = ""
@@ -136,7 +137,6 @@ class Assessment():
             tables += "</table>"
 
         return tables
-
 
     @staticmethod
     def create(request):

@@ -4,8 +4,7 @@ from time import time
 
 from django import forms
 
-
-from meditor.models import Attribute, Goal, Metric
+from meditor.models import Attribute, Metric
 
 from . import data_editor
 
@@ -139,14 +138,13 @@ class AttributeForm(MeditorEditorForm):
 
         for attribute in data_editor.AttributesData(self.state).fetch():
             if (attribute.name, attribute.name) not in choices and \
-                attribute.name != current_name:
+               attribute.name != current_name:
                 choices += ((attribute.name, attribute.name),)
 
         choices = sorted(choices, key=lambda x: x[1])
 
         self.fields['parent'] = forms.ChoiceField(label='Parent', required=False,
                                                   widget=widget, choices=choices)
-
 
 
 class AttributesForm(MeditorEditorForm):
@@ -194,7 +192,6 @@ class MetricsForm(MeditorEditorForm):
 
         self.fields['id'] = forms.ChoiceField(label='Metric',
                                               widget=self.widget, choices=choices)
-
 
 
 class MetricForm(MeditorEditorForm):
@@ -266,7 +263,6 @@ class MetricForm(MeditorEditorForm):
 
         self.fields['metrics_data'] = forms.ChoiceField(label='Metrics Data', required=False,
                                                         widget=self.widget, choices=choices)
-
 
         self.fields['old_attribute'] = forms.CharField(label='old_attribute', max_length=100, required=False)
         self.fields['old_attribute'].widget = forms.HiddenInput(attrs={'class': 'form-control', 'readonly': 'True'})

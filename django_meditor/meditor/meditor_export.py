@@ -92,7 +92,6 @@ def fetch_model(model_name):
 
         return attribute_json
 
-
     def fetch_goal(goal_orm):
         goal_json = {"name": goal_orm.name, "description": goal_orm.description,
                      "attributes": [], "subgoals": []}
@@ -104,7 +103,6 @@ def fetch_model(model_name):
             goal_json['subgoals'].append(fetch_goal(subgoal_orm))
 
         return goal_json
-
 
     model_json = {}
 
@@ -122,10 +120,10 @@ def fetch_model(model_name):
 
         goal_json = fetch_goal(goal_orm)
 
-
         model_json['goals'].append(goal_json)
 
     return model_json
+
 
 def fetch_models(model_name=None):
     models_json = {"qualityModels": []}
@@ -192,7 +190,6 @@ def gl2viewer(gl_models_json, model_name=None):
 
         return metrics
 
-
     viewer_json = {}
     alambic_json = gl2alambic(gl_models_json, model_name=model_name)
 
@@ -208,7 +205,6 @@ def gl2viewer(gl_models_json, model_name=None):
 
 def gl2alambic(gl_models_json, model_name=None):
     """ Convert a GrimoireLab JSON quality model to Alambic format """
-
 
     def attribute2child(attribute):
         """ Convert an Alambic child to an attribute """
@@ -229,7 +225,6 @@ def gl2alambic(gl_models_json, model_name=None):
 
         return al_attribute
 
-
     def goal2atributte(goal):
         """ In Alambic goals are first level attributes """
 
@@ -246,7 +241,6 @@ def gl2alambic(gl_models_json, model_name=None):
                 goal_attribute["children"].append(goal2atributte(subgoal))
 
         return goal_attribute
-
 
     alambic_json = {"name": "", "version": "", "children": []}
     gl_model_json = select_model(gl_models_json, model_name)
@@ -272,7 +266,7 @@ def gl2ossmeter(gl_models_json, model_name=None):
                             "description": attribute['description'],
                             "metrics": [],
                             "factoids": []
-                           }
+                            }
             for metric in attribute['metrics']:
                 qa_attribute['metrics'].append(metric['name'])
             for factoid in attribute['factoids']:
@@ -286,7 +280,6 @@ def gl2ossmeter(gl_models_json, model_name=None):
                 qaspect['qualityAspects'].append(subqaspect)
 
         return qaspect
-
 
     ossmodel_json = {"qualityModel": {"qualityAspects": []}}
     gl_model_json = select_model(gl_models_json, model_name)

@@ -17,10 +17,9 @@ from django.db.utils import IntegrityError
 
 from meditor.meditor_export import fetch_models
 from meditor.meditor_import import convert_to_grimoirelab, feed_models, SUPPORTED_FORMATS
-from meditor.models import Attribute, DataSourceType, Goal, Metric, MetricData, QualityModel
+from meditor.models import Attribute, Goal, Metric, MetricData, QualityModel
 
 from . import forms_editor
-from . import data
 
 
 #
@@ -91,6 +90,7 @@ def editor(request):
     context = build_forms_context()
 
     return shortcuts.render(request, 'meditor/editor.html', context)
+
 
 def import_from_file(request):
 
@@ -174,6 +174,7 @@ def return_error(message):
 #
 # Classes implementing the logic
 #
+
 
 class EditorState():
 
@@ -305,7 +306,6 @@ class MetricDataView():
             return shortcuts.render(request, 'meditor/editor.html', build_forms_context())
 
 
-
 class MetricView():
 
     @staticmethod
@@ -327,7 +327,7 @@ class MetricView():
                 except Metric.DoesNotExist:
                     # Create a new metric
                     metric_orm = Metric(name=name, attribute=attribute_orm,
-                                        thresholds = thresholds)
+                                        thresholds=thresholds)
 
                 metric_orm.save()
 
@@ -410,7 +410,6 @@ class MetricView():
                     attribute = Attribute.objects.get(name=old_attribute)
                     attribute.metrics.remove(metric_orm)
                     attribute.save()
-
 
                 state = EditorState(metrics=[metric_id], form=form)
                 return shortcuts.render(request, 'meditor/editor.html',

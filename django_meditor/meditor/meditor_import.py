@@ -27,7 +27,6 @@ import argparse
 import json
 import logging
 import os
-import sys
 
 from time import time
 
@@ -55,7 +54,6 @@ def get_params():
                         help="Import file format (default grimoirelab)")
     parser.add_argument('-c', '--check', action='store_true',
                         help='Export the data and compare it with the imported')
-
 
     return parser.parse_args()
 
@@ -118,7 +116,6 @@ def feed_models(models_json):
 
         return attribute_orm
 
-
     def feed_goal(goal):
         gparams = {"name": goal['name']}
         goal_orm = add(Goal, **gparams)
@@ -136,7 +133,6 @@ def feed_models(models_json):
 
         return goal_orm
 
-
     for model in models_json['qualityModels']:
         mparams = {"name": model['name']}
         if 'version' in model:
@@ -148,6 +144,7 @@ def feed_models(models_json):
             model_orm.goals.add(goal_orm)
 
         model_orm.save()
+
 
 def alambic2gl(model_json):
     """ Convert a JSON from Alambic format to GrimoireLab """
@@ -178,7 +175,6 @@ def alambic2gl(model_json):
             goal_json["attributes"].append(attribute_json)
 
         return goal_json
-
 
     logging.debug('Converting from Alambic to GrimoireLab quality model')
 
@@ -226,7 +222,6 @@ def ossmeter2gl(model_json):
 
         return goal_json
 
-
     logging.debug('Converting from OSSMeter to GrimoireLab quality model')
 
     grimoirelab_json = {"qualityModels": []}
@@ -239,7 +234,6 @@ def ossmeter2gl(model_json):
         goal_json = build_goal(qualityAspect)
 
         gl_model_json["goals"].append(goal_json)
-
 
     grimoirelab_json["qualityModels"].append(gl_model_json)
 

@@ -20,7 +20,7 @@ class VisualizationForm(forms.Form):
         kwargs['initial'] = {"es_url": self.ELASTIC_URL,
                              "kibana_url": self.KIBANA_URL,
                              "es_index": self.INDEX_DATA,
-                             "attribute_template": self.ATTRIBUTE_TEMPLATE }
+                             "attribute_template": self.ATTRIBUTE_TEMPLATE}
 
         super(VisualizationForm, self).__init__(*args, **kwargs)
 
@@ -42,6 +42,7 @@ class VisualizationForm(forms.Form):
         self.fields['kibana_url'].validators = [URLValidator()]
         self.fields['es_index'] = forms.CharField(label='Index with metrics data', max_length=100, widget=widget)
         self.fields['attribute_template'] = forms.CharField(label='Attribute template', max_length=100, widget=widget)
+
 
 class AssessmentForm(forms.Form):
     """ A form to collect the params needed to build an assessment of projects """

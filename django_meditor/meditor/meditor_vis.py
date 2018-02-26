@@ -27,7 +27,6 @@ import argparse
 import json
 import logging
 import os
-import sys
 
 
 import django
@@ -96,6 +95,7 @@ def build_filters(metrics, index):
     filter_json[0]['query']['bool']['should'] = filter_should
 
     return filter_json
+
 
 def build_dashboard(es_url, es_index, template_dashboard, goal, attribute):
     logging.debug('Building the dashboard for the attribute: %s (goal %s)', attribute, goal)
