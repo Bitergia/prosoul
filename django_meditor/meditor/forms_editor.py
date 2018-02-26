@@ -137,7 +137,7 @@ class AttributeForm(MeditorEditorForm):
 
         widget = forms.Select(attrs={'class': 'form-control'})
 
-        for attribute in data_editor.AttributesData(state=None).fetch():
+        for attribute in data_editor.AttributesData(self.state).fetch():
             if (attribute.name, attribute.name) not in choices and \
                 attribute.name != current_name:
                 choices += ((attribute.name, attribute.name),)
