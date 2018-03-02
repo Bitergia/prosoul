@@ -1,0 +1,10 @@
+{
+	"GrimoireELK": {
+		"git": ["https://github.com/chaoss/grimoirelab-elk.git"],
+		"github": ["https://github.com/chaoss/grimoirelab-elk"]
+	},
+	"perceval": {
+		"git": ["https://github.com/chaoss/perceval.git"],
+		"github": ["https://github.com/chaoss/perceval"]
+	}
+}
