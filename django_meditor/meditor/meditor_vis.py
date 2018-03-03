@@ -35,6 +35,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'django_meditor.settings'
 django.setup()
 
 from meditor.models import QualityModel
+from meditor.meditor_utils import find_metric_name_field
 
 from kidash.kidash import search_dashboards, fetch_dashboard, feed_dashboard
 
@@ -49,6 +50,8 @@ def get_params():
     parser.add_argument('-t', '--template', required='True', help='Dashboard template to be used')
     parser.add_argument('-m', '--model', required='True',
                         help='Model to be used to build the Dashboard')
+    parser.add_argument('-b', '--backend-metrics-data', default='grimoirelab',
+                        help='Backend metrics data to use (grimoirelab, ossmeter, ...)')
 
     return parser.parse_args()
 
@@ -65,7 +68,7 @@ def find_dash_id(es_url, dash_name):
     return dash_id
 
 
-def build_filters(metrics, index):
+def build_filters(metrics, index, metric_name):
     # Basic filter template to be updated
     template = """
     [{"$state": {"store": "appState"},
@@ -73,16 +76,16 @@ def build_filters(metrics, index):
         "alias": null,
         "disabled": false,
         "index": "ossmeter",
-        "key": "metric_es_name.keyword",
+        "key": "%s",
         "negate": false,
         "params": ["numberOfDocuments", "numberOfBugs"],
         "type": "phrases",
         "value": "numberOfDocuments, numberOfBugs"},
         "query": {"bool": {"minimum_should_match": 1,
-                  "should": [{"match_phrase": {"metric_es_name.keyword": "numberOfDocuments"}},
-                             {"match_phrase": {"metric_es_name.keyword": "numberOfBugs"}}]}}},
+                  "should": [{"match_phrase": {"%s": "metric1"}},
+                             {"match_phrase": {"%s": "metric2"}}]}}},
       {"query": {"match_all": {}}}]
-      """
+      """ % (metric_name, metric_name, metric_name)
 
     filter_json = json.loads(template)
 
@@ -91,13 +94,14 @@ def build_filters(metrics, index):
     filter_json[0]['meta']['value'] = ", ".join(metrics)
     filter_should = []
     for metric in metrics:
-        filter_should.append({'match_phrase': {'metric_es_name.keyword': metric}})
+        filter_should.append({'match_phrase': {metric_name: metric}})
     filter_json[0]['query']['bool']['should'] = filter_should
 
     return filter_json
 
 
-def build_dashboard(es_url, es_index, template_dashboard, goal, attribute):
+def build_dashboard(es_url, es_index, template_dashboard, goal, attribute,
+                    backend_metrics_data):
     logging.debug('Building the dashboard for the attribute: %s (goal %s)', attribute, goal)
 
     # Check that the model and the template dashboard exists
@@ -122,7 +126,8 @@ def build_dashboard(es_url, es_index, template_dashboard, goal, attribute):
     # Add the filters to the template dashboard and export it to Kibana
     dashboard = fetch_dashboard(es_url, template_dashboard_id)
     search_json = json.loads(dashboard['dashboard']['value']['kibanaSavedObjectMeta']['searchSourceJSON'])
-    search_json['filter'] = build_filters(metrics_data, es_index)
+    metric_name = find_metric_name_field(backend_metrics_data)
+    search_json['filter'] = build_filters(metrics_data, es_index, metric_name)
     dashboard['dashboard']['value']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(search_json)
     dashboard['dashboard']['value']['title'] = goal.name + "_" + attribute.name
     dashboard['dashboard']['id'] = goal.name + "_" + attribute.name
@@ -132,7 +137,8 @@ def build_dashboard(es_url, es_index, template_dashboard, goal, attribute):
     logging.info('Created the attribute dashboard %s', dashboard['dashboard']['value']['title'])
 
 
-def build_dashboards(es_url, es_index, template_dashboard, model_name):
+def build_dashboards(es_url, es_index, template_dashboard, model_name,
+                     backend_metrics_data):
 
     logging.debug('Building the dashboards for the model: %s', model_name)
 
@@ -147,7 +153,8 @@ def build_dashboards(es_url, es_index, template_dashboard, model_name):
     # Build a new dashboard for each attribute in the quality model
     for goal in model_orm.goals.all():
         for attribute in goal.attributes.all():
-            build_dashboard(es_url, es_index, template_dashboard, goal, attribute)
+            build_dashboard(es_url, es_index, template_dashboard, goal,
+                            attribute, backend_metrics_data)
 
 
 if __name__ == '__main__':
@@ -163,4 +170,4 @@ if __name__ == '__main__':
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     build_dashboards(args.elastic_url, args.index,
-                     args.template, args.model)
+                     args.template, args.model, args.backend_metrics_data)

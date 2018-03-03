@@ -2,6 +2,7 @@ from django import forms
 from django.core.validators import URLValidator
 
 from . import data_editor
+from meditor.meditor_utils import BACKEND_METRICS_DATA
 
 CROSSMINER_URL = 'https://crossminer.biterg.io'
 CROSSMINER_METRICS_INDEX = 'ossmeter'
@@ -35,6 +36,13 @@ class VisualizationForm(forms.Form):
 
         self.fields['quality_model'] = forms.ChoiceField(label='Quality Model', required=True,
                                                          widget=widget_select, choices=qmodels)
+
+        backends = []
+        for backend in BACKEND_METRICS_DATA:
+            backends += ((backend, backend),)
+
+        self.fields['backend_metrics_data'] = forms.ChoiceField(label='Backend for metrics data', required=True,
+                                                                widget=widget_select, choices=backends)
         # self.fields['quality_model'].widget = forms.Select()
         self.fields['es_url'] = forms.CharField(label='Elasticsearch URL', max_length=100, widget=widget)
         self.fields['es_url'].validators = [URLValidator()]
