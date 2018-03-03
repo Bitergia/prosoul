@@ -76,6 +76,13 @@ class AssessmentForm(forms.Form):
 
         self.fields['quality_model'] = forms.ChoiceField(label='Quality Model', required=True,
                                                          widget=widget_select, choices=qmodels)
+
+        backends = []
+        for backend in BACKEND_METRICS_DATA:
+            backends += ((backend, backend),)
+
+        self.fields['backend_metrics_data'] = forms.ChoiceField(label='Backend for metrics data', required=True,
+                                                                widget=widget_select, choices=backends)
         self.fields['es_url'] = forms.CharField(label='Elasticsearch URL', max_length=100, widget=widget)
         self.fields['es_url'].validators = [URLValidator()]
         self.fields['es_index'] = forms.CharField(label='Index with metrics data', max_length=100, widget=widget)

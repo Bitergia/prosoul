@@ -24,6 +24,7 @@
 #
 
 import argparse
+# import json
 import logging
 import os
 
@@ -35,6 +36,8 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'django_meditor.settings'
 django.setup()
 
 from meditor.models import QualityModel
+
+from meditor.meditor_utils import find_metric_name_field
 
 THRESHOLDS = ["Very Poor", "Poor", "Fair", "Good", "Very Good"]
 HEADERS_JSON = {"Content-Type": "application/json"}
@@ -49,12 +52,57 @@ def get_params():
     parser.add_argument('-i', '--index', required='True', help='Index with the metrics')
     parser.add_argument('-m', '--model', required='True',
                         help='Model to be used to build the Dashboard')
+    parser.add_argument('-b', '--backend-metrics-data', default='grimoirelab',
+                        help='Backend metrics data to use (grimoirelab, ossmeter, ...)')
 
     return parser.parse_args()
 
 
-def compute_metric_per_project(es_url, es_index, metric_name):
-    # Get the total aggregated value for a metric in the CROSSMINER
+def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_name):
+    # Get the total aggregated value for a metrics in GrimoireLab
+    # Elasticsearch index with metrics
+
+    project_metrics = []
+    es_query = """
+    {
+      "size": 0,
+      "aggs": {
+        "3": {
+          "terms": {
+            "field": "project"
+          }
+        }
+      },
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "term": {
+                "%s": "%s"
+              }
+            }
+          ]
+        }
+      }
+    }
+
+    """ % (metric_field, metric_name)
+
+    # logging.debug(json.dumps(json.loads(es_query), indent=True))
+
+    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, headers=HEADERS_JSON)
+    res.raise_for_status()
+
+    project_buckets = res.json()["aggregations"]["3"]["buckets"]
+    for pb in project_buckets:
+        metric_value = pb["doc_count"]
+        project_metrics.append({"project": pb['key'], "metric": metric_value})
+
+    return project_metrics
+
+
+def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_name):
+    # Get the total aggregated value for a metric in the OSSMeter
     # Elasticsearch index with metrics
     project_metrics = []
     es_query = """
@@ -65,7 +113,7 @@ def compute_metric_per_project(es_url, es_index, metric_name):
           "must": [
             {
               "term": {
-                "metric_es_name.keyword": "%s"
+                "%s": "%s"
               }
             }
           ]
@@ -74,11 +122,7 @@ def compute_metric_per_project(es_url, es_index, metric_name):
       "aggs": {
         "3": {
           "terms": {
-            "field": "project.keyword",
-            "size": 5,
-            "order": {
-              "2": "desc"
-            }
+            "field": "project.keyword"
           },
           "aggs": {
             "2": {
@@ -90,19 +134,35 @@ def compute_metric_per_project(es_url, es_index, metric_name):
         }
       }
     }
-    """ % metric_name
+    """ % (metric_field, metric_name)
+
+    # logging.debug(json.dumps(json.loads(es_query), indent=True))
 
     res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, headers=HEADERS_JSON)
     res.raise_for_status()
 
     project_buckets = res.json()["aggregations"]["3"]["buckets"]
     for pb in project_buckets:
-        project_metrics.append({"project": pb['key'], "metric": pb["2"]["value"]})
+        metric_value = pb["2"]["value"]
+        project_metrics.append({"project": pb['key'], "metric": metric_value})
 
     return project_metrics
 
 
-def assess_attribute(es_url, es_index, attribute):
+def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data):
+    """ Compute the value of a metric for all projects available """
+    metric_name = metric_data
+    metric_per_project = None
+    metric_field = find_metric_name_field(backend_metrics_data)
+    if backend_metrics_data == "ossmeter":
+        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_name)
+    elif backend_metrics_data == "grimoirelab":
+        metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_name)
+
+    return metric_per_project
+
+
+def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
     logging.debug('Doing the assessment for attribute: %s', attribute.name)
     # Collect all metrics that are included in the models
     metrics_with_data = []
@@ -120,7 +180,7 @@ def assess_attribute(es_url, es_index, attribute):
     for metric in metrics_with_data:
         metric_data = metric.data.implementation
         atribute_assessment[metric_data] = {}
-        metric_value = compute_metric_per_project(es_url, es_index, metric_data)
+        metric_value = compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data)
         if metric_value:
             for project_metric in metric_value:
                 pname = project_metric['project']
@@ -141,7 +201,7 @@ def assess_attribute(es_url, es_index, attribute):
     return atribute_assessment
 
 
-def assess(es_url, es_index, model_name):
+def assess(es_url, es_index, model_name, backend_metrics_data):
     logging.debug('Building the assessment for projects ...')
 
     assessment = {}  # Includes the assessment for each attribute
@@ -149,7 +209,6 @@ def assess(es_url, es_index, model_name):
     # Check that the model exists
     model_orm = None
     try:
-        metric_params = {"name": model_name}
         model_orm = QualityModel.objects.get(name=model_name)
     except QualityModel.DoesNotExist:
         logging.error('Can not find the metrics model %s', model_name)
@@ -157,7 +216,7 @@ def assess(es_url, es_index, model_name):
 
     for goal in model_orm.goals.all():
         for attribute in goal.attributes.all():
-            res = assess_attribute(es_url, es_index, attribute)
+            res = assess_attribute(es_url, es_index, attribute, backend_metrics_data)
             assessment[attribute.name] = res
 
     return assessment
@@ -175,6 +234,6 @@ if __name__ == '__main__':
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
 
-    assessment = assess(args.elastic_url, args.index, args.model)
+    assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data)
 
     print(assessment)

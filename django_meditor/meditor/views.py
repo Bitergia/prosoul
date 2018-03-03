@@ -150,19 +150,24 @@ class Assessment():
                 qmodel_name = form.cleaned_data['quality_model']
                 es_url = form.cleaned_data['es_url']
                 es_index = form.cleaned_data['es_index']
+                backend_metrics_data = form.cleaned_data['backend_metrics_data']
 
                 # Time to execute the assessment creation
                 try:
-                    assessment = assess(es_url, es_index, qmodel_name)
+                    assessment = assess(es_url, es_index, qmodel_name, backend_metrics_data)
                 except Exception as ex:
                     error = "Problem creating the assessment " + str(ex)
 
                 context.update({"errors": error})
                 if not error:
-                    context.update({"assessment": Assessment.render_tables(assessment)})
+                    assessment_table = Assessment.render_tables(assessment)
+                    if assessment_table:
+                        context.update({"assessment": Assessment.render_tables(assessment)})
+                    else:
+                        context.update({"errors": "Empty assessment. Review the form data."})
                 return shortcuts.render(request, 'meditor/assessment.html', context)
             else:
                 context.update({"errors": form.errors})
                 return shortcuts.render(request, 'meditor/assessment.html', context)
         else:
-            return shortcuts.render(request, 'meditor/assessment.html', {"error": "Use GET method to send data"})
+            return shortcuts.render(request, 'meditor/assessment.html', {"error": "Use POST method to send data"})
