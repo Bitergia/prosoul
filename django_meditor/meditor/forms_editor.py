@@ -25,7 +25,9 @@ def perfdata(func):
 
 class MeditorEditorForm(forms.Form):
 
-    widget = forms.Select(attrs={'size': SELECT_LINES, 'class': 'form-control'})
+    select_widget = forms.Select(attrs={'size': SELECT_LINES, 'class': 'form-control'})
+    attrs = {'size': SELECT_LINES, 'class': 'form-control', 'onclick': 'this.form.submit()'}
+    select_widget_onclick = forms.Select(attrs=attrs)
 
     # Hidden widgets to store the state of the MeditorEditorForm
     qmodel_state = forms.CharField(required=False, max_length=50, widget=forms.HiddenInput())
@@ -67,7 +69,7 @@ class QualityModelForm(MeditorEditorForm):
 
 class QualityModelsForm(MeditorEditorForm):
 
-    widget = forms.Select(attrs={'class': 'form-control', 'onclick': 'this.form.submit()'})
+    select_widget = forms.Select(attrs={'class': 'form-control', 'onclick': 'this.form.submit()'})
 
     @perfdata
     def __init__(self, *args, **kwargs):
@@ -79,7 +81,7 @@ class QualityModelsForm(MeditorEditorForm):
             choices += ((qmodel.name, qmodel.name),)
 
         self.fields['name'] = forms.ChoiceField(label='QualityModels', required=True,
-                                                widget=self.widget, choices=choices)
+                                                widget=self.select_widget, choices=choices)
 
 
 class GoalForm(MeditorEditorForm):
@@ -113,7 +115,7 @@ class GoalsForm(MeditorEditorForm):
 
         choices = sorted(choices, key=lambda x: x[1])
         self.fields['name'] = forms.ChoiceField(label='Goals',
-                                                widget=self.widget, choices=choices)
+                                                widget=self.select_widget_onclick, choices=choices)
 
 
 class AttributeForm(MeditorEditorForm):
@@ -165,7 +167,7 @@ class AttributesForm(MeditorEditorForm):
         super(AttributesForm, self).__init__(*args, **kwargs)
 
         self.fields['name'] = forms.ChoiceField(label='Attributes',
-                                                widget=self.widget, choices=self.list_choices())
+                                                widget=self.select_widget_onclick, choices=self.list_choices())
 
 
 class MetricDataForm(MeditorEditorForm):
@@ -191,7 +193,7 @@ class MetricsForm(MeditorEditorForm):
                 break
 
         self.fields['id'] = forms.ChoiceField(label='Metric',
-                                              widget=self.widget, choices=choices)
+                                              widget=self.select_widget_onclick, choices=choices)
 
 
 class MetricForm(MeditorEditorForm):

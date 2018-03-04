@@ -371,7 +371,14 @@ class MetricView():
             form = forms_editor.MetricsForm(request.POST)
             if form.is_valid():
                 metric_id = int(form.cleaned_data['id'])
-                state = EditorState(form=form, metrics=[metric_id])
+                metrics = [metric_id]
+                old_metrics = form.cleaned_data['metrics_state']
+                if old_metrics == str(metric_id):
+                    # Unselect the metric
+                    form.cleaned_data['metrics_state'] = None
+                    metrics = None
+
+                state = EditorState(form=form, metrics=metrics)
                 return shortcuts.render(request, template,
                                         build_forms_context(state))
             else:
@@ -469,6 +476,12 @@ class AttributeView():
             if form.is_valid():
                 name = form.cleaned_data['name']
                 attributes = [name] if name else []
+                old_attributes = form.cleaned_data['attributes_state']
+                if old_attributes == name:
+                    # Unselect the attribute and its metrics
+                    form.cleaned_data['attributes_state'] = None
+                    form.cleaned_data['metrics_state'] = None
+                    attributes = None
 
                 return shortcuts.render(request, template,
                                         build_forms_context(EditorState(form=form, attributes=attributes)))
@@ -583,8 +596,15 @@ class GoalView():
         if request.method == 'POST':
             form = forms_editor.GoalsForm(request.POST)
             if form.is_valid():
+                old_goals = form.cleaned_data['goals_state']
                 name = form.cleaned_data['name']
                 goals = [name]
+                if old_goals == name:
+                    # Unselect the goal and its attributes and metrics
+                    form.cleaned_data['goals_state'] = None
+                    form.cleaned_data['attributes_state'] = None
+                    form.cleaned_data['metrics_state'] = None
+                    goals = None
                 state = EditorState(goals=goals, form=form)
             else:
                 state = EditorState()
