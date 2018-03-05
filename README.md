@@ -1,6 +1,6 @@
-# prosoul [![Build Status](https://travis-ci.org/Bitergia/prosoul.svg?branch=master)](https://travis-ci.org/Bitergia/prosoul)
+# Prosoul [![Build Status](https://travis-ci.org/Bitergia/prosoul.svg?branch=master)](https://travis-ci.org/Bitergia/prosoul)
 
-**prosoul** is a software quality models manager to create, import/export, view and edit
+**Prosoul** is a software quality models manager to create, import/export, view and edit
 models.
 
 
@@ -13,7 +13,9 @@ In the initial version the metrics supported will be the [CROSSMINER ones](https
 Based on the models, visualizations and assessment for the projects are generated. In the inital version
 Kibana dashoards will be created using [GrimoireLab](http://grimoirelab.github.io/).
 
-The final goal is to have a tool for "Automatic Project Assessment and Visualization based on Quality Models".
+The final goal is to have a tool for "Automatic Project Assessment and Visualization based on Evolved Quality Models".
+
+The original name for this project was Meditor but is was chaged to Prosoul because meditor already was used in pip.
 
 ## Source code and contributions
 
@@ -24,7 +26,7 @@ to the project.
 
 ## Execution
 
-**prosoul** is a Django application so to run it you need django installed.
+**Prosoul** is a Django application so to run it you need django installed.
 
 ```
 prosoul/django_prosoul $ python3 manage.py makemigrations
@@ -44,9 +46,9 @@ prosoul/docker $ docker-compose up
 
 There is two introductory videos: showing the import and view feature, and howto use the editor for adding a new quality model:
 
-* Import and view of quality models: [prosoul-intro.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/prosoul-intro.webm)
-* Adding a new quality model: [prosoul-editor.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/prosoul-editor.webm)
-* Creating a viz and an assessment based on a quality model: [prosoul-viz-assess.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/prosoul-viz-assess.webm)
+* Import and view of quality models: [prosoul-intro.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/doc/meditor-intro.webm)
+* Adding a new quality model: [prosoul-editor.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/doc/meditor-editor.webm)
+* Creating a viz and an assessment based on a quality model: [prosoul-viz-assess.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/doc/meditor-viz-assess.webm)
 
 ## Import / Export
 
@@ -77,13 +79,13 @@ prosoul/django_prosoul $ PYTHONPATH=. prosoul/prosoul_export.py -f prosoul/data/
 
 A draft diagram for the architecture is:
 
-![](prosoul-arch.png?raw=true)
+![](doc/meditor-arch.png?raw=true)
 
 ## Prosoul in CROSSMINER
 
 There is a specific guide for [using prosoul in CROSSMINER](prosoul-crossminer.md) for creating the visualization for a quality model and generating the assessment of the projects in CROSSMINER.
 
-There is a [demo online of prosoul for CROSSMINER](http://prosoul.castalia.camp).
+There is a [demo online of prosoul for CROSSMINER](http://meditor.castalia.camp).
 
 
 ## License
