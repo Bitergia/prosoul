@@ -79,11 +79,11 @@ prosoul/django_prosoul $ PYTHONPATH=. prosoul/prosoul_export.py -f prosoul/data/
 
 A draft diagram for the architecture is:
 
-![](doc/meditor-arch.png?raw=true)
+![](doc/prosoul-arch.png?raw=true)
 
 ## Prosoul in CROSSMINER
 
-There is a specific guide for [using prosoul in CROSSMINER](prosoul-crossminer.md) for creating the visualization for a quality model and generating the assessment of the projects in CROSSMINER.
+There is a specific guide for [using prosoul in CROSSMINER](doc/prosoul-crossminer.md) for creating the visualization for a quality model and generating the assessment of the projects in CROSSMINER.
 
 There is a [demo online of prosoul for CROSSMINER](http://meditor.castalia.camp).
 
