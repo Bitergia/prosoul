@@ -1,24 +1,24 @@
 #!/bin/bash
 
-echo "Running MEditor"
+echo "Running Prosoul"
 
-git clone https://github.com/Bitergia/meditor.git
-cd meditor/django_meditor/
+git clone https://github.com/Bitergia/prosoul.git
+cd prosoul/django_prosoul/
 
 # Create the data models
 python3 manage.py makemigrations
 python3 manage.py migrate
 
 # Create the initial admin user: admin/admin
-PYTHONPATH=. django_meditor/create_admin_superuser.py
+PYTHONPATH=. django_prosoul/create_admin_superuser.py
 
 # Import some quality models as samples
-PYTHONPATH=. meditor/meditor_import.py -f meditor/data/ossmeter_qm.json --format ossmeter
-PYTHONPATH=. meditor/meditor_import.py -f meditor/data/alambic_quality_model.json --format alambic
-PYTHONPATH=. meditor/meditor_import.py -f meditor/data/basic_maturiy_model.json --format grimoirelab
+PYTHONPATH=. prosoul/prosoul_import.py -f prosoul/data/ossmeter_qm.json --format ossmeter
+PYTHONPATH=. prosoul/prosoul_import.py -f prosoul/data/alambic_quality_model.json --format alambic
+PYTHONPATH=. prosoul/prosoul_import.py -f prosoul/data/basic_maturiy_model.json --format grimoirelab
 
 
-# Run the MEditor service
+# Run the Prosoul service
 python3 manage.py runserver 0.0.0.0:8000
 # There is an issue with gunicorn finding static contents
-# gunicorn django_meditor.wsgi --bind 0.0.0.0:8000
+# gunicorn django_prosoul.wsgi --bind 0.0.0.0:8000

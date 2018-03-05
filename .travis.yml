@@ -12,14 +12,14 @@ before_install:
   - pip install gunicorn
   - pip install requests
   - pip install kidash
-  - cd django_meditor && python manage.py makemigrations && cd ..
-  - cd django_meditor && python manage.py migrate && cd ..
+  - cd django_prosoul && python manage.py makemigrations && cd ..
+  - cd django_prosoul && python manage.py migrate && cd ..
 
 # install:
 #   - ./setup.py install
 
 script:
   - flake8 .
-  - cd django_meditor && python manage.py test && cd ..
+  - cd django_prosoul && python manage.py test && cd ..
 # These tests needs ssh host verify and ssh public keys
 #  - cd pathfinder/tests/ && ./run_tests.py && cd ../..

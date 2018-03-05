@@ -1,6 +1,6 @@
-# Contributing to Meditor
+# Contributing to Prosoul
 
-We'd love for you to contribute to our source code and to make Meditor better!
+We'd love for you to contribute to our source code and to make Prosoul better!
 Here are the guidelines we'd like you to follow:
 
 * [Code of Conduct](#coc)
@@ -14,13 +14,13 @@ Here are the guidelines we'd like you to follow:
 
 ## <a name="coc"></a> Code of Conduct
 
-Help us keep Meditor open and inclusive. Please read and follow our [Code of Conduct][coc].
+Help us keep Prosoul open and inclusive. Please read and follow our [Code of Conduct][coc].
 
 ## <a name="requests"></a> Questions, Bugs, Features
 
 ### <a name="question"></a> Got a Question or Problem?
 
-Meditor is yet a small project so just use GitHub issues for sending your question.
+Prosoul is yet a small project so just use GitHub issues for sending your question.
 
 ### <a name="qualitymodel"></a> Do you want to contribute a Quality Model?
 
@@ -60,7 +60,7 @@ with quickly:
 
 * **Overview of the Issue** - if an error is being thrown a non-minified stack trace helps
 * **Motivation for or Use Case** - explain why this is a bug for you
-* **Meditor Version(s)** - is it a regression?
+* **Prosoul Version(s)** - is it a regression?
 * **Browsers and Operating System** - is this a problem with all browsers or only specific ones?
 * **Reproduce the Error** - provide an unambiguous set of stepsto reproduce the error.
 * **Related Issues** - has a similar issue been reported before?
@@ -72,9 +72,9 @@ with quickly:
 ## <a name="submit-pr"></a> Pull Request Submission Guidelines
 Before you submit your pull request consider the following guidelines:
 
-* Search [GitHub](https://github.com/Bitergia/meditor/pulls) for an open or closed Pull Request
+* Search [GitHub](https://github.com/Bitergia/prosoul/pulls) for an open or closed Pull Request
   that relates to your submission. You don't want to duplicate effort.
-* Close [meditor][github] Django app
+* Close [prosoul][github] Django app
 * Make your changes in a new git branch:
 
     ```shell
@@ -96,7 +96,7 @@ Before you submit your pull request consider the following guidelines:
     git push origin my-fix-branch
     ```
 
-* In GitHub, send a pull request to `meditor:master`. This will trigger the Travis integration.
+* In GitHub, send a pull request to `prosoul:master`. This will trigger the Travis integration.
 
 * If you find that the Travis integration has failed, look into the logs on Travis to find out
 if your changes caused test failures, the commit message was malformed etc. If you find that the
@@ -153,8 +153,8 @@ from the main (upstream) repository:
 
 Thanks to AngularJS for its great [CONTRIBUTING.md][angular-contrib] in which is based this one.
 
-[angular-contrib]: https://github\.com/Bitergia/meditor/blob/master/CONTRIBUTING.md
-[coc]: https://github\.com/Bitergia/meditor/blob/master/CODE_OF_CONDUCT.md
-[github-issues]: https://github\.com/Bitergia/meditor/issues
-[github-new-issue]: https://github\.com/Bitergia/meditor/issues/new
-[github]: https://github\.com/Bitergia/meditor
+[angular-contrib]: https://github\.com/Bitergia/prosoul/blob/master/CONTRIBUTING.md
+[coc]: https://github\.com/Bitergia/prosoul/blob/master/CODE_OF_CONDUCT.md
+[github-issues]: https://github\.com/Bitergia/prosoul/issues
+[github-new-issue]: https://github\.com/Bitergia/prosoul/issues/new
+[github]: https://github\.com/Bitergia/prosoul

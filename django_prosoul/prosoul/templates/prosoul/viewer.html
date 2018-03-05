@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% with active_page="viewer" %}
+
+{% block title %}Quality Models{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    {% load static %}
+    <link rel="stylesheet" href="{% static "prosoul/viewer.css" %}">
+{% endblock %}
+
+{% block body %}
+
+<!-- LEFT COLUMN -->
+<div style="float:left; width:70%; margin-right: 10px; height:90%; min-height: 600px;">
+
+{% include 'prosoul/viewer_js.html' %}
+
+</div>
+<!-- END LEFT COLUMN -->
+
+<!-- RIGHT COLUMN -->
+<div>
+  <div class="form-group">
+    Select a quality model to show:
+    <form>
+      <select style="width:20%;" name="qmodel_selected" multiple class="form-control"
+      rows="4" onchange="submit()">
+        {% for qmodel in qmodels %}
+          {% if qmodel.name == qmodel_selected %}
+            <option selected>{{qmodel.name}}</option>
+          {% else %}
+            <option>{{qmodel.name}}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
+    <div style="height:100px"></div>
+    Quality Models: {{qmodels|length}}<br>
+    Attributes in selected model: {{attributes_data.children|length}}<br>
+    Metrics in selected model: {{metrics_data.children|length}}<br>
+    <!--
+    <div style="height:100px"></div>
+    <a href="?project={{project_selected}}&export_file=project.json" class="btn btn-success" role="button">Export Quality Models</a>
+    <div style="height:10px"></div>
+    <a href="?project={{project_selected}}&import_file=project.json" class="btn btn-success" role="button">Import Quality Models</a>
+    -->
+</div>
+<!-- END RIGHT COLUMN -->
+{% endblock %}
+{% endwith  %}

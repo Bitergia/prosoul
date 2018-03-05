@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% with active_page="project" %}
+
+{% block title %}Prosoul{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#myTable').DataTable();
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+    <div class="text-center container-fluid bg-1">
+        {% block alert-message %}
+            <div class="alert alert-danger" style="margin-top: 10px;" role="alert">
+                <strong>Error: </strong>{{ alert_message }}
+            </div>
+        {% endblock %}
+
+        <div class="container-fluid" style="margin-top: 20px;">
+        <h1>Ups! Something went wrong.<h1>
+        <h2>Do you need some <a href="#">help</a>?</h2><br>
+        <a href="../"><button type="button" class="btn btn-primary">Go back to prosoul</button></a>
+        </div>
+
+    </div>
+{% endblock %}
+{% endwith  %}

@@ -1,6 +1,6 @@
-# meditor [![Build Status](https://travis-ci.org/Bitergia/meditor.svg?branch=master)](https://travis-ci.org/Bitergia/meditor)
+# prosoul [![Build Status](https://travis-ci.org/Bitergia/prosoul.svg?branch=master)](https://travis-ci.org/Bitergia/prosoul)
 
-**meditor** is a software quality models manager to create, import/export, view and edit
+**prosoul** is a software quality models manager to create, import/export, view and edit
 models.
 
 
@@ -17,19 +17,19 @@ The final goal is to have a tool for "Automatic Project Assessment and Visualiza
 
 ## Source code and contributions
 
-All the source code is available in the [Meditor GitHub repository](https://github.com/Bitergia/meditor). Please, upload pull requests if you have proposals to change the source code, and open an issue if you want to report a bug, ask for a new feature, or just comment something.
+All the source code is available in the [Prosoul GitHub repository](https://github.com/Bitergia/prosoul). Please, upload pull requests if you have proposals to change the source code, and open an issue if you want to report a bug, ask for a new feature, or just comment something.
 
 The [code of conduct](CODE_OF_CONDUCT.md) must be followed in all contributions
 to the project.
 
 ## Execution
 
-**meditor** is a Django application so to run it you need django installed.
+**prosoul** is a Django application so to run it you need django installed.
 
 ```
-meditor/django_meditor $ python3 manage.py makemigrations
-meditor/django_meditor $ python3 manage.py migrate
-meditor/django_meditor $ python3 manage.py runserver
+prosoul/django_prosoul $ python3 manage.py makemigrations
+prosoul/django_prosoul $ python3 manage.py migrate
+prosoul/django_prosoul $ python3 manage.py runserver
 ```
 
 By default the applicacion will be accesible in: http://127.0.0.1:8000/
@@ -37,16 +37,16 @@ By default the applicacion will be accesible in: http://127.0.0.1:8000/
 A docker image is also available to execute the application:
 
 ```
-meditor/docker $ docker-compose up
+prosoul/docker $ docker-compose up
 ```
 
 ## Basic Usage
 
 There is two introductory videos: showing the import and view feature, and howto use the editor for adding a new quality model:
 
-* Import and view of quality models: [meditor-intro.webm](https://raw.githubusercontent.com/Bitergia/meditor/master/meditor-intro.webm)
-* Adding a new quality model: [meditor-editor.webm](https://raw.githubusercontent.com/Bitergia/meditor/master/meditor-editor.webm)
-* Creating a viz and an assessment based on a quality model: [meditor-viz-assess.webm](https://raw.githubusercontent.com/Bitergia/meditor/master/meditor-viz-assess.webm)
+* Import and view of quality models: [prosoul-intro.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/prosoul-intro.webm)
+* Adding a new quality model: [prosoul-editor.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/prosoul-editor.webm)
+* Creating a viz and an assessment based on a quality model: [prosoul-viz-assess.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/prosoul-viz-assess.webm)
 
 ## Import / Export
 
@@ -56,13 +56,13 @@ from the command line:
 * Import a model from a OSSMeter JSON file:
 
 ```
-meditor/django_meditor $ PYTHONPATH=. meditor/meditor_import.py -f meditor/data/ossmeter_qm.json --format ossmeter
+prosoul/django_prosoul $ PYTHONPATH=. prosoul/prosoul_import.py -f prosoul/data/ossmeter_qm.json --format ossmeter
 ```
 
 * Export a model to a GrimoireLab JSON file:
 
 ```
-meditor/django_meditor $ PYTHONPATH=. meditor/meditor_export.py -f meditor/data/ossmeter_qm_grimoirelab.json --format grimoirelab -m "Default OSSMETER quality model"
+prosoul/django_prosoul $ PYTHONPATH=. prosoul/prosoul_export.py -f prosoul/data/ossmeter_qm_grimoirelab.json --format grimoirelab -m "Default OSSMETER quality model"
 ```
 
 ## Requirements
@@ -77,13 +77,13 @@ meditor/django_meditor $ PYTHONPATH=. meditor/meditor_export.py -f meditor/data/
 
 A draft diagram for the architecture is:
 
-![](meditor-arch.png?raw=true)
+![](prosoul-arch.png?raw=true)
 
-## Meditor in CROSSMINER
+## Prosoul in CROSSMINER
 
-There is a specific guide for [using meditor in CROSSMINER](meditor-crossminer.md) for creating the visualization for a quality model and generating the assessment of the projects in CROSSMINER.
+There is a specific guide for [using prosoul in CROSSMINER](prosoul-crossminer.md) for creating the visualization for a quality model and generating the assessment of the projects in CROSSMINER.
 
-There is a [demo online of meditor for CROSSMINER](http://meditor.castalia.camp).
+There is a [demo online of prosoul for CROSSMINER](http://prosoul.castalia.camp).
 
 
 ## License

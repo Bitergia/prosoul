@@ -13,7 +13,7 @@ kibiter:
   ports:
    - "5601:5601"
 
-meditor:
-  image: acsdocker/meditor
+prosoul:
+  image: acsdocker/prosoul
   ports:
    - "8000:8000"

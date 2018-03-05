@@ -5,7 +5,7 @@ FROM debian:stretch-slim
 MAINTAINER Alvaro del Castillo <acs@bitergia.com>
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV DEPLOY_USER meditor
+ENV DEPLOY_USER prosoul
 ENV DEPLOY_USER_DIR /home/${DEPLOY_USER}
 
 # Initial user

@@ -1,4 +1,4 @@
-# Meditor Contributor Code of Conduct
+# Prosoul Contributor Code of Conduct
 
 ## Our Pledge
 
