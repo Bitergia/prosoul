@@ -37,7 +37,7 @@ django.setup()
 
 from django.test import TestCase
 
-from prosoul.models import Attribute, DataSourceType, Factoid, Goal, Metric, QualityModel
+from prosoul.models import Attribute, DataSourceType, Factoid, Goal, Metric, MetricData, QualityModel
 
 from prosoul.prosoul_export import fetch_models, gl2alambic, gl2ossmeter, show_report
 
@@ -96,8 +96,14 @@ def feed_models(models_json):
             if 'data_source_type' in metric and metric['data_source_type']:
                 dsparams = {"name": metric['data_source_type']}
                 data_source_orm = add(DataSourceType, **dsparams)
+            metric_data_orm = None
+            if 'data' in metric and metric['data']:
+                mdparams = {"implementation": metric['data']}
+                metric_data_orm = add(MetricData, **mdparams)
+
             metparams = {"name": metric['name'],
-                         "data_source_type": data_source_orm}
+                         "data_source_type": data_source_orm,
+                         "data": metric_data_orm}
             if 'thresholds' in metric and metric['thresholds']:
                 metparams['thresholds'] = metric['thresholds']
             metric_orm = add(Metric, **metparams)

@@ -66,10 +66,14 @@ def fetch_model(model_name):
             data_source_type_name = None
             if metric_orm.data_source_type:
                 data_source_type_name = metric_orm.data_source_type.name
+            metric_data = None
+            if metric_orm.data:
+                metric_data = metric_orm.data.implementation
 
             metric_json = {
                 "name": metric_orm.name,
                 "description": metric_orm.description,
+                "data": metric_data,
                 "data_source_type": data_source_type_name,
                 "thresholds": metric_orm.thresholds
             }
