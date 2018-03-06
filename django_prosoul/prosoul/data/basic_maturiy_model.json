@@ -1,78 +1,103 @@
 {
  "qualityModels": [
   {
+   "name": "Basic Maturity Model",
    "goals": [
     {
      "attributes": [
       {
-       "factoids": [],
        "metrics": [
         {
          "data_source_type": null,
-         "mclass": null,
-         "name": "Bus factor"
+         "thresholds": null,
+         "name": "Bus factor",
+         "data": null,
+         "description": ""
         },
         {
          "data_source_type": null,
-         "mclass": null,
-         "name": "Gender Diversity"
+         "thresholds": null,
+         "name": "Gender Diversity",
+         "data": null,
+         "description": ""
         },
         {
          "data_source_type": null,
-         "mclass": null,
-         "name": "Organizations Diversity"
+         "thresholds": null,
+         "name": "Organizations Diversity",
+         "data": null,
+         "description": ""
         },
         {
          "data_source_type": null,
-         "mclass": null,
-         "name": "Commits by developer"
+         "thresholds": null,
+         "name": "Commits by developer",
+         "data": null,
+         "description": ""
         }
        ],
-       "name": "Community"
+       "subattributes": [],
+       "name": "Community",
+       "factoids": [],
+       "description": ""
       },
       {
-       "factoids": [],
        "metrics": [
         {
          "data_source_type": "git",
-         "mclass": null,
-         "name": "slope of the commits trend"
+         "thresholds": null,
+         "name": "slope of the commits trend",
+         "data": null,
+         "description": ""
         },
         {
          "data_source_type": "git",
-         "mclass": null,
-         "name": "slope of the files trend"
+         "thresholds": null,
+         "name": "slope of the files trend",
+         "data": null,
+         "description": ""
         }
        ],
-       "name": "Activity"
+       "subattributes": [],
+       "name": "Activity",
+       "factoids": [],
+       "description": ""
       },
       {
-       "factoids": [],
        "metrics": [
         {
          "data_source_type": "git",
-         "mclass": null,
-         "name": "Lines per commit"
+         "thresholds": null,
+         "name": "Lines per commit",
+         "data": null,
+         "description": ""
         },
         {
          "data_source_type": "git",
-         "mclass": null,
-         "name": "Merge vs Normal commits"
+         "thresholds": null,
+         "name": "Merge vs Normal commits",
+         "data": null,
+         "description": ""
         },
         {
          "data_source_type": "git",
-         "mclass": null,
-         "name": "Bugs in commits logs"
+         "thresholds": null,
+         "name": "Bugs in commits logs",
+         "data": null,
+         "description": ""
         }
        ],
-       "name": "Process"
+       "subattributes": [],
+       "name": "Process",
+       "factoids": [],
+       "description": ""
       }
      ],
+     "subgoals": [],
      "name": "Maturity",
-     "subgoals": []
+     "description": ""
     }
-   ],
-   "name": "Basic Maturity Model"
+   ]
   }
  ]
 }
