@@ -366,6 +366,7 @@ class MetricView():
 
     @staticmethod
     def select_metric(request):
+        error = None
         template = 'prosoul/editor.html'
         if request.method == 'POST':
             form = forms_editor.MetricsForm(request.POST)
@@ -379,11 +380,14 @@ class MetricView():
                     metrics = None
 
                 state = EditorState(form=form, metrics=metrics)
-                return shortcuts.render(request, template,
-                                        build_forms_context(state))
             else:
-                # TODO: Show error
-                raise Http404
+                state = EditorState(form=form)
+                error = form.errors
+
+            context = build_forms_context(state)
+            context.update({"errors": error})
+            return shortcuts.render(request, template, context)
+
         else:
             return shortcuts.render(request, template, build_forms_context())
 
@@ -469,7 +473,8 @@ class AttributeView():
             return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
 
     @staticmethod
-    def select_attribute(request):
+    def select_attribute(request, context=None):
+        error = None
         template = 'prosoul/editor.html'
         if request.method == 'POST':
             form = forms_editor.AttributesForm(request.POST)
@@ -482,12 +487,22 @@ class AttributeView():
                     form.cleaned_data['attributes_state'] = None
                     form.cleaned_data['metrics_state'] = None
                     attributes = None
+                state = EditorState(form=form, attributes=attributes)
 
                 return shortcuts.render(request, template,
-                                        build_forms_context(EditorState(form=form, attributes=attributes)))
+                                        build_forms_context(state))
             else:
-                # TODO: Show error
-                raise Http404
+                state = EditorState(form=form)
+                error = form.errors
+
+            if context:
+                context.update(build_forms_context(state))
+            else:
+                context = build_forms_context(state)
+
+            context.update({"errors": error})
+            return shortcuts.render(request, template, context)
+
         else:
             return shortcuts.render(request, template, build_forms_context())
 
@@ -607,7 +622,7 @@ class GoalView():
                     goals = None
                 state = EditorState(goals=goals, form=form)
             else:
-                state = EditorState()
+                state = EditorState(form=form)
                 error = form.errors
 
             if context:
@@ -617,6 +632,7 @@ class GoalView():
 
             context.update({"errors": error})
             return shortcuts.render(request, template, context)
+
         else:
             return shortcuts.render(request, template, build_forms_context())
 
