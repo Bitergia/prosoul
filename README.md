@@ -87,6 +87,9 @@ There is a specific guide for [using prosoul in CROSSMINER](doc/prosoul-crossmin
 
 There is a [demo online of prosoul for CROSSMINER](http://meditor.castalia.camp).
 
+## ROADMAP
+
+The ROADMAP for Prosoul is based on [GitHub milestones](https://github.com/Bitergia/prosoul/milestones). The current active work is done in the issues related to the current milestone.
 
 ## License
 
