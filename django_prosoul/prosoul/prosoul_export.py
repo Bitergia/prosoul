@@ -70,7 +70,8 @@ def fetch_model(model_name):
             metric_json = {
                 "name": metric_orm.name,
                 "description": metric_orm.description,
-                "data_source_type": data_source_type_name
+                "data_source_type": data_source_type_name,
+                "thresholds": metric_orm.thresholds
             }
             attribute_json['metrics'].append(metric_json)
 

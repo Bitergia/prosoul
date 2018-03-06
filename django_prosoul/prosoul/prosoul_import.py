@@ -98,6 +98,8 @@ def feed_models(models_json):
                 data_source_orm = add(DataSourceType, **dsparams)
             metparams = {"name": metric['name'],
                          "data_source_type": data_source_orm}
+            if 'thresholds' in metric and metric['thresholds']:
+                metparams['thresholds'] = metric['thresholds']
             metric_orm = add(Metric, **metparams)
             attribute_orm.metrics.add(metric_orm)
 
