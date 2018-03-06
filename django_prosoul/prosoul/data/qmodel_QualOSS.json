@@ -1,0 +1,100 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Maintainability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Reliability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Portability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Operability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Performance",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Functional Suitability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Security",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Compatibility",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Product related quality",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Process maturity",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Maintenance capacity QualOSS",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Sustainability QualOSS",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Community related quality",
+     "subgoals": []
+    }
+   ],
+   "name": "QualOSS"
+  }
+ ]
+}
