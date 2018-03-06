@@ -1,59 +1,67 @@
 {
  "qualityModels": [
   {
+   "name": "Developer Quality Model",
    "goals": [
     {
+     "description": "",
+     "subgoals": [],
+     "name": "Product",
      "attributes": [
       {
        "description": "",
+       "subattributes": [],
+       "name": "Vitality",
        "factoids": [],
        "metrics": [
         {
-         "data_source_type": null,
          "description": "",
-         "name": "numberOfCommits"
+         "data": "GitEnrich",
+         "name": "numberOfCommits",
+         "data_source_type": null,
+         "thresholds": "9,90,900,9000,9900"
         },
         {
-         "data_source_type": null,
          "description": "",
-         "name": "numberOfIssues"
+         "data": "GitHubEnrich",
+         "name": "numberOfIssues",
+         "data_source_type": null,
+         "thresholds": "9,90,900,990,999"
         }
-       ],
-       "name": "Vitality",
-       "subattributes": []
+       ]
       }
-     ],
-     "description": "",
-     "name": "Product",
-     "subgoals": []
+     ]
     },
     {
+     "description": "",
+     "subgoals": [],
+     "name": "Community",
      "attributes": [
       {
        "description": "",
+       "subattributes": [],
+       "name": "Attention",
        "factoids": [],
        "metrics": [
         {
-         "data_source_type": null,
          "description": "",
-         "name": "numberOfIssuesAttended"
+         "data": null,
+         "name": "numberOfIssuesAttended",
+         "data_source_type": null,
+         "thresholds": null
         },
         {
-         "data_source_type": null,
          "description": "",
-         "name": "numberOfIssuesClosed"
+         "data": null,
+         "name": "numberOfIssuesClosed",
+         "data_source_type": null,
+         "thresholds": null
         }
-       ],
-       "name": "Attention",
-       "subattributes": []
+       ]
       }
-     ],
-     "description": "",
-     "name": "Community",
-     "subgoals": []
+     ]
     }
-   ],
-   "name": "Developer Quality Model"
+   ]
   }
  ]
 }
