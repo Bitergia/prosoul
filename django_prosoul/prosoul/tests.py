@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from .prosoul_import import compare_models, convert_to_grimoirelab, feed_models
 
+
 class ProsoulImportExport(TestCase):
 
     def test_import_export_grimoirelab(self):
