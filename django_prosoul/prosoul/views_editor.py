@@ -140,7 +140,8 @@ def export_to_file(request, qmodel=None):
         return editor(request)
 
     if request.method == "POST":
-        qmodel = request.POST["name"]
+        qmodel_id = request.POST["id"]
+        qmodel = QualityModel.objects.get(id=qmodel_id)
 
     file_name = "qmodel_%s.json" % qmodel
     task_init = time()
@@ -280,7 +281,6 @@ class QualityModelView():
                                         build_forms_context(EditorState(qmodel_id=qmodel_orm.id)))
             else:
                 # TODO: Show error
-                print("FORM errors", form.errors)
                 raise Http404
         else:
             return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
