@@ -73,15 +73,17 @@ class QualityModelsForm(ProsoulEditorForm):
 
     @perfdata
     def __init__(self, *args, **kwargs):
+        print(args, kwargs)
+
         super(QualityModelsForm, self).__init__(*args, **kwargs)
 
         choices = [('', '')]  # Initial empty choice
 
         for qmodel in data_editor.QualityModelsData(self.state).fetch():
-            choices += ((qmodel.name, qmodel.name),)
+            choices += ((qmodel.id, qmodel.name),)
 
-        self.fields['name'] = forms.ChoiceField(label='QualityModels', required=True,
-                                                widget=self.select_widget, choices=choices)
+        self.fields['id'] = forms.ChoiceField(label='QualityModels', required=True,
+                                              widget=self.select_widget, choices=choices)
 
 
 class GoalForm(ProsoulEditorForm):
@@ -93,12 +95,12 @@ class GoalForm(ProsoulEditorForm):
         self.fields['goal_name'] = forms.CharField(label='Goal name', max_length=100)
         self.fields['goal_name'].widget = forms.TextInput(attrs={'class': 'form-control'})
 
-        current_goal = None
+        current_id = None
         if self.state and self.state.goals:
-            current_goal = self.state.goals[0]
-        self.fields['current_name'] = forms.CharField(required=False, max_length=50,
-                                                      widget=forms.HiddenInput(),
-                                                      initial=current_goal)
+            current_id = self.state.goals[0]
+        self.fields['current_id'] = forms.CharField(required=False, max_length=50,
+                                                    widget=forms.HiddenInput(),
+                                                    initial=current_id)
 
 
 class GoalsForm(ProsoulEditorForm):
@@ -110,12 +112,12 @@ class GoalsForm(ProsoulEditorForm):
         choices = ()
 
         for goal in data_editor.GoalsData(self.state).fetch():
-            if (goal.name, goal.name) not in choices:
-                choices += ((goal.name, goal.name),)
+            if (goal.id, goal.name) not in choices:
+                choices += ((goal.id, goal.name),)
 
         choices = sorted(choices, key=lambda x: x[1])
-        self.fields['name'] = forms.ChoiceField(label='Goals',
-                                                widget=self.select_widget_onclick, choices=choices)
+        self.fields['id'] = forms.ChoiceField(label='Goals',
+                                              widget=self.select_widget_onclick, choices=choices)
 
 
 class AttributeForm(ProsoulEditorForm):
@@ -128,25 +130,25 @@ class AttributeForm(ProsoulEditorForm):
         self.fields['attribute_name'] = forms.CharField(label='Attribute name', max_length=100)
         self.fields['attribute_name'].widget = forms.TextInput(attrs=ds_attrs)
 
-        current_name = None
+        current_id = None
         if self.state and self.state.attributes:
-            current_name = self.state.attributes[0]
-        self.fields['current_name'] = forms.CharField(required=False, max_length=50,
-                                                      widget=forms.HiddenInput(),
-                                                      initial=current_name)
+            current_id = self.state.attributes[0]
+        self.fields['current_id'] = forms.CharField(required=False, max_length=50,
+                                                    widget=forms.HiddenInput(),
+                                                    initial=current_id)
         choices = (('', ''),)
 
         widget = forms.Select(attrs={'class': 'form-control'})
 
         for attribute in data_editor.AttributesData(self.state).fetch():
-            if (attribute.name, attribute.name) not in choices and \
-               attribute.name != current_name:
-                choices += ((attribute.name, attribute.name),)
+            if (attribute.id, attribute.name) not in choices and \
+               attribute.id != current_id:
+                choices += ((attribute.id, attribute.name),)
 
         choices = sorted(choices, key=lambda x: x[1])
 
-        self.fields['parent'] = forms.ChoiceField(label='Parent', required=False,
-                                                  widget=widget, choices=choices)
+        self.fields['parent_id'] = forms.ChoiceField(label='Parent', required=False,
+                                                     widget=widget, choices=choices)
 
 
 class AttributesForm(ProsoulEditorForm):
@@ -155,8 +157,8 @@ class AttributesForm(ProsoulEditorForm):
         choices = ()
 
         for attribute in data_editor.AttributesData(self.state).fetch():
-            if (attribute.name, attribute.name) not in choices:
-                choices += ((attribute.name, attribute.name),)
+            if (attribute.id, attribute.name) not in choices:
+                choices += ((attribute.id, attribute.name),)
 
         choices = sorted(choices, key=lambda x: x[1])
 
@@ -166,8 +168,8 @@ class AttributesForm(ProsoulEditorForm):
     def __init__(self, *args, **kwargs):
         super(AttributesForm, self).__init__(*args, **kwargs)
 
-        self.fields['name'] = forms.ChoiceField(label='Attributes',
-                                                widget=self.select_widget_onclick, choices=self.list_choices())
+        self.fields['id'] = forms.ChoiceField(label='Attributes',
+                                              widget=self.select_widget_onclick, choices=self.list_choices())
 
 
 class MetricDataForm(ProsoulEditorForm):
@@ -214,7 +216,7 @@ class MetricForm(ProsoulEditorForm):
             self.metric_id = self.state.metrics[0]
 
         if self.state and self.state.attributes:
-            attribute_orm = Attribute.objects.get(name=self.state.attributes[0])
+            attribute_orm = Attribute.objects.get(id=self.state.attributes[0])
             kwargs['initial'].update({
                 'attributes': attribute_orm.name,
                 'old_attribute': attribute_orm.name

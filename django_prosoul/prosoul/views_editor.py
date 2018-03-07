@@ -52,15 +52,20 @@ def build_forms_context(state=None):
     metric_data_form = forms_editor.MetricDataForm(state=state)
 
     if state:
-        qmodel_form.initial['name'] = state.qmodel_name
+        qmodel_form.initial['id'] = state.qmodel_id
+        qmodel_form.initial['name'] = QualityModel.objects.get(id=state.qmodel_id).name
         if state.goals:
-            goals_form.initial['name'] = state.goals[0]
-            goal_form.initial['goal_name'] = state.goals[0]
+            goals_form.initial['id'] = state.goals[0]
+            goal_name = Goal.objects.get(id=state.goals[0]).name
+            goals_form.initial['name'] = goal_name
+            goal_form.initial['goal_name'] = goal_name
             goal_remove_form.initial['goal_name'] = state.goals[0]
         if state.attributes:
-            attributes_form.initial['name'] = state.attributes[0]
-            attribute_form.initial['attribute_name'] = state.attributes[0]
-            attribute_remove_form.initial['attribute_name'] = state.attributes[0]
+            attributes_form.initial['id'] = state.attributes[0]
+            attr_name = Attribute.objects.get(id=state.attributes[0]).name
+            attributes_form.initial['name'] = attr_name
+            attribute_form.initial['attribute_name'] = attr_name
+            attribute_remove_form.initial['attribute_name'] = attr_name
         if state.metrics:
             metrics_form.initial['id'] = state.metrics[0]
             metric_name = Metric.objects.get(id=state.metrics[0]).name
@@ -178,31 +183,31 @@ def return_error(message):
 
 class EditorState():
 
-    def __init__(self, qmodel_name=None, goals=[], attributes=[],
-                 metrics=[], form=None):
-        self.qmodel_name = qmodel_name
+    def __init__(self, qmodel_id=None, goals=None, attributes=None,
+                 metrics=None, form=None):
+        self.qmodel_id = qmodel_id
         self.goals = goals
         self.attributes = attributes
         self.metrics = metrics
 
         if form:
             # The form includes the state not changed to be propagated
+            qmodels_state = form.cleaned_data['qmodel_state']
             goals_state = form.cleaned_data['goals_state']
             attributes = form.cleaned_data['attributes_state']
             metrics = form.cleaned_data['metrics_state']
 
-            if not self.qmodel_name:
-                self.qmodel_name = form.cleaned_data['qmodel_state']
-            if not self.goals:
+            if self.qmodel_id is None:
+                self.qmodel_id = qmodels_state if qmodels_state else None
+            if self.goals is None:
                 self.goals = [goals_state] if goals_state else []
-            if not self.attributes:
+            if self.attributes is None:
                 self.attributes = [attributes] if attributes else []
-            if not self.metrics:
+            if self.metrics is None:
                 self.metrics = [metrics] if metrics else []
 
     def is_empty(self):
-        return not (self.qmodel_name or self.goals or self.attributes or
-                    self.metrics)
+        return not (self.qmodel_id or self.goals or self.attributes or self.metrics)
 
     def initial_state(self):
         """ State to be filled in the forms so it is propagated
@@ -210,13 +215,24 @@ class EditorState():
         The state needs to be serialized so it can be used in
         forms fields.
         """
+        initial = {}
 
-        initial = {
-            'qmodel_state': self.qmodel_name,
-            'goals_state': ";".join(self.goals),
-            'attributes_state': ";".join(self.attributes),
-            "metrics_state": ";".join([str(metric_id) for metric_id in self.metrics])
-        }
+        initial['qmodel_state'] = self.qmodel_id
+
+        if self.goals:
+            initial['goals_state'] = ";".join([str(oid) for oid in self.goals])
+        else:
+            initial['goals_state'] = None
+
+        if self.attributes:
+            initial['attributes_state'] = ";".join([str(oid) for oid in self.attributes])
+        else:
+            initial['attributes_state'] = None
+
+        if self.metrics:
+            initial['metrics_state'] = ";".join([str(oid) for oid in self.metrics])
+        else:
+            initial['metrics_state'] = None
 
         return initial
 
@@ -229,16 +245,15 @@ class QualityModelView():
         if request.method == 'POST':
             form = forms_editor.QualityModelsForm(request.POST)
             if form.is_valid():
-                name = form.cleaned_data['name']
-                if not name:
-                    # TODO: Show error when qmodel name is empty
+                model_id = form.cleaned_data['id']
+                if not model_id:
                     return shortcuts.render(request, template, build_forms_context())
                 # Select and qmodel reset the state. Don't pass form=form
-                state = build_forms_context(EditorState(qmodel_name=name))
+                state = build_forms_context(EditorState(qmodel_id=model_id))
                 if context:
                     context.update(state)
                 else:
-                    context = build_forms_context(EditorState(qmodel_name=name))
+                    context = state
                 return shortcuts.render(request, template, context)
             else:
                 # Ignore when the empty option is selected
@@ -262,7 +277,7 @@ class QualityModelView():
 
                 # Select and qmodel reset the state. Don't pass form=form
                 return shortcuts.render(request, 'prosoul/editor.html',
-                                        build_forms_context(EditorState(qmodel_name=qmodel_name)))
+                                        build_forms_context(EditorState(qmodel_id=qmodel_orm.id)))
             else:
                 # TODO: Show error
                 print("FORM errors", form.errors)
@@ -441,8 +456,8 @@ class AttributeView():
         if request.method == 'POST':
             form = forms_editor.AttributeForm(request.POST)
             if form.is_valid():
-                goal_name = form.cleaned_data['goals_state']
-                parent_name = form.cleaned_data['parent']
+                goal_id = form.cleaned_data['goals_state']
+                parent_id = form.cleaned_data['parent_id']
                 goal_orm = None
 
                 attribute_name = form.cleaned_data['attribute_name']
@@ -450,19 +465,20 @@ class AttributeView():
                 try:
                     attribute_orm.save()
 
-                    if parent_name:
+                    if parent_id:
                         # If there is an attribute parent use it instead of goal
-                        parent_orm = Attribute.objects.get(name=parent_name)
+                        parent_orm = Attribute.objects.get(name=parent_id)
                         parent_orm.subattributes.add(attribute_orm)
                         parent_orm.save()
-                    elif goal_name:
-                        goal_orm = Goal.objects.get(name=goal_name)
+                    elif goal_id:
+                        goal_orm = Goal.objects.get(id=goal_id)
                         goal_orm.attributes.add(attribute_orm)
                         goal_orm.save()
                 except IntegrityError:
+                    attribute_orm = Attribute.objects.get(name=attribute_name)
                     error = "Attribute %s alredy exists" % (attribute_name)
 
-                context = EditorState(attributes=[attribute_name], form=form)
+                context = EditorState(attributes=[attribute_orm.id], form=form)
                 send_context = build_forms_context(context)
                 send_context.update({"errors": error})
                 return shortcuts.render(request, 'prosoul/editor.html', send_context)
@@ -479,10 +495,10 @@ class AttributeView():
         if request.method == 'POST':
             form = forms_editor.AttributesForm(request.POST)
             if form.is_valid():
-                name = form.cleaned_data['name']
-                attributes = [name] if name else []
+                attr_id = form.cleaned_data['id']
+                attributes = [attr_id] if attr_id else []
                 old_attributes = form.cleaned_data['attributes_state']
-                if old_attributes == name:
+                if old_attributes == attr_id:
                     # Unselect the attribute and its metrics
                     form.cleaned_data['attributes_state'] = None
                     form.cleaned_data['metrics_state'] = None
@@ -517,7 +533,7 @@ class AttributeView():
                     Attribute.objects.get(name=attribute_name).delete()
                 except Attribute.DoesNotExist:
                     error = "Can't remove %s. Attribute does not exists." % attribute_name
-                send_context = build_forms_context(EditorState(form=form))
+                send_context = build_forms_context(EditorState(form=form, attributes=[]))
                 send_context.update({"errors": error})
                 return shortcuts.render(request, 'prosoul/editor.html', send_context)
             else:
@@ -534,14 +550,13 @@ class AttributeView():
 
             if form.is_valid():
                 name = form.cleaned_data['attribute_name']
-                current_name = form.cleaned_data['current_name']
-                parent_name = form.cleaned_data['parent']
+                current_id = form.cleaned_data['current_id']
 
-                attribute_orm = Attribute.objects.get(name=current_name)
+                attribute_orm = Attribute.objects.get(id=current_id)
                 attribute_orm.name = name
                 attribute_orm.save()
 
-                state = EditorState(attributes=[name], form=form)
+                state = EditorState(attributes=[current_id], form=form)
                 return shortcuts.render(request, 'prosoul/editor.html',
                                         build_forms_context(state))
             else:
@@ -560,20 +575,21 @@ class GoalView():
         if request.method == 'POST':
             form = forms_editor.GoalForm(request.POST)
             if form.is_valid():
-                qmodel_name = form.cleaned_data['qmodel_state']
+                qmodel_id = form.cleaned_data['qmodel_state']
                 qmodel_orm = None
                 goal_name = form.cleaned_data['goal_name']
                 goal_orm = Goal(name=goal_name)
                 try:
                     goal_orm.save()
-                    if qmodel_name:
-                        qmodel_orm = QualityModel.objects.get(name=qmodel_name)
+                    if qmodel_id:
+                        qmodel_orm = QualityModel.objects.get(id=qmodel_id)
                         qmodel_orm.goals.add(goal_orm)
                         qmodel_orm.save()
                 except IntegrityError:
                     error = "Goal %s alredy exists" % (goal_name)
+                    qmodel_orm = QualityModel.objects.get(name=goal_name)
 
-                context = EditorState(goals=[goal_name], form=form)
+                context = EditorState(goals=[goal_orm.id], form=form)
                 send_context = build_forms_context(context)
                 send_context.update({"errors": error})
                 return shortcuts.render(request, 'prosoul/editor.html', send_context)
@@ -594,7 +610,7 @@ class GoalView():
                     Goal.objects.get(name=goal_name).delete()
                 except Goal.DoesNotExist:
                     error = "Can't remove %s. Goal does not exists." % goal_name
-                send_context = build_forms_context(EditorState(form=form))
+                send_context = build_forms_context(EditorState(goals=[], form=form))
                 send_context.update({"errors": error})
                 return shortcuts.render(request, 'prosoul/editor.html', send_context)
             else:
@@ -612,9 +628,9 @@ class GoalView():
             form = forms_editor.GoalsForm(request.POST)
             if form.is_valid():
                 old_goals = form.cleaned_data['goals_state']
-                name = form.cleaned_data['name']
-                goals = [name]
-                if old_goals == name:
+                goal_id = form.cleaned_data['id']
+                goals = [goal_id]
+                if old_goals == goal_id:
                     # Unselect the goal and its attributes and metrics
                     form.cleaned_data['goals_state'] = None
                     form.cleaned_data['attributes_state'] = None
@@ -642,15 +658,14 @@ class GoalView():
             form = forms_editor.GoalForm(request.POST)
 
             if form.is_valid():
-                name = form.cleaned_data['goal_name']
-                current_name = form.cleaned_data['current_name']
-                print("CURRENT", current_name)
+                goal_name = form.cleaned_data['goal_name']
+                current_id = form.cleaned_data['current_id']
 
-                goal_orm = Goal.objects.get(name=current_name)
-                goal_orm.name = name
+                goal_orm = Goal.objects.get(id=current_id)
+                goal_orm.name = goal_name
                 goal_orm.save()
 
-                state = EditorState(goals=[name], form=form)
+                state = EditorState(goals=[current_id], form=form)
                 return shortcuts.render(request, 'prosoul/editor.html',
                                         build_forms_context(state))
             else:

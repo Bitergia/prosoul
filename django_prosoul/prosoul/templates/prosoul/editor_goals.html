@@ -22,10 +22,9 @@
         {% for field in goals_form.state_fields %}
         {{ field }}
         {% endfor %}
-        {{ goals_form.name.errors }}
         <div class="form-group form-group-lg">
-          {{ goals_form.name }}
-          {{ goals_form.name.errors }}
+          {{ goals_form.id }}
+          {{ goals_form.id.errors }}
         </div>
       </fieldset>
     </form>

@@ -27,7 +27,7 @@ class AttributesData():
             for attribute in attributes:
                 yield attribute
         elif self.state.attributes:
-            attributes = Attribute.objects.filter(name__in=self.state.attributes)
+            attributes = Attribute.objects.filter(id__in=self.state.attributes)
             for attribute in attributes:
                 yield attribute
         elif self.state.metrics:
@@ -35,11 +35,11 @@ class AttributesData():
             for attribute in self.__fetch_from_metrics(metrics):
                 yield attribute
         elif self.state.goals:
-            goals = Goal.objects.filter(name__in=self.state.goals)
+            goals = Goal.objects.filter(id__in=self.state.goals)
             for attribute in self.__find_goals_attributes(goals):
                 yield attribute
-        elif self.state.qmodel_name:
-            qmodel = QualityModel.objects.get(name=self.state.qmodel_name)
+        elif self.state.qmodel_id:
+            qmodel = QualityModel.objects.get(id=self.state.qmodel_id)
             goals = qmodel.goals.all()
             for attribute in self.__find_goals_attributes(goals):
                 yield attribute
@@ -65,11 +65,11 @@ class GoalsData():
             for goal in Goal.objects.all():
                 yield goal
         elif self.state.goals:
-            goals = Goal.objects.filter(name__in=self.state.goals)
+            goals = Goal.objects.filter(id__in=self.state.goals)
             for goal in goals:
                 yield goal
         elif self.state.attributes:
-            attributes = Attribute.objects.filter(name__in=self.state.attributes).values_list("id")
+            attributes = Attribute.objects.filter(id__in=self.state.attributes).values_list("id")
             goals = Goal.objects.filter(attributes__in=list(attributes))
             for goal in goals:
                 yield goal
@@ -79,8 +79,8 @@ class GoalsData():
             goals = Goal.objects.filter(attributes__in=list(attributes))
             for goal in goals:
                 yield goal
-        elif self.state.qmodel_name:
-            qmodel = QualityModel.objects.get(name=self.state.qmodel_name)
+        elif self.state.qmodel_id:
+            qmodel = QualityModel.objects.get(id=self.state.qmodel_id)
             goals = qmodel.goals.all()
             for goal in goals:
                 yield goal
@@ -110,16 +110,16 @@ class MetricsData():
             for metric in metrics:
                 yield metric
         elif self.state.attributes:
-            attributes = Attribute.objects.filter(name__in=self.state.attributes)
+            attributes = Attribute.objects.filter(id__in=self.state.attributes)
             for attribute in attributes:
                 for metric in attribute.metrics.all():
                     yield metric
         elif self.state.goals:
-            goals = Goal.objects.filter(name__in=self.state.goals)
+            goals = Goal.objects.filter(id__in=self.state.goals)
             for metric in self.__find_goals_metrics(goals):
                 yield metric
-        elif self.state.qmodel_name:
-            qmodel = QualityModel.objects.get(name=self.state.qmodel_name)
+        elif self.state.qmodel_id:
+            qmodel = QualityModel.objects.get(id=self.state.qmodel_id)
             for metric in self.__find_goals_metrics(qmodel.goals.all()):
                 yield metric
 

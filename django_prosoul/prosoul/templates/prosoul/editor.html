@@ -77,8 +77,8 @@ function disableElement(element_id) {
 </script>
 
 <!-- Element disabling control-->
-{% if not qmodels_form.initial.name %}
-    {% if qmodels_form.name|length == 1 %}
+{% if not qmodels_form.initial.id %}
+    {% if qmodels_form.id|length == 1 %}
         <script>
         // If there are no qmodels, open `add` modal
         // qmodels length is 1 because of the empty option
@@ -99,8 +99,8 @@ function disableElement(element_id) {
         disableElement("edit-metric-btn");
         disableElement("add-metric-data-btn");
     </script>
-{% elif not goals_form.initial.name %}
-    {% if goals_form.name|length == 0 %}
+{% elif not goals_form.initial.id %}
+    {% if goals_form.id|length == 0 %}
         <script>
             disableElement("select-goal");
             // If there are no goals, open `add` modal
@@ -118,8 +118,8 @@ function disableElement(element_id) {
       disableElement("edit-metric-btn");
       disableElement("add-metric-data-btn");
     </script>
-{% elif not attributes_form.initial.name %}
-    {% if attributes_form.name|length == 0 %}
+{% elif not attributes_form.initial.id %}
+    {% if attributes_form.id|length == 0 %}
         <script>
             disableElement("select-attribute");
             // If there are no attributes, open `add` modal
