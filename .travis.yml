@@ -21,5 +21,3 @@ before_install:
 script:
   - flake8 .
   - cd django_prosoul && python manage.py test && cd ..
-# These tests needs ssh host verify and ssh public keys
-#  - cd pathfinder/tests/ && ./run_tests.py && cd ../..
