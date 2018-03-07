@@ -532,8 +532,9 @@ class AttributeView():
             form = forms_editor.AttributeForm(request.POST)
             if form.is_valid():
                 attribute_name = form.cleaned_data['attribute_name']
+                current_id = form.cleaned_data['current_id']
                 try:
-                    Attribute.objects.get(name=attribute_name).delete()
+                    Attribute.objects.get(id=current_id).delete()
                 except Attribute.DoesNotExist:
                     error = "Can't remove %s. Attribute does not exists." % attribute_name
                 send_context = build_forms_context(EditorState(form=form, attributes=[]))
@@ -609,8 +610,9 @@ class GoalView():
             form = forms_editor.GoalForm(request.POST)
             if form.is_valid():
                 goal_name = form.cleaned_data['goal_name']
+                current_id = form.cleaned_data['current_id']
                 try:
-                    Goal.objects.get(name=goal_name).delete()
+                    Goal.objects.get(id=current_id).delete()
                 except Goal.DoesNotExist:
                     error = "Can't remove %s. Goal does not exists." % goal_name
                 send_context = build_forms_context(EditorState(goals=[], form=form))
