@@ -587,7 +587,7 @@ class GoalView():
                         qmodel_orm.save()
                 except IntegrityError:
                     error = "Goal %s alredy exists" % (goal_name)
-                    qmodel_orm = QualityModel.objects.get(name=goal_name)
+                    goal_orm = Goal.objects.get(name=goal_name)
 
                 context = EditorState(goals=[goal_orm.id], form=form)
                 send_context = build_forms_context(context)
