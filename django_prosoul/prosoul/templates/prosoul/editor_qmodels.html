@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-md-4">
+  <div class="col-md-12">
     <form class="form-inline" action="./editor_select_qmodel" method="post">
       {% csrf_token %}
       {% for field in qmodels_form.state_fields %}
@@ -9,25 +9,20 @@
       <div class="form-group mb-2">
         <label for="id_id"><h1>QualityModel:</h1></label>
         {{ qmodels_form.id }}
+        <div style="margin:20px" class="button-group text-right row">
+          <button type="submit" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addQualityModelModal">
+            <i class="fa fa-plus"></i> Add <span class="sr-only">qmodel</span>
+          </button>
+          <fieldset>
+            <button type="submit" class="btn btn-default btn-sm" data-toggle="modal" data-target="#importModal">
+              <i class="fa fa-upload"></i> Import <span class="sr-only">qmodel</span>
+            </button>
+            <button type="submit" class="btn btn-default btn-sm" data-toggle="modal" data-target="#exportModal">
+              <i class="fa fa-download"></i> Export <span class="sr-only">qmodel</span>
+            </button>
+          </fieldset>
+        </div>
       </div>
     </form>
-  </div>
-  <div class="col-md-5">
-
-  </div>
-  <div class="col-md-3">
-    <div class="button-group text-right row">
-      <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#addQualityModelModal">
-        <i class="fa fa-plus"></i> Add <span class="sr-only">qmodel</span>
-      </button>
-      <fieldset>
-          <button type="submit" class="btn btn-default" data-toggle="modal" data-target="#importModal">
-            <i class="fa fa-upload"></i> Import <span class="sr-only">qmodel</span>
-          </button>
-          <button type="submit" class="btn btn-default" data-toggle="modal" data-target="#exportModal">
-            <i class="fa fa-download"></i> Export <span class="sr-only">qmodel</span>
-          </button>
-      </fieldset>
-    </div>
   </div>
 </div>
