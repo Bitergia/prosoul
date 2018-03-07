@@ -56,7 +56,7 @@ class Factoid(ProsoulModel):
 
 
 class Attribute(ProsoulModel):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=False)
     # Relations
     metrics = models.ManyToManyField(Metric, blank=True)
     factoids = models.ManyToManyField(Factoid, blank=True)
@@ -67,7 +67,7 @@ class Attribute(ProsoulModel):
 
 
 class Goal(ProsoulModel):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=False)
     # Relations
     attributes = models.ManyToManyField(Attribute)
     subgoals = models.ManyToManyField("Goal", blank=True)

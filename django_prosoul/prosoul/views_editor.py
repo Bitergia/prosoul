@@ -325,20 +325,22 @@ class MetricView():
 
     @staticmethod
     def add_metric(request):
+        error = None
         if request.method == 'POST':
             form = forms_editor.MetricForm(request.POST)
             if form.is_valid():
                 name = form.cleaned_data['metric_name']
                 thresholds = form.cleaned_data['metric_thresholds']
-                attribute = form.cleaned_data['attributes']
+                attribute_id = form.cleaned_data['attributes']
 
-                attribute_orm = Attribute.objects.get(name=attribute)
+                attribute_orm = Attribute.objects.get(id=attribute_id)
 
                 # Try to find a metric already created
                 try:
                     metric_orm = Metric.objects.get(name=name)
-                    metric_orm.attribute = attribute_orm
-                    metric_orm.thresholds = thresholds
+                    error = "The metric %s already exists" % name
+                    # metric_orm.attribute = attribute_orm
+                    # metric_orm.thresholds = thresholds
                 except Metric.DoesNotExist:
                     # Create a new metric
                     metric_orm = Metric(name=name, attribute=attribute_orm,
@@ -348,15 +350,16 @@ class MetricView():
 
                 attribute_orm.metrics.add(metric_orm)
                 attribute_orm.save()
-
-                form.cleaned_data['metrics_state'] = []
-                state = EditorState(form=form)
-                return shortcuts.render(request, 'prosoul/editor.html',
-                                        build_forms_context(state))
             else:
-                # TODO: Show error
-                print(form.errors)
-                raise Http404
+                error = form.errors
+
+            form.cleaned_data['metrics_state'] = []
+            state = EditorState(form=form)
+            context = build_forms_context(state)
+            context.update({"errors": error})
+
+            return shortcuts.render(request, 'prosoul/editor.html',
+                                    context)
         else:
             return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
 
@@ -414,9 +417,9 @@ class MetricView():
             if form.is_valid():
                 metric_id = form.cleaned_data['metric_id']
                 name = form.cleaned_data['metric_name']
-                attribute = form.cleaned_data['attributes']
+                attribute_id = form.cleaned_data['attributes']
                 metric_data = form.cleaned_data['metrics_data']
-                old_attribute = form.cleaned_data['old_attribute']
+                old_attribute_id = form.cleaned_data['old_attribute_id']
                 thresholds = form.cleaned_data['metric_thresholds']
 
                 metric_orm = Metric.objects.get(id=metric_id)
@@ -429,11 +432,11 @@ class MetricView():
                 metric_orm.save()
 
                 # Add the metric to the new attribute
-                if attribute != old_attribute:
-                    attribute = Attribute.objects.get(name=attribute)
+                if attribute_id != old_attribute_id:
+                    attribute = Attribute.objects.get(id=attribute_id)
                     attribute.metrics.add(metric_orm)
                     attribute.save()
-                    attribute = Attribute.objects.get(name=old_attribute)
+                    attribute = Attribute.objects.get(name=old_attribute_id)
                     attribute.metrics.remove(metric_orm)
                     attribute.save()
 

@@ -218,8 +218,8 @@ class MetricForm(ProsoulEditorForm):
         if self.state and self.state.attributes:
             attribute_orm = Attribute.objects.get(id=self.state.attributes[0])
             kwargs['initial'].update({
-                'attributes': attribute_orm.name,
-                'old_attribute': attribute_orm.name
+                'attributes': attribute_orm.id,
+                'old_attribute_id': attribute_orm.id
             })
 
         if self.metric_id:
@@ -247,8 +247,9 @@ class MetricForm(ProsoulEditorForm):
 
         choices = ()
 
-        for ds in data_editor.AttributesData(state=None).fetch():
-            choices += ((ds.name, ds.name),)
+        # Show only the attributes for this quality model
+        for attr in data_editor.AttributesData(state=self.state).fetch():
+            choices += ((attr.id, attr.name),)
 
         empty_choice = [('', '')]
         choices = empty_choice + sorted(choices, key=lambda x: x[1])
@@ -268,5 +269,5 @@ class MetricForm(ProsoulEditorForm):
         self.fields['metrics_data'] = forms.ChoiceField(label='Metrics Data', required=False,
                                                         widget=self.widget, choices=choices)
 
-        self.fields['old_attribute'] = forms.CharField(label='old_attribute', max_length=100, required=False)
-        self.fields['old_attribute'].widget = forms.HiddenInput(attrs={'class': 'form-control', 'readonly': 'True'})
+        self.fields['old_attribute_id'] = forms.CharField(label='old_attribute', max_length=100, required=False)
+        self.fields['old_attribute_id'].widget = forms.HiddenInput(attrs={'class': 'form-control', 'readonly': 'True'})
