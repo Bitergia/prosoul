@@ -57,12 +57,9 @@
 
 <script>
 
-// Disable "onclick" event when selecting a qmodel on
-// Import and Download modals.
+// Disable "onclick" event when selecting a qmodel to download it
 qmodel_download_form = document.getElementById("qmodel_download");
-qmodel_download_form["name"].removeAttribute("onclick");
-qmodel_download_form = document.getElementById("qmodel_import");
-qmodel_download_form["name"].removeAttribute("onclick");
+qmodel_download_form["id"].removeAttribute("onclick");
 
 // Disable element
 function disableElement(element_id) {
