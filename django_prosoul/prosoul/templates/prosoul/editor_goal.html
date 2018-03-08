@@ -3,53 +3,51 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <form>
-          {% if not goals_form.initial.name %}
-          <div class="modal-title">Add goal for <strong>{{ qmodels_form.initial.name }}</strong></div>
-          {% else %}
-          <div class="modal-title">Edit goal <strong>{{ goals_form.initial.name }}</strong>
-            for <strong>{{ qmodels_form.initial.name }}</strong></div>
-            {% endif %}
-          </form>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-        <div class="container">
-          <form method="post" enctype="multipart/form-data">
-            <fieldset id="add-goal">
-              <div class="modal-body">
-                {% csrf_token %}
-                {% for field in goal_form.state_fields %}
-                {{ field }}
-                {% endfor %}
-                {{ goal_form.current_id }}
-                {{ goal_form.name.errors }}
+        {% if not goals_form.initial.name %}
+        <div class="modal-title">Add goal for <strong>{{ qmodels_form.initial.name }}</strong></div>
+        {% else %}
+        <div class="modal-title">Edit goal <strong>{{ goals_form.initial.name }}</strong>
+          for <strong>{{ qmodels_form.initial.name }}</strong></div>
+          {% endif %}
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="container">
+        <form method="post" enctype="multipart/form-data">
+          <fieldset id="add-goal">
+            <div class="modal-body">
+              {% csrf_token %}
+              {% for field in goal_form.state_fields %}
+              {{ field }}
+              {% endfor %}
+              {{ goal_form.current_id }}
+              {{ goal_form.name.errors }}
+              <div class="input-group">
+                <span class="input-group-addon"><i class="fa fa-suitcase"></i></span>
+                {{ goal_form.goal_name }}
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div class="form-actions pull-right">
                 <div class="input-group">
-                  <span class="input-group-addon"><i class="fa fa-suitcase"></i></span>
-                  {{ goal_form.goal_name }}
-                </div>
-              </div>
-              <div class="modal-footer">
-                <div class="form-actions pull-right">
-                  <div class="input-group">
-                    {% if not goals_form.initial.name %}
-                    <div id="goal-add-btn" class="button-group">
-                      <button type="submit" formaction='./add_goal' class="btn">
-                        <i class="fa fa-plus"></i> Add</button>
-                    </div>
-                    {% else %}
-                    <div id="goal-edit-btn" class="button-group">
-                      <button type="submit" formaction="./update_goal" class="btn">
-                        <i class="fa fa-save"></i> Save</button>
-                        <button type="submit" formaction='./remove_goal' class="btn">
-                          <i class="fa fa-trash-o"></i> Remove</button>
-                    </div>
-                    {% endif %}
+                  {% if not goals_form.initial.name %}
+                  <div id="goal-add-btn" class="button-group">
+                    <button type="submit" formaction='./add_goal' class="btn">
+                      <i class="fa fa-plus"></i> Add</button>
                   </div>
+                  {% else %}
+                  <div id="goal-edit-btn" class="button-group">
+                    <button type="submit" formaction="./update_goal" class="btn">
+                      <i class="fa fa-save"></i> Save</button>
+                      <button type="submit" formaction='./remove_goal' class="btn">
+                        <i class="fa fa-trash-o"></i> Remove</button>
+                  </div>
+                  {% endif %}
                 </div>
               </div>
-            </fieldset>
-          </form>
-        </div>
+            </div>
+          </fieldset>
+        </form>
       </div>
     </div>
   </div>
+</div>
