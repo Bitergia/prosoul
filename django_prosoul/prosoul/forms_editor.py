@@ -4,7 +4,7 @@ from time import time
 
 from django import forms
 
-from prosoul.models import Attribute, Metric
+from prosoul.models import Attribute, Metric, QualityModel
 
 from . import data_editor
 
@@ -62,8 +62,14 @@ class QualityModelForm(ProsoulEditorForm):
     def __init__(self, *args, **kwargs):
         super(QualityModelForm, self).__init__(*args, **kwargs)
 
+        qmodel_name = None
+        if self.state and self.state.qmodel_id:
+            qmodel_id = self.state.qmodel_id
+            qmodel_name = QualityModel.objects.get(id=qmodel_id).name
+
         qm_attrs = {'class': 'form-control', 'placeholder': 'QualityModel name'}
-        self.fields['qmodel_name'] = forms.CharField(label='QualityModel name', max_length=100)
+        self.fields['qmodel_name'] = forms.CharField(label='QualityModel name',
+                                                     max_length=100, initial=qmodel_name)
         self.fields['qmodel_name'].widget = forms.TextInput(attrs=qm_attrs)
 
 

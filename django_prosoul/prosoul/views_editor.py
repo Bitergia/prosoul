@@ -52,8 +52,9 @@ def build_forms_context(state=None):
     metric_data_form = forms_editor.MetricDataForm(state=state)
 
     if state:
-        qmodel_form.initial['id'] = state.qmodel_id
-        qmodel_form.initial['name'] = QualityModel.objects.get(id=state.qmodel_id).name
+        if state.qmodel_id:
+            qmodel_form.initial['id'] = state.qmodel_id
+            qmodel_form.initial['name'] = QualityModel.objects.get(id=state.qmodel_id).name
         if state.goals:
             goals_form.initial['id'] = state.goals[0]
             goal_name = Goal.objects.get(id=state.goals[0]).name
@@ -264,7 +265,6 @@ class QualityModelView():
 
     @staticmethod
     def add_qmodel(request):
-
         if request.method == 'POST':
             form = forms_editor.QualityModelForm(request.POST)
             if form.is_valid():
@@ -282,6 +282,54 @@ class QualityModelView():
             else:
                 # TODO: Show error
                 raise Http404
+        else:
+            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+
+    @staticmethod
+    def remove_qmodel(request):
+        errors = None
+        if request.method == 'POST':
+            form = forms_editor.QualityModelForm(request.POST)
+            if form.is_valid():
+                qmodel_name = form.cleaned_data['qmodel_name']
+                try:
+                    QualityModel.objects.get(name=qmodel_name).delete()
+                except QualityModel.DoesNotExist:
+                    errors = "Can't delete not found quality model %s" % qmodel_name
+            else:
+                error = form.errors
+
+            # Select and qmodel reset the state. Don't pass form=form
+            context = build_forms_context(EditorState(qmodel_id=None))
+            context['errors'] = errors
+
+            return shortcuts.render(request, 'prosoul/editor.html', context)
+
+        else:
+            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+
+    @staticmethod
+    def update_qmodel(request):
+        errors = None
+        if request.method == 'POST':
+            form = forms_editor.QualityModelForm(request.POST)
+            if form.is_valid():
+                qmodel_id = form.cleaned_data['qmodel_state']
+                qmodel_name = form.cleaned_data['qmodel_name']
+                try:
+                    qmodel_orm = QualityModel.objects.get(id=qmodel_id)
+                    qmodel_orm.name = qmodel_name
+                    qmodel_orm.save()
+                except QualityModel.DoesNotExist:
+                    errors = "Can't find quality model %s" % qmodel_id
+            else:
+                error = form.errors
+
+            context = build_forms_context(EditorState(form=form))
+            context['errors'] = errors
+
+            return shortcuts.render(request, 'prosoul/editor.html', context)
+
         else:
             return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
 

@@ -1,14 +1,22 @@
 <!-- Modal: Add qmodel -->
 <div class="modal fade" id="addQualityModelModal" role="dialog">
-    <div class="modal-dialog">
-    <!-- Modal content-->
-        <div class="modal-content">
-          <form action="./add_qmodel" method="post">
-              {% csrf_token %}
-          <div class="modal-header">
-            <div class="modal-title">Add Quality Model</div>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        {% if not qmodels_form.initial.id %}
+          <div class="modal-title">Add Quality Model</div>
+        {% else %}
+          <div class="modal-title">Edit Quality Model <strong>{{ qmodels_form.initial.name }}</strong></div>
+        {% endif %}
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <div class="container">
+        <form method="post">
+          {% csrf_token %}
+          {% for field in goal_form.state_fields %}
+          {{ field }}
+          {% endfor %}
           <div class="modal-body">
               <div class="input-group">
                   <span class="input-group-addon"><i class="fa fa-globe"></i></span>
@@ -17,9 +25,26 @@
               </div>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="btn btn-primary btn-sm">Add</button>
+            <div class="form-actions pull-right">
+              <div class="input-group">
+                {% if not qmodels_form.initial.name %}
+                <div id="qmodel-add-btn" class="button-group">
+                  <button type="submit" formaction='./add_qmodel' class="btn">
+                    <i class="fa fa-plus"></i> Add</button>
+                </div>
+                {% else %}
+                <div id="qmodel-edit-btn" class="button-group">
+                  <button type="submit" formaction="./update_qmodel" class="btn">
+                    <i class="fa fa-save"></i> Save</button>
+                  <button type="submit" formaction='./remove_qmodel' class="btn">
+                    <i class="fa fa-trash-o"></i> Remove</button>
+                </div>
+                {% endif %}
+              </div>
+            </div>
           </div>
         </form>
-        </div>
+      </div>
     </div>
+  </div>
 </div>

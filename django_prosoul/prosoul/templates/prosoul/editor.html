@@ -74,10 +74,11 @@ function disableElement(element_id) {
         <script>
         // If there are no qmodels, open `add` modal
         // qmodels length is 1 because of the empty option
-            $('#addQualityModelModal').modal('show');
+          $('#addQualityModelModal').modal('show');
         </script>
     {% endif %}
     <script>
+        disableElement("edit-qmodel-btn");
         disableElement("add-goal");
         disableElement("add-goal-btn");
         disableElement("edit-goal-btn");
