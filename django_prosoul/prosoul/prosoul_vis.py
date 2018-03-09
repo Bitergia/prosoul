@@ -28,7 +28,6 @@ import json
 import logging
 import os
 
-
 import django
 # settings.configure()
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_prosoul.settings'
@@ -37,35 +36,24 @@ django.setup()
 from prosoul.models import QualityModel
 from prosoul.prosoul_utils import find_metric_name_field
 
-from kidash.kidash import search_dashboards, fetch_dashboard, feed_dashboard
+from kidash.kidash import feed_dashboard
 
 
 def get_params():
-    parser = argparse.ArgumentParser(usage="usage: mdashboard.py [options]",
+    parser = argparse.ArgumentParser(usage="usage: prosoul_vis.py [options]",
                                      description="Create a Kibana Dashboard to show a Quality Model")
     parser.add_argument("-e", "--elastic-url", required=True,
                         help="Elasticsearch URL with the metrics")
     parser.add_argument('-g', '--debug', action='store_true')
     parser.add_argument('-i', '--index', required='True', help='Index with the metrics')
-    parser.add_argument('-t', '--template', required='True', help='Dashboard template to be used')
+    parser.add_argument('-t', '--template-file', required=True,
+                        help='Dashboard template file to be used')
     parser.add_argument('-m', '--model', required='True',
                         help='Model to be used to build the Dashboard')
     parser.add_argument('-b', '--backend-metrics-data', default='grimoirelab',
                         help='Backend metrics data to use (grimoirelab, ossmeter, ...)')
 
     return parser.parse_args()
-
-
-def find_dash_id(es_url, dash_name):
-    dash_id = None
-
-    for dashboard in search_dashboards(es_url):
-        if dashboard['title'] == dash_name:
-            dash_id = dashboard['_id']
-            logging.debug('Template dashboard found %s (%s)', dash_name, dash_id)
-            break
-
-    return dash_id
 
 
 def build_filters(metrics, index, metric_name):
@@ -100,7 +88,7 @@ def build_filters(metrics, index, metric_name):
     return filter_json
 
 
-def build_dashboard(es_url, es_index, template_dashboard, goal, attribute,
+def build_dashboard(es_url, es_index, template_filename, goal, attribute,
                     backend_metrics_data):
     logging.debug('Building the dashboard for the attribute: %s (goal %s)', attribute, goal)
 
@@ -117,14 +105,13 @@ def build_dashboard(es_url, es_index, template_dashboard, goal, attribute,
 
     logging.debug("Metrics to be included: %s", metrics_data)
 
-    # Get the dashboard template to add to it the metric filters
-    template_dashboard_id = find_dash_id(es_url, template_dashboard)
-    if not template_dashboard_id:
-        logging.error('Can not find the template dashboard %s', template_dashboard)
-        raise RuntimeError("Can not find the template dashboard" + template_dashboard)
+    # Upload the dashboard created from the template dashboard
+    logging.debug("Uploading the template panel %s", template_filename)
+    template_file = open(template_filename, "r")
+    dashboard = json.load(template_file)
+    template_file.close()
 
     # Add the filters to the template dashboard and export it to Kibana
-    dashboard = fetch_dashboard(es_url, template_dashboard_id)
     search_json = json.loads(dashboard['dashboard']['value']['kibanaSavedObjectMeta']['searchSourceJSON'])
     metric_name = find_metric_name_field(backend_metrics_data)
     search_json['filter'] = build_filters(metrics_data, es_index, metric_name)
@@ -137,7 +124,7 @@ def build_dashboard(es_url, es_index, template_dashboard, goal, attribute,
     logging.info('Created the attribute dashboard %s', dashboard['dashboard']['value']['title'])
 
 
-def build_dashboards(es_url, es_index, template_dashboard, model_name,
+def build_dashboards(es_url, es_index, template_file, model_name,
                      backend_metrics_data):
 
     logging.debug('Building the dashboards for the model: %s', model_name)
@@ -153,7 +140,7 @@ def build_dashboards(es_url, es_index, template_dashboard, model_name,
     # Build a new dashboard for each attribute in the quality model
     for goal in model_orm.goals.all():
         for attribute in goal.attributes.all():
-            build_dashboard(es_url, es_index, template_dashboard, goal,
+            build_dashboard(es_url, es_index, template_file, goal,
                             attribute, backend_metrics_data)
 
 
@@ -170,4 +157,4 @@ if __name__ == '__main__':
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     build_dashboards(args.elastic_url, args.index,
-                     args.template, args.model, args.backend_metrics_data)
+                     args.template_file, args.model, args.backend_metrics_data)

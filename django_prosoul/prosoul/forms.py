@@ -1,6 +1,7 @@
 from django import forms
 from django.core.validators import URLValidator
 
+from . import data
 from . import data_editor
 from prosoul.prosoul_utils import BACKEND_METRICS_DATA
 
@@ -30,12 +31,18 @@ class VisualizationForm(forms.Form):
         widget_select = forms.Select(attrs=es_attrs)
 
         qmodels = [('', '')]  # Initial empty choice
-
         for qmodel in data_editor.QualityModelsData().fetch():
             qmodels += ((qmodel.name, qmodel.name),)
 
         self.fields['quality_model'] = forms.ChoiceField(label='Quality Model', required=True,
                                                          widget=widget_select, choices=qmodels)
+
+        templates = []
+        for template_tuple in data.VizTemplatesData().fetch():
+            templates += (template_tuple,)
+
+        self.fields['attribute_template'] = forms.ChoiceField(label='Attribute Template', required=True,
+                                                              widget=widget_select, choices=templates)
 
         backends = []
         for backend in BACKEND_METRICS_DATA:
@@ -49,7 +56,6 @@ class VisualizationForm(forms.Form):
         self.fields['kibana_url'] = forms.CharField(label='Kibana URL', max_length=100, widget=widget)
         self.fields['kibana_url'].validators = [URLValidator()]
         self.fields['es_index'] = forms.CharField(label='Index with metrics data', max_length=100, widget=widget)
-        self.fields['attribute_template'] = forms.CharField(label='Attribute template', max_length=100, widget=widget)
 
 
 class AssessmentForm(forms.Form):
