@@ -40,7 +40,6 @@ echo "Loading the Visualization Templates"
 export PYTHONPATH=$KIDASH_PYTHONPATH
 $KIDASH --import git.json
 $KIDASH --import github_issues.json
-$KIDASH --import ../../django_prosoul/prosoul/panels/attribute-template-grimoirelab.json
 
 echo "Loading the Quality Model"
 PYTHONPATH=../../django_prosoul ../../django_prosoul/prosoul/prosoul_import.py -f ../../django_prosoul/prosoul/data/developer_model.json
