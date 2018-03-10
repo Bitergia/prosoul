@@ -24,7 +24,7 @@
 #
 
 import argparse
-# import json
+import json
 import logging
 import os
 
@@ -201,6 +201,10 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
     return atribute_assessment
 
 
+def publish_assessment(es_url, es_index, assessment):
+    pass
+
+
 def assess(es_url, es_index, model_name, backend_metrics_data):
     logging.debug('Building the assessment for projects ...')
 
@@ -215,9 +219,14 @@ def assess(es_url, es_index, model_name, backend_metrics_data):
         RuntimeError('Can not find the metrics model %s' + model_name)
 
     for goal in model_orm.goals.all():
+        assessment[goal.name] = {}
         for attribute in goal.attributes.all():
             res = assess_attribute(es_url, es_index, attribute, backend_metrics_data)
-            assessment[attribute.name] = res
+            assessment[goal.name][attribute.name] = res
+
+    print(json.dumps(assessment, indent=True))
+
+    publish_assessment(es_url, es_index, assessment)
 
     return assessment
 
@@ -235,5 +244,3 @@ if __name__ == '__main__':
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data)
-
-    print(assessment)

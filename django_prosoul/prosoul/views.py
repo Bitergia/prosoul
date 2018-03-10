@@ -88,55 +88,82 @@ class Assessment():
         render_index = template.render(context, request)
         return HttpResponse(render_index)
 
+    @staticmethod
+    def render_attribute_table(metrics, goal):
+        table = "<table class='table'>"
+        # Headers
+        table += "<thead><th scope='col'>Attribute</th>"
+        for metric in metrics:
+            table += "<th>%s</th>" % metric
+        table += "</thead>"
+        for attribute in goal:
+            # One row per atribute with its metrics
+            table += "<tr><th scope='row'>%s</td>" % attribute
+            # Let's find the metrics to fill the metrics columns
+            for metric_col in metrics:
+                metric_col_found = False
+                for metric in goal[attribute]:
+                    if metric == metric_col:
+                        table += "<td>%s</td>" % goal[attribute][metric]
+                        metric_col_found = True
+                        break
+                if not metric_col_found:
+                    table += "<td></td>"
+            table += "</tr>"
+        table += "</table>"
+
+        return table
+
     def render_tables(assessment):
         """ Convert the JSON with the assessmet in an HTML table
 
         Sample format:
 
-        {'Vitality': {'numberOfCommits': {'perceval': 2, 'GrimoireELK': 3},
-                      'numberOfBugs':    {'perceval': 3, 'GrimoireELK': 3}},
-         'Attention': {}}
+        {
+         "Community": {
+          "Attention": {}
+         },
+         "Product": {
+          "Vitality": {
+           "GitHubEnrich": {
+            "perceval": 2,
+            "GrimoireELK": 2
+           },
+           "GitEnrich": {
+            "perceval": 3,
+            "GrimoireELK": 3
+           }
+          }
+         }
+        }
         """
 
         projects_data = {}
         metrics = []
 
-        for attribute in assessment:
-            for metric in assessment[attribute]:
-                metrics.append(metric)
-                for project in assessment[attribute][metric]:
-                    if project not in projects_data:
-                        projects_data[project] = {}
-                    if attribute not in projects_data[project]:
-                        projects_data[project][attribute] = {}
-                    projects_data[project][attribute][metric] = assessment[attribute][metric][project]
+        for goal in assessment:
+            for attribute in assessment[goal]:
+                for metric in assessment[goal][attribute]:
+                    metrics.append(metric)
+                    for project in assessment[goal][attribute][metric]:
+                        if project not in projects_data:
+                            projects_data[project] = {}
+                        if goal not in projects_data[project]:
+                            projects_data[project][goal] = {}
+                        if attribute not in projects_data[project][goal]:
+                            projects_data[project][goal][attribute] = {}
+                        projects_data[project][goal][attribute][metric] = assessment[goal][attribute][metric][project]
+
+        print(projects_data)
 
         metrics = list(set(metrics))
         # TODO: move this table rendering to Django templates
         tables = ""
         for project in projects_data:
-            tables += "<h4>" + project + "</h4>"
-            tables += "<table class='table'>"
-            # Headers
-            tables += "<thead><th scope='col'>Attribute</th>"
-            for metric in metrics:
-                tables += "<th>%s</th>" % metric
-            tables += "</thead>"
-            for attribute in projects_data[project]:
-                # One row per atribute with its metrics
-                tables += "<tr><th scope='row'>%s</td>" % attribute
-                # Let's find the metrics to fill the metrics columns
-                for metric_col in metrics:
-                    metric_col_found = False
-                    for metric in projects_data[project][attribute]:
-                        if metric == metric_col:
-                            tables += "<td>%s</td>" % projects_data[project][attribute][metric]
-                            metric_col_found = True
-                            break
-                    if not metric_col_found:
-                        tables += "<td></td>"
-                tables += "</tr>"
-            tables += "</table>"
+            tables += "<h3>Project: " + project + "</h3>"
+            for goal in projects_data[project]:
+                tables += "<h5>Goal: " + goal + "</h5>"
+                tables += Assessment.render_attribute_table(metrics, projects_data[project][goal])
 
         return tables
 
