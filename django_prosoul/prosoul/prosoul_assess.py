@@ -201,8 +201,34 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
     return atribute_assessment
 
 
+def enrich_assessment(assessment):
+    for goal in assessment:
+        for attr in assessment[goal]:
+            for metric in assessment[goal][attr]:
+                for project in assessment[goal][attr][metric]:
+                    aitem = {
+                        "goal": goal,
+                        "attribute": attr,
+                        "metric": metric,
+                        "project": project,
+                        "score": assessment[goal][attr][metric][project]
+                    }
+                    yield aitem
+
+
 def publish_assessment(es_url, es_index, assessment):
-    pass
+    nscores = 0
+    scores_index = es_index + "_scores"
+    for item in enrich_assessment(assessment):
+        # Don't use the bulk interface because the number of items is low
+        add_item = requests.post('%s/%s' % (es_url, scores_index + "/items"),
+                                 headers=HEADERS_JSON, data=json.dumps(item))
+        add_item.raise_for_status()
+        nscores += 1
+
+    logging.info("Total scores published in %s: %i", scores_index, nscores)
+
+    return nscores
 
 
 def assess(es_url, es_index, model_name, backend_metrics_data):
