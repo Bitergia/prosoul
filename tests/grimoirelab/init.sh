@@ -1,13 +1,5 @@
-# Change to the directory in which you have cloned 
-# https://github.com/chaoss/grimoirelab-elk
-# https://github.com/chaoss/grimoirelab-kidash
-GIT_CLONES_DIR='/home/acs/devel/'
-
-# P2O="p2o.py"
-P2O="$GIT_CLONES_DIR/GrimoireELK/utils/p2o.py"
-# KIDASH='kidash'
-KIDASH_PYTHONPATH="$GIT_CLONES_DIR/grimoirelab-kidash:$GIT_CLONES_DIR/GrimoireELK"
-KIDASH="$GIT_CLONES_DIR/grimoirelab-kidash/bin/kidash"
+P2O="p2o.py"
+KIDASH='kidash'
 ES="http://localhost:9200"
 
 # init.sh <github api token>
@@ -37,10 +29,11 @@ curl -XPOST -H "Content-Type: application/json" $ES/_aliases -d '
 '
 
 echo "Loading the Visualization Templates"
-export PYTHONPATH=$KIDASH_PYTHONPATH
 $KIDASH --import git.json
 $KIDASH --import github_issues.json
 
 echo "Loading the Quality Model"
-PYTHONPATH=../../django_prosoul ../../django_prosoul/prosoul/prosoul_import.py -f ../../django_prosoul/prosoul/data/developer_model.json
+PYTHONPATH=../../django-prosoul ../../django-prosoul/manage.py makemigrations
+PYTHONPATH=../../django-prosoul ../../django-prosoul/manage.py migrate
+PYTHONPATH=../../django-prosoul ../../django-prosoul/prosoul/prosoul_import.py -f ../../django-prosoul/prosoul/data/developer_model.json
 

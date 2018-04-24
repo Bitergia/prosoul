@@ -9,15 +9,14 @@ before_install:
   - pip install flake8
   - pip install coveralls
   - pip install django
-  - pip install gunicorn
   - pip install requests
   - pip install kidash
-  - cd django_prosoul && python manage.py makemigrations && cd ..
-  - cd django_prosoul && python manage.py migrate && cd ..
+  - cd django-prosoul && python manage.py makemigrations && cd ..
+  - cd django-prosoul && python manage.py migrate && cd ..
 
 # install:
 #   - ./setup.py install
 
 script:
   - flake8 .
-  - cd django_prosoul && python manage.py test && cd ..
+  - cd django-prosoul && python manage.py test && cd ..
