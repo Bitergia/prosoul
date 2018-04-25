@@ -41,6 +41,7 @@ from prosoul.prosoul_utils import find_metric_name_field
 
 THRESHOLDS = ["Very Poor", "Poor", "Fair", "Good", "Very Good"]
 HEADERS_JSON = {"Content-Type": "application/json"}
+MAX_PROJECTS = 10000  # max number of projects to analyze
 
 
 def get_params():
@@ -87,7 +88,8 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
       "aggs": {
         "3": {
           "terms": {
-            "field": "project"
+            "field": "project",
+            "size": %i
           }
         }
       },
@@ -104,7 +106,7 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
       }
     }
 
-    """ % (metric_field, metric_name, metric_params_filter)
+    """ % (MAX_PROJECTS, metric_field, metric_name, metric_params_filter)
 
     logging.debug(json.dumps(json.loads(es_query), indent=True))
 
@@ -223,6 +225,12 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
 
 
 def enrich_assessment(assessment):
+    """
+    Generate one item with a metric score for a project
+
+    :param assessment: A dict with the results of the assessment
+    :return:
+    """
     for goal in assessment:
         for attr in assessment[goal]:
             for metric in assessment[goal][attr]:
@@ -232,7 +240,7 @@ def enrich_assessment(assessment):
                         "attribute": attr,
                         "metric": metric,
                         "project": project,
-                        "score": assessment[goal][attr][metric][project]
+                        "score_" + metric: assessment[goal][attr][metric][project]
                     }
                     yield aitem
 
