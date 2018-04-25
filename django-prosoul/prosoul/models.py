@@ -26,8 +26,12 @@ class DataSourceType(ProsoulModel):
 class MetricData(ProsoulModel):
     # Name of the metric in Elasticsearch with the data for the metric
     implementation = models.CharField(max_length=200, null=True, blank=True)
+    # params to be used to compute the metric, including filters
+    params = models.CharField(max_length=1024, null=True, blank=True)
 
     def __str__(self):
+        if self.params:
+            return self.implementation + " " + self.params
         return self.implementation
 
 

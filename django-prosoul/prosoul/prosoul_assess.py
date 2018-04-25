@@ -58,10 +58,28 @@ def get_params():
     return parser.parse_args()
 
 
-def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_name):
-    # Get the total aggregated value for a metrics in GrimoireLab
-    # Elasticsearch index with metrics
+def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data):
+    """
+    In the current implementation the metrics supported are just counting metrics with
+    an optional filtering defined in metric_params.
 
+    :param es_url: Elasticsearch URL
+    :param es_index: Elasticsearch index with the metrics
+    :param metric_field: field to select the metrics data
+    :param metric_data: data to compute the metric
+    :return:
+    """
+
+    metric_name = metric_data.implementation
+
+    metric_params_filter = ''
+    if metric_data.params:
+        # Build the filter if metric_params is defined
+        metric_params_filter = json.dumps(json.loads(metric_data.params)['filter'])
+        # Add a , to join this filter to the rest of filters
+        metric_params_filter = ", " + metric_params_filter
+
+    # Get the total aggregated value for a metrics in GrimoireLab
     project_metrics = []
     es_query = """
     {
@@ -80,15 +98,15 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
               "term": {
                 "%s": "%s"
               }
-            }
+            } %s
           ]
         }
       }
     }
 
-    """ % (metric_field, metric_name)
+    """ % (metric_field, metric_name, metric_params_filter)
 
-    # logging.debug(json.dumps(json.loads(es_query), indent=True))
+    logging.debug(json.dumps(json.loads(es_query), indent=True))
 
     res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, headers=HEADERS_JSON)
     res.raise_for_status()
@@ -101,9 +119,12 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
     return project_metrics
 
 
-def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_name):
+def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data):
     # Get the total aggregated value for a metric in the OSSMeter
     # Elasticsearch index with metrics
+
+    metric_name = metric_data.implementation
+
     project_metrics = []
     es_query = """
     {
@@ -151,13 +172,13 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_n
 
 def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data):
     """ Compute the value of a metric for all projects available """
-    metric_name = metric_data
+    metric_name = str(metric_data)
     metric_per_project = None
     metric_field = find_metric_name_field(backend_metrics_data)
     if backend_metrics_data == "ossmeter":
-        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_name)
+        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data)
     elif backend_metrics_data == "grimoirelab":
-        metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_name)
+        metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data)
 
     return metric_per_project
 
@@ -178,14 +199,14 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
     logging.debug("Metrics to be included: %s (%s attribute)", metrics_with_data, attribute.name)
 
     for metric in metrics_with_data:
-        metric_data = metric.data.implementation
-        atribute_assessment[metric_data] = {}
-        metric_value = compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data)
+
+        atribute_assessment[str(metric.data)] = {}
+        metric_value = compute_metric_per_project(es_url, es_index, metric.data, backend_metrics_data)
         if metric_value:
             for project_metric in metric_value:
                 pname = project_metric['project']
                 pmetric = project_metric['metric']
-                logging.debug("Project %s metric %s value %i", pname, metric_data, pmetric)
+                logging.debug("Project %s metric %s value %i", pname, str(metric.data), pmetric)
                 logging.debug("Doing the assesment ...")
                 if metric.thresholds:
                     score = 0
@@ -193,8 +214,8 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
                         if project_metric['metric'] > float(threshold):
                             score += 1
                 logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
-                              metric_data, score, THRESHOLDS[score - 1])
-                atribute_assessment[metric_data][pname] = score
+                              str(metric.data), score, THRESHOLDS[score - 1])
+                atribute_assessment[str(metric.data)][pname] = score
         else:
             logging.debug("Can't find value for for %s", metric)
 

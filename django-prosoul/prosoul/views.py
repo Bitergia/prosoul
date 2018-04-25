@@ -94,7 +94,12 @@ class Assessment():
         # Headers
         table += "<thead><th scope='col'>Attribute</th>"
         for metric in metrics:
-            table += "<th>%s</th>" % metric
+            # Clean the metric name
+            # "GitHubEnrich {\"filter\": {\"term\": {\"state\": \"closed\"}}}
+            if len(metric.split()) == 1:
+                table += "<th>%s</th>" % metric
+            else:
+                table += "<th>%s + filter</th>" % metric.split()[0]
         table += "</thead>"
         for attribute in goal:
             # One row per atribute with its metrics
@@ -121,7 +126,12 @@ class Assessment():
 
         {
          "Community": {
-          "Attention": {}
+          "Attention": {
+           "GitHubEnrich {\"filter\": {\"term\": {\"state\": \"closed\"}}}": {
+            "perceval": 5,
+            "GrimoireELK": 5
+           }
+          }
          },
          "Product": {
           "Vitality": {

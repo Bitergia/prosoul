@@ -1,67 +1,71 @@
 {
  "qualityModels": [
   {
-   "name": "Developer Quality Model",
    "goals": [
     {
-     "description": "",
-     "subgoals": [],
-     "name": "Product",
      "attributes": [
       {
        "description": "",
-       "subattributes": [],
-       "name": "Vitality",
        "factoids": [],
        "metrics": [
         {
-         "description": "",
-         "data": "GitEnrich",
-         "name": "numberOfCommits",
+         "data_implementation": "GitEnrich",
+         "data_params": null,
          "data_source_type": null,
+         "description": "",
+         "name": "numberOfCommits",
          "thresholds": "9,90,900,9000,9900"
         },
         {
-         "description": "",
-         "data": "GitHubEnrich",
-         "name": "numberOfIssues",
+         "data_implementation": "GitHubEnrich",
+         "data_params": null,
          "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssues",
          "thresholds": "9,90,900,990,999"
         }
-       ]
+       ],
+       "name": "Vitality",
+       "subattributes": []
       }
-     ]
+     ],
+     "description": "",
+     "name": "Product",
+     "subgoals": []
     },
     {
-     "description": "",
-     "subgoals": [],
-     "name": "Community",
      "attributes": [
       {
        "description": "",
-       "subattributes": [],
-       "name": "Attention",
        "factoids": [],
        "metrics": [
         {
-         "description": "",
-         "data": null,
-         "name": "numberOfIssuesAttended",
+         "data_implementation": null,
+         "data_params": null,
          "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesAttended",
          "thresholds": null
         },
         {
-         "description": "",
-         "data": null,
-         "name": "numberOfIssuesClosed",
+         "data_implementation": "GitHubEnrich",
+         "data_params": "{\"filter\": {\"term\": {\"state\": \"closed\"}}}",
          "data_source_type": null,
-         "thresholds": null
+         "description": "",
+         "name": "numberOfIssuesClosed",
+         "thresholds": "5,10,50,100,200"
         }
-       ]
+       ],
+       "name": "Attention",
+       "subattributes": []
       }
-     ]
+     ],
+     "description": "",
+     "name": "Community",
+     "subgoals": []
     }
-   ]
+   ],
+   "name": "Developer Quality Model"
   }
  ]
 }

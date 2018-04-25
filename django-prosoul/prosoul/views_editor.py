@@ -344,13 +344,14 @@ class MetricDataView():
                 state = EditorState(form=form)
                 metric_id = state.metrics[0]
                 implementation = form.cleaned_data['implementation']
+                params = form.cleaned_data['params']
 
                 # Try to find a metric data already created
                 try:
-                    metric_data_orm = MetricData.objects.get(implementation=implementation)
+                    metric_data_orm = MetricData.objects.get(implementation=implementation, params=params)
                 except MetricData.DoesNotExist:
                     # Create a new metric
-                    metric_data_orm = MetricData(implementation=implementation)
+                    metric_data_orm = MetricData(implementation=implementation, params=params)
                     metric_data_orm.save()
 
                 metric_orm = Metric.objects.get(id=metric_id)
@@ -466,7 +467,7 @@ class MetricView():
                 metric_id = form.cleaned_data['metric_id']
                 name = form.cleaned_data['metric_name']
                 attribute_id = form.cleaned_data['attributes']
-                metric_data = form.cleaned_data['metrics_data']
+                metric_data_id = form.cleaned_data['metrics_data']
                 old_attribute_id = form.cleaned_data['old_attribute_id']
                 thresholds = form.cleaned_data['metric_thresholds']
 
@@ -474,8 +475,8 @@ class MetricView():
                 metric_orm.name = name
                 metric_orm.data = None
                 metric_orm.thresholds = thresholds
-                if metric_data:
-                    metric_data_orm = MetricData.objects.get(implementation=metric_data)
+                if metric_data_id:
+                    metric_data_orm = MetricData.objects.get(id=metric_data_id)
                     metric_orm.data = metric_data_orm
                 metric_orm.save()
 

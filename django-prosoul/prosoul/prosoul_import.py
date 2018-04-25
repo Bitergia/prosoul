@@ -97,8 +97,9 @@ def feed_models(models_json):
                 dsparams = {"name": metric['data_source_type']}
                 data_source_orm = add(DataSourceType, **dsparams)
             metric_data_orm = None
-            if 'data' in metric and metric['data']:
-                mdparams = {"implementation": metric['data']}
+            if 'data_implementation' in metric and metric['data_implementation']:
+                mdparams = {"implementation": metric['data_implementation'],
+                            "params": metric['data_params']}
                 metric_data_orm = add(MetricData, **mdparams)
 
             metparams = {"name": metric['name'],

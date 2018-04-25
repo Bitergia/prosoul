@@ -183,8 +183,11 @@ class MetricDataForm(ProsoulEditorForm):
         super(MetricDataForm, self).__init__(*args, **kwargs)
 
         ds_attrs = {'class': 'form-control', 'placeholder': 'Implementation'}
-        self.fields['implementation'] = forms.CharField(label='Attribute name', max_length=100)
+        self.fields['implementation'] = forms.CharField(label='Implementation', max_length=100)
         self.fields['implementation'].widget = forms.TextInput(attrs=ds_attrs)
+        self.fields['params'] = forms.CharField(label='Params', max_length=100)
+        params_sample = '{"filter": {"term": {"state": "closed"}}}'
+        self.fields['params'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': params_sample})
 
 
 class MetricsForm(ProsoulEditorForm):
@@ -237,7 +240,7 @@ class MetricForm(ProsoulEditorForm):
                     'metric_thresholds': metric_orm.thresholds
                 })
                 if metric_orm.data:
-                    kwargs['initial'].update({'metrics_data': metric_orm.data.implementation})
+                    kwargs['initial'].update({'metrics_data': metric_orm.data.id})
             except Metric.DoesNotExist:
                 print(self.__class__, "Received metric which does not exists", self.metric_id)
         super(MetricForm, self).__init__(*args, **kwargs)
@@ -267,7 +270,7 @@ class MetricForm(ProsoulEditorForm):
         choices = ()
 
         for metric_data in data_editor.MetricsDataData(state=None).fetch():
-            choices += ((metric_data.implementation, metric_data.implementation),)
+            choices += ((metric_data.id, str(metric_data)),)
 
         empty_choice = [('', '')]
         choices = empty_choice + sorted(choices, key=lambda x: x[1])
