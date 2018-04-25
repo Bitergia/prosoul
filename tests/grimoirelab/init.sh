@@ -11,10 +11,10 @@ fi
 
 echo "Loading the metrics data"
 mysqladmin -u root create prosoul_sh
-$P2O --enrich --db-sortinghat prosoul_sh --json-projects-map projects.json --index git-raw --index-enrich git git https://github.com/chaoss/grimoirelab-elk.git
-$P2O --enrich --db-sortinghat prosoul_sh --json-projects-map projects.json --index git-raw --index-enrich git git https://github.com/chaoss/perceval.git
-$P2O --enrich --db-sortinghat prosoul_sh --json-projects-map projects.json --index github-raw --index-enrich github_issues github chaoss perceval -t $1
-$P2O --enrich --db-sortinghat prosoul_sh --json-projects-map projects.json --index github-raw --index-enrich github_issues github chaoss grimoirelab-elk -t $1
+$P2O --enrich --db-sortinghat prosoul_sh --db-host localhost --json-projects-map projects.json --index git-raw --index-enrich git git https://github.com/chaoss/grimoirelab-elk.git
+$P2O --enrich --db-sortinghat prosoul_sh --db-host localhost --json-projects-map projects.json --index git-raw --index-enrich git git https://github.com/chaoss/perceval.git
+$P2O --enrich --db-sortinghat prosoul_sh --db-host localhost --json-projects-map projects.json --index github-raw --index-enrich github_issues github chaoss perceval -t $1
+$P2O --enrich --db-sortinghat prosoul_sh --db-host localhost --json-projects-map projects.json --index github-raw --index-enrich github_issues github chaoss grimoirelab-elk -t $1
 
 echo "Generating grimoirelab alias"
 curl -XPOST -H "Content-Type: application/json" $ES/_aliases -d '
