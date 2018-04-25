@@ -35,6 +35,8 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_prosoul.settings'
 django.setup()
 
+from dateutil import parser
+
 from prosoul.models import QualityModel
 
 from prosoul.prosoul_utils import find_metric_name_field
@@ -55,11 +57,13 @@ def get_params():
                         help='Model to be used to build the Dashboard')
     parser.add_argument('-b', '--backend-metrics-data', default='grimoirelab',
                         help='Backend metrics data to use (grimoirelab, ossmeter, ...)')
+    parser.add_argument('--from-date', default='1970-01-01',
+                        help='Start date from which to compute the metrics (1970-01-01 by default)')
 
     return parser.parse_args()
 
 
-def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data):
+def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data, from_date=None):
     """
     In the current implementation the metrics supported are just counting metrics with
     an optional filtering defined in metric_params.
@@ -68,17 +72,33 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
     :param es_index: Elasticsearch index with the metrics
     :param metric_field: field to select the metrics data
     :param metric_data: data to compute the metric
+    :param from_date: date from which to compute the metrics
     :return:
     """
 
     metric_name = metric_data.implementation
+    metric_filter = ""
 
-    metric_params_filter = ''
     if metric_data.params:
         # Build the filter if metric_params is defined
-        metric_params_filter = json.dumps(json.loads(metric_data.params)['filter'])
+        metric_filter = json.dumps(json.loads(metric_data.params)['filter'])
+
+    if from_date:
+        from_date_iso = from_date.isoformat()
+        filter_date = """
+        {"range" :
+            {
+                "grimoire_creation_date" : {
+                    "gte" : "%s"
+                }
+            }
+        }
+        """ % from_date_iso
+        metric_filter = metric_filter + "," + filter_date if metric_filter else filter_date
+
+    if metric_filter:
         # Add a , to join this filter to the rest of filters
-        metric_params_filter = ", " + metric_params_filter
+        metric_filter = ", " + metric_filter
 
     # Get the total aggregated value for a metrics in GrimoireLab
     project_metrics = []
@@ -106,7 +126,7 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
       }
     }
 
-    """ % (MAX_PROJECTS, metric_field, metric_name, metric_params_filter)
+    """ % (MAX_PROJECTS, metric_field, metric_name, metric_filter)
 
     logging.debug(json.dumps(json.loads(es_query), indent=True))
 
@@ -114,6 +134,9 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
     res.raise_for_status()
 
     project_buckets = res.json()["aggregations"]["3"]["buckets"]
+
+    logging.info("Total projects found for %s: %i", metric_name, len(project_buckets))
+
     for pb in project_buckets:
         metric_value = pb["doc_count"]
         project_metrics.append({"project": pb['key'], "metric": metric_value})
@@ -172,7 +195,7 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
     return project_metrics
 
 
-def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data):
+def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data, from_date=None):
     """ Compute the value of a metric for all projects available """
     metric_name = str(metric_data)
     metric_per_project = None
@@ -180,12 +203,12 @@ def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_da
     if backend_metrics_data == "ossmeter":
         metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data)
     elif backend_metrics_data == "grimoirelab":
-        metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data)
+        metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data, from_date)
 
     return metric_per_project
 
 
-def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
+def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date=None):
     logging.debug('Doing the assessment for attribute: %s', attribute.name)
     # Collect all metrics that are included in the models
     metrics_with_data = []
@@ -201,9 +224,8 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
     logging.debug("Metrics to be included: %s (%s attribute)", metrics_with_data, attribute.name)
 
     for metric in metrics_with_data:
-
         atribute_assessment[str(metric.data)] = {}
-        metric_value = compute_metric_per_project(es_url, es_index, metric.data, backend_metrics_data)
+        metric_value = compute_metric_per_project(es_url, es_index, metric.data, backend_metrics_data, from_date)
         if metric_value:
             for project_metric in metric_value:
                 pname = project_metric['project']
@@ -215,8 +237,9 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data):
                     for threshold in metric.thresholds.split(","):
                         if project_metric['metric'] > float(threshold):
                             score += 1
+                threshold = score - 1 if score else 0
                 logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
-                              str(metric.data), score, THRESHOLDS[score - 1])
+                              str(metric.data), score, THRESHOLDS[threshold])
                 atribute_assessment[str(metric.data)][pname] = score
         else:
             logging.debug("Can't find value for for %s", metric)
@@ -260,7 +283,7 @@ def publish_assessment(es_url, es_index, assessment):
     return nscores
 
 
-def assess(es_url, es_index, model_name, backend_metrics_data):
+def assess(es_url, es_index, model_name, backend_metrics_data, from_date=None):
     logging.debug('Building the assessment for projects ...')
 
     assessment = {}  # Includes the assessment for each attribute
@@ -276,7 +299,7 @@ def assess(es_url, es_index, model_name, backend_metrics_data):
     for goal in model_orm.goals.all():
         assessment[goal.name] = {}
         for attribute in goal.attributes.all():
-            res = assess_attribute(es_url, es_index, attribute, backend_metrics_data)
+            res = assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date)
             assessment[goal.name][attribute.name] = res
 
     print(json.dumps(assessment, indent=True))
@@ -298,4 +321,6 @@ if __name__ == '__main__':
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
 
-    assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data)
+    from_date = None if not args.from_date else parser.parse(args.from_date)
+
+    assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data, from_date)
