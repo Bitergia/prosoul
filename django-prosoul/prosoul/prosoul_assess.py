@@ -26,6 +26,7 @@
 import argparse
 import json
 import logging
+import operator
 import os
 
 import requests
@@ -37,8 +38,9 @@ django.setup()
 
 from dateutil import parser
 
-from prosoul.models import QualityModel
+from elasticsearch import helpers, Elasticsearch
 
+from prosoul.models import QualityModel
 from prosoul.prosoul_utils import find_metric_name_field
 
 THRESHOLDS = ["Very Poor", "Poor", "Fair", "Good", "Very Good"]
@@ -247,6 +249,45 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     return atribute_assessment
 
 
+def goals2projects(assessment):
+    """
+    Converts an goals assessment dict to a projects assessment dict
+
+    :param assessment: the goal assessment dict
+    :return: the project assessment dict
+    """
+
+    def check_project_dict(projects, project, goal, attr, metric):
+        """ Check that the project dict has all the needed entries"""
+
+        if project not in projects:
+            project_dict = {}
+        else:
+            project_dict = projects[project]
+
+        if goal not in project_dict:
+            project_dict[goal] = {}
+
+        if attr not in project_dict[goal]:
+            project_dict[goal][attr] = {}
+
+        if metric not in project_dict[goal][attr]:
+            project_dict[goal][attr][metric] = {}
+
+        return project_dict
+
+    projects = {}
+
+    for goal in assessment:
+        for attr in assessment[goal]:
+            for metric in assessment[goal][attr]:
+                for project in assessment[goal][attr][metric]:
+                    projects[project] = check_project_dict(projects, project, goal, attr, metric)
+                    projects[project][goal][attr][metric] = assessment[goal][attr][metric][project]
+
+    return projects
+
+
 def enrich_assessment(assessment):
     """
     Generate one item with a metric score for a project
@@ -269,18 +310,34 @@ def enrich_assessment(assessment):
 
 
 def publish_assessment(es_url, es_index, assessment):
-    nscores = 0
+    """
+    Publish all the scores for the metrics in assessment
+
+    :param es_url: URL for Elasticsearch
+    :param es_index: index in Elasticsearch
+    :param assessment: dict with the assessment data
+    :return:
+    """
+
     scores_index = es_index + "_scores"
+
+    es_conn = Elasticsearch([es_url], timeout=100)
+
+    scores = []
+
+    # Uploading info to the new ES
     for item in enrich_assessment(assessment):
-        # Don't use the bulk interface because the number of items is low
-        add_item = requests.post('%s/%s' % (es_url, scores_index + "/items"),
-                                 headers=HEADERS_JSON, data=json.dumps(item))
-        add_item.raise_for_status()
-        nscores += 1
+        score = {
+            "_index": scores_index,
+            "_type": "item",
+            "_source": item
+        }
+        scores.append(score)
 
-    logging.info("Total scores published in %s: %i", scores_index, nscores)
+    helpers.bulk(es_conn, scores)
+    logging.info("Total scores published in %s: %i", scores_index, len(scores))
 
-    return nscores
+    return len(scores)
 
 
 def assess(es_url, es_index, model_name, backend_metrics_data, from_date=None):
@@ -302,11 +359,91 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date=None):
             res = assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date)
             assessment[goal.name][attribute.name] = res
 
-    print(json.dumps(assessment, indent=True))
+    logging.debug(json.dumps(assessment, indent=True))
 
     publish_assessment(es_url, es_index, assessment)
 
     return assessment
+
+
+def extract_metrics(qm_assessment):
+    """
+    Extract all metrics from a quality model assessment
+    :param qm_assessment: a dict with the quality model assessment
+    :return: a list with all the metrics
+    """
+
+    metrics = []
+
+    for goal in qm_assessment:
+        for attr in qm_assessment[goal]:
+            for metric in qm_assessment[goal][attr]:
+                metrics.append(qm_assessment[goal][attr][metric])
+
+    return metrics
+
+
+def build_project_big_number(project):
+    """
+    Get all metrics for a project and compute the average
+
+    :param project: a dict with a project assessment
+    :return: the average of all metrics
+    """
+
+    average = None
+    metrics = []
+
+    metrics = extract_metrics(project)
+    average = sum(metrics) / len(metrics)
+    average = round(average, 2)
+
+    return average
+
+
+def build_report(assessment, kind):
+    """
+
+    :param assessment: dict with the goals assessment based on a quality model
+    :param kind: kind of report to be built
+    :return: a dict with the report per each project
+    """
+
+    kinds = ['big_number']
+    projects_report = {}
+
+    if kind not in kinds:
+        raise RuntimeError("Report kind not supported " + kind)
+
+    if kind == 'big_number':
+        # Average of all metrics
+        projects_data = goals2projects(assessment)
+
+        for project in projects_data:
+            projects_report[project] = build_project_big_number(projects_data[project])
+
+    return projects_report
+
+
+def show_report(report_data, kind):
+    """
+
+    Print in standard output a report based on report_data and kind
+
+    :param report_data: a dict with the report data
+    :param kind: kind of report in report_data
+    :return:
+    """
+
+    kinds = ['big_number']
+    projects_report = {}
+
+    if kind not in kinds:
+        raise RuntimeError("Report kind not supported " + kind)
+
+    sorted_report = sorted(report.items(), key=operator.itemgetter(1), reverse=True)
+    for item in sorted_report:
+        print(item)
 
 
 if __name__ == '__main__':
@@ -324,3 +461,5 @@ if __name__ == '__main__':
     from_date = None if not args.from_date else parser.parse(args.from_date)
 
     assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data, from_date)
+    report = build_report(assessment, "big_number")
+    show_report(report, "big_number")
