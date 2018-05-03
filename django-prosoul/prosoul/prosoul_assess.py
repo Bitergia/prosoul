@@ -49,7 +49,7 @@ MAX_PROJECTS = 10000  # max number of projects to analyze
 
 
 def get_params():
-    parser = argparse.ArgumentParser(usage="usage: mdashboard.py [options]",
+    parser = argparse.ArgumentParser(usage="usage: prosoul_assess.py [options]",
                                      description="Create a Kibana Dashboard to show a Quality Model")
     parser.add_argument("-e", "--elastic-url", required=True,
                         help="Elasticsearch URL with the metrics")
@@ -211,6 +211,18 @@ def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_da
 
 
 def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date=None):
+    """
+    Do the assessment for an attribute in the quality model. If a metric does not have thresholds,
+    the score for it is 0.
+
+    :param es_url: Elasticsearch URL
+    :param es_index: Index with the metrics data
+    :param attribute: name of the attribute from which to compute the metrics
+    :param backend_metrics_data: grimoirelab and ossmeter are the backend supported now
+    :param from_date: initial date from which to compute the metrics
+    :return: a dict with metrics as keys and the projects score per each metric as value
+    """
+
     logging.debug('Doing the assessment for attribute: %s', attribute.name)
     # Collect all metrics that are included in the models
     metrics_with_data = []
@@ -234,14 +246,14 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
                 pmetric = project_metric['metric']
                 logging.debug("Project %s metric %s value %i", pname, str(metric.data), pmetric)
                 logging.debug("Doing the assesment ...")
+                score = 0
                 if metric.thresholds:
-                    score = 0
                     for threshold in metric.thresholds.split(","):
                         if project_metric['metric'] > float(threshold):
                             score += 1
-                threshold = score - 1 if score else 0
-                logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
-                              str(metric.data), score, THRESHOLDS[threshold])
+                    threshold = score - 1 if score else 0
+                    logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
+                                  str(metric.data), score, THRESHOLDS[threshold])
                 atribute_assessment[str(metric.data)][pname] = score
         else:
             logging.debug("Can't find value for for %s", metric)
