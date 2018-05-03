@@ -54,8 +54,8 @@ def get_params():
     parser.add_argument("-e", "--elastic-url", required=True,
                         help="Elasticsearch URL with the metrics")
     parser.add_argument('-g', '--debug', action='store_true')
-    parser.add_argument('-i', '--index', required='True', help='Index with the metrics')
-    parser.add_argument('-m', '--model', required='True',
+    parser.add_argument('-i', '--index', required=True, help='Index with the metrics')
+    parser.add_argument('-m', '--model', required=True,
                         help='Model to be used to build the Dashboard')
     parser.add_argument('-b', '--backend-metrics-data', default='grimoirelab',
                         help='Backend metrics data to use (grimoirelab, ossmeter, ...)')

@@ -185,7 +185,7 @@ class MetricDataForm(ProsoulEditorForm):
         ds_attrs = {'class': 'form-control', 'placeholder': 'Implementation'}
         self.fields['implementation'] = forms.CharField(label='Implementation', max_length=100)
         self.fields['implementation'].widget = forms.TextInput(attrs=ds_attrs)
-        self.fields['params'] = forms.CharField(label='Params', max_length=100)
+        self.fields['params'] = forms.CharField(label='Params', required=False, max_length=100)
         params_sample = '{"filter": {"term": {"state": "closed"}}}'
         self.fields['params'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': params_sample})
 
