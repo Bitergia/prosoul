@@ -24,6 +24,7 @@
 #
 
 import argparse
+import csv
 import json
 import logging
 import operator
@@ -64,7 +65,9 @@ def get_params():
     parser.add_argument('--from-date', default='1970-01-01',
                         help='Start date from which to compute the metrics (1970-01-01 by default)')
     parser.add_argument('--plot', action='store_true',
-                        help='Show a plot with the metrics values (use it with --metric option)')
+                        help='Show a plot with the metrics values')
+    parser.add_argument('--csvfile', required=False,
+                        help='Generate a CSV file with the scores of the assessment)')
 
     return parser.parse_args()
 
@@ -417,11 +420,44 @@ def build_project_big_number(project):
     return average
 
 
-def build_report(assessment, kind):
+def dump_csv(csv_file, projects_data):
+    """
+    Dump the project metric scores to a CSV file
+
+    :param csv_file: file in which to dump the projects metrics score data
+    :param projects_data: dict with the projects metrics score
+    :return:
+    """
+
+    fieldnames = ['project']
+    # Get all score fields: we need to cross all projects to be sure all metrics are found
+    for project in projects_data:
+        for goal in projects_data[project]:
+            for attr in projects_data[project][goal]:
+                for metric in projects_data[project][goal][attr]:
+                    if metric not in fieldnames:
+                        fieldnames.append(metric)
+
+    with open(csv_file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+
+        for project in projects_data:
+            row_dict = {"project": project}
+            for goal in projects_data[project]:
+                for attr in projects_data[project][goal]:
+                    for metric in projects_data[project][goal][attr]:
+                        row_dict[metric] = projects_data[project][goal][attr][metric]
+            writer.writerow(row_dict)
+
+
+def build_report(assessment, kind, csv_file=None):
     """
 
     :param assessment: dict with the goals assessment based on a quality model
     :param kind: kind of report to be built
+    :param csv_file: export the metric scores to a CSV file
     :return: a dict with the report per each project
     """
 
@@ -434,6 +470,8 @@ def build_report(assessment, kind):
     if kind == 'big_number':
         # Average of all metrics
         projects_data = goals2projects(assessment)
+        if csv_file:
+            dump_csv(csv_file, projects_data)
 
         for project in projects_data:
             projects_report[project] = build_project_big_number(projects_data[project])
@@ -470,7 +508,6 @@ def show_report(report_data, kind, plot_data=False):
         plot.show()
 
 
-
 if __name__ == '__main__':
 
     args = get_params()
@@ -486,5 +523,5 @@ if __name__ == '__main__':
     from_date = None if not args.from_date else parser.parse(args.from_date)
 
     assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data, from_date)
-    report = build_report(assessment, "big_number")
+    report = build_report(assessment, "big_number", args.csvfile)
     show_report(report, "big_number", args.plot)
