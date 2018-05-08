@@ -38,6 +38,8 @@ django.setup()
 
 from dateutil import parser
 
+import matplotlib.pyplot as plot
+
 from elasticsearch import helpers, Elasticsearch
 
 from prosoul.models import QualityModel
@@ -61,6 +63,8 @@ def get_params():
                         help='Backend metrics data to use (grimoirelab, ossmeter, ...)')
     parser.add_argument('--from-date', default='1970-01-01',
                         help='Start date from which to compute the metrics (1970-01-01 by default)')
+    parser.add_argument('--plot', action='store_true',
+                        help='Show a plot with the metrics values (use it with --metric option)')
 
     return parser.parse_args()
 
@@ -437,17 +441,19 @@ def build_report(assessment, kind):
     return projects_report
 
 
-def show_report(report_data, kind):
+def show_report(report_data, kind, plot_data=False):
     """
 
     Print in standard output a report based on report_data and kind
 
     :param report_data: a dict with the report data
     :param kind: kind of report in report_data
+    :param plot_data: show a plot with the data
     :return:
     """
 
     kinds = ['big_number']
+    plot_name = "Projects score"
     projects_report = {}
 
     if kind not in kinds:
@@ -456,6 +462,13 @@ def show_report(report_data, kind):
     sorted_report = sorted(report.items(), key=operator.itemgetter(1), reverse=True)
     for item in sorted_report:
         print(item)
+    if plot_data:
+        scores = [item[1] for item in sorted_report]
+        x = range(0, len(scores))
+        plot.plot(x, scores)
+        plot.title(plot_name)
+        plot.show()
+
 
 
 if __name__ == '__main__':
@@ -474,4 +487,4 @@ if __name__ == '__main__':
 
     assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data, from_date)
     report = build_report(assessment, "big_number")
-    show_report(report, "big_number")
+    show_report(report, "big_number", args.plot)
