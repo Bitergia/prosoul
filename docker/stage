@@ -3,7 +3,7 @@
 echo "Running Prosoul"
 
 git clone https://github.com/Bitergia/prosoul.git
-cd prosoul/django_prosoul/
+cd prosoul/django-prosoul/
 
 # Create the data models
 python3 manage.py makemigrations
