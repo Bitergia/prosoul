@@ -10,6 +10,7 @@ before_install:
   - pip install coveralls
   - pip install django
   - pip install requests
+  - pip install matplotlib
   - pip install kidash
   - cd django-prosoul && python manage.py makemigrations && cd ..
   - cd django-prosoul && python manage.py migrate && cd ..
