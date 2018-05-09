@@ -20,7 +20,7 @@ RUN apt-get update && \
         python3 \
         python3-pip \
         python3-venv \
-        python3-dev \
+        python3-dev python3-tk \
         unzip curl wget sudo ssh vim \
         && \
     apt-get clean && \
@@ -42,6 +42,7 @@ ENV LANG C.UTF-8
 RUN pip3 install setuptools
 RUN pip3 install django
 RUN pip3 install gunicorn
+RUN pip3 install matplotlib
 RUN pip3 install requests
 RUN pip3 install kidash
 
