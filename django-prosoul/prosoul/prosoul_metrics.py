@@ -155,6 +155,9 @@ def show_metric_stats(name, metric_project_values, plot_data=False):
     for project in metric_project_values:
         metrics.append(project['metric'])
 
+    if not metrics:
+        return
+
     # Show the max, min, median, mean and standard deviation of the metric
     print("Max:", max(metrics), "Min:", min(metrics), "Mean:", round(mean(metrics), 2),
           "Median:", round(median(metrics), 2), "Stdev:", round(stdev(metrics), 2))
