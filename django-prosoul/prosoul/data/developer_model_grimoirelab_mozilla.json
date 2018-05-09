@@ -1,0 +1,71 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "GitEnrich",
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfCommits",
+         "thresholds": "1000,10000,50000,100000,250000"
+        },
+        {
+         "data_implementation": "BugzillaRESTEnrich",
+         "data_params": "",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssues",
+         "thresholds": "1000,10000,40000,80000,150000"
+        }
+       ],
+       "name": "Vitality",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Product",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "BugzillaRESTEnrich",
+         "data_params": "{\"filter\": {\"range\" : {\"comments\" : {\"gte\" : 1}}}}",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesAttended",
+         "thresholds": "1000,10000,40000,80000,150000"
+        },
+        {
+         "data_implementation": "BugzillaRESTEnrich",
+         "data_params": "{\"filter\": {\"term\": {\"status\": \"RESOLVED\"}}}",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesClosed",
+         "thresholds": "1000,10000,40000,80000,150000"
+        }
+       ],
+       "name": "Attention",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Community",
+     "subgoals": []
+    }
+   ],
+   "name": "Developer Quality Model"
+  }
+ ]
+}

@@ -1,0 +1,71 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "GitEnrich",
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfCommits",
+         "thresholds": "50,100,500,1000,10000"
+        },
+        {
+         "data_implementation": null,
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssues",
+         "thresholds": ""
+        }
+       ],
+       "name": "Vitality",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Product",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": null,
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesAttended",
+         "thresholds": ""
+        },
+        {
+         "data_implementation": null,
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesClosed",
+         "thresholds": ""
+        }
+       ],
+       "name": "Attention",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Community",
+     "subgoals": []
+    }
+   ],
+   "name": "Developer Quality Model"
+  }
+ ]
+}
