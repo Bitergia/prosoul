@@ -1,3 +1,14 @@
+# First step is to create a python virtual env from which to work
+VENV_DIR=~/venvs/prosoul
+WD=`pwd`
+mkdir -p $VENV_DIR
+python3 -m venv $VENV_DIR
+source $VENV_DIR/bin/activate
+cd ../../django-prosoul/
+pip3 install -r requirements.txt
+cd $WD
+
+# And now, collect the raw data, generate enriched index, aliases and import the quality model
 P2O="p2o.py"
 KIDASH='kidash'
 ES="http://localhost:9200"

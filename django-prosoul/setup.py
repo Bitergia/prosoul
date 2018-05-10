@@ -70,6 +70,8 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     install_requires=[
-        'django>=2.0',
-    ]
+        'django>=2.0', 'matplotlib', 'grimoire-elk', 'sortinghat', 'kidash'
+    ],
+    python_requires='>=3.4'
+
 )

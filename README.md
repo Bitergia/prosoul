@@ -26,12 +26,23 @@ to the project.
 
 ## Execution
 
-**Prosoul** is a Django application so to run it you need django installed.
+**Prosoul** is a Django application. The recommended way to execute it is inside a python virtual environment.
+
+Change VENV_DIR with the path to the folder in which you want to store the virtual environment.
 
 ```
-prosoul/django_prosoul $ python3 manage.py makemigrations
-prosoul/django_prosoul $ python3 manage.py migrate
-prosoul/django_prosoul $ python3 manage.py runserver
+prosoul/django-prosoul $ mkdir -p VENV_DIR
+prosoul/django-prosoul $ python3 -m venv VENV_DIR
+prosoul/django-prosoul $ source VENV_DIR/bin/activate
+prosoul/django-prosoul $ pip3 install -r requirements.txt
+```
+
+And to start the Django application:
+
+```
+prosoul/django-prosoul $ python3 manage.py makemigrations
+prosoul/django-prosoul $ python3 manage.py migrate
+prosoul/django-prosoul $ python3 manage.py runserver
 ```
 
 By default the applicacion will be accesible in: http://127.0.0.1:8000/
@@ -58,13 +69,13 @@ from the command line:
 * Import a model from a OSSMeter JSON file:
 
 ```
-prosoul/django_prosoul $ PYTHONPATH=. prosoul/prosoul_import.py -f prosoul/data/ossmeter_qm.json --format ossmeter
+prosoul/django-prosoul $ PYTHONPATH=. prosoul/prosoul_import.py -f prosoul/data/ossmeter_qm.json --format ossmeter
 ```
 
 * Export a model to a GrimoireLab JSON file:
 
 ```
-prosoul/django_prosoul $ PYTHONPATH=. prosoul/prosoul_export.py -f prosoul/data/ossmeter_qm_grimoirelab.json --format grimoirelab -m "Default OSSMETER quality model"
+prosoul/django-prosoul $ PYTHONPATH=. prosoul/prosoul_export.py -f prosoul/data/ossmeter_qm_grimoirelab.json --format grimoirelab -m "Default OSSMETER quality model"
 ```
 
 ## Requirements
