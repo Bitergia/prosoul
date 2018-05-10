@@ -84,8 +84,9 @@ prosoul/django-prosoul $ PYTHONPATH=. prosoul/prosoul_export.py -f prosoul/data/
 * setuptools
 * django
 * kidash
-* matplotlib
 * requests
+* python3-tk
+* matplotlib
 
 ## Architecture
 
