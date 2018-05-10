@@ -72,6 +72,7 @@ def add(cls_orm, **params):
             obj_orm.save()
             logging.debug('Added %s: %s', cls_orm.__name__, params)
         except django.db.utils.IntegrityError as ex:
+            obj_orm = None
             logging.error("Can't add %s: %s", cls_orm.__name__, params)
             logging.error(ex)
 
@@ -108,6 +109,8 @@ def feed_models(models_json):
             if 'thresholds' in metric and metric['thresholds']:
                 metparams['thresholds'] = metric['thresholds']
             metric_orm = add(Metric, **metparams)
+            if metric_orm is None:
+                raise RuntimeError("Can not import attribute " + attribute['name'])
             attribute_orm.metrics.add(metric_orm)
 
         if 'factoids' in attribute:
