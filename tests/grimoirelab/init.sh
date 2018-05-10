@@ -10,11 +10,10 @@ if [ -z "$1" ]
 fi
 
 echo "Loading the metrics data"
-mysqladmin -u root create prosoul_sh
-$P2O --enrich --db-sortinghat prosoul_sh --db-host localhost --json-projects-map projects.json --index git-raw --index-enrich git git https://github.com/chaoss/grimoirelab-elk.git
-$P2O --enrich --db-sortinghat prosoul_sh --db-host localhost --json-projects-map projects.json --index git-raw --index-enrich git git https://github.com/chaoss/perceval.git
-$P2O --enrich --db-sortinghat prosoul_sh --db-host localhost --json-projects-map projects.json --index github-raw --index-enrich github_issues github chaoss perceval -t $1
-$P2O --enrich --db-sortinghat prosoul_sh --db-host localhost --json-projects-map projects.json --index github-raw --index-enrich github_issues github chaoss grimoirelab-elk -t $1
+$P2O --enrich --db-host localhost --json-projects-map projects.json --index git-raw --index-enrich git git https://github.com/chaoss/grimoirelab-elk.git
+$P2O --enrich --db-host localhost --json-projects-map projects.json --index git-raw --index-enrich git git https://github.com/chaoss/perceval.git
+$P2O --enrich --db-host localhost --json-projects-map projects.json --index github-raw --index-enrich github_issues github chaoss perceval -t $1
+$P2O --enrich --db-host localhost --json-projects-map projects.json --index github-raw --index-enrich github_issues github chaoss grimoirelab-elk -t $1
 
 echo "Generating grimoirelab alias"
 curl -XPOST -H "Content-Type: application/json" $ES/_aliases -d '
@@ -28,12 +27,7 @@ curl -XPOST -H "Content-Type: application/json" $ES/_aliases -d '
   }
 '
 
-echo "Loading the Visualization Templates"
-$KIDASH --import git.json
-$KIDASH --import github_issues.json
-
 echo "Loading the Quality Model"
 PYTHONPATH=../../django-prosoul ../../django-prosoul/manage.py makemigrations
 PYTHONPATH=../../django-prosoul ../../django-prosoul/manage.py migrate
 PYTHONPATH=../../django-prosoul ../../django-prosoul/prosoul/prosoul_import.py -f ../../django-prosoul/prosoul/data/developer_model.json
-
