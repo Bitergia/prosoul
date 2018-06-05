@@ -1,0 +1,119 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "GitEnrich",
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfCommits",
+         "thresholds": "9,90,900,9000,9900"
+        },
+        {
+         "data_implementation": "GitHubEnrich",
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssues",
+         "thresholds": "9,90,900,990,999"
+        }
+       ],
+       "name": "Vitality",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "GitEnrich",
+         "data_params": "{\"aggs\": { \"1\": { \"sum\": {\"field\": \"lines_added\"}}}}",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfLinesAdded",
+         "thresholds": "0,1000,10000,100000,1000000"
+        },
+        {
+         "data_implementation": "GitEnrich",
+         "data_params": "{\"aggs\": { \"1\": { \"sum\": {\"field\": \"lines_removed\"}}}}",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfLinesRemoved",
+         "thresholds": "0,1000,10000,100000,1000000"
+        }
+       ],
+       "name": "Code Size",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Product",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "GitHubEnrich",
+         "data_params": "{\"filter\": {\"range\" : {\"comments\" : {\"gte\" : 1}}}}",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesAttended",
+         "thresholds": "5,10,50,100,200"
+        },
+        {
+         "data_implementation": "GitHubEnrich",
+         "data_params": "{\"filter\": {\"term\": {\"state\": \"closed\"}}}",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesClosed",
+         "thresholds": "5,10,50,100,200"
+        }
+       ],
+       "name": "Attention",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "GitEnrich",
+         "data_params": "{\"aggs\": { \"1\": { \"cardinality\": {\"field\": \"author_uuid\"}}}}",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfCommitters",
+         "thresholds": "1,5,10,15,20"
+        },
+        {
+         "data_implementation": "GitHubEnrich",
+         "data_params": "{\"aggs\": { \"1\": { \"cardinality\": {\"field\": \"author_uuid\"}}}}",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssueReporters",
+         "thresholds": "1,5,10,15,20"
+        }
+       ],
+       "name": "Size",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Community",
+     "subgoals": []
+    }
+   ],
+   "name": "Developer Quality Model with Size"
+  }
+ ]
+}
