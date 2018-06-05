@@ -68,6 +68,7 @@ def get_params():
                         help='Show a plot with the metrics values')
     parser.add_argument('--csvfile', required=False,
                         help='Generate a CSV file with the scores of the assessment)')
+    parser.add_argument('--attribute', help='Generate only the assessment for an attribute')
 
     return parser.parse_args()
 
@@ -86,11 +87,21 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
     """
 
     metric_name = metric_data.implementation
-    metric_filter = ""
+    metric_filter = ""  # filter needed to compute the metric
+    metric_agg = ""  # aggregation needed to compute the metric
+    agg_id = None  # id for the aggregation
 
     if metric_data.params:
+        # In the params we can have filter or aggs
+        params = json.loads(metric_data.params)
         # Build the filter if metric_params is defined
-        metric_filter = json.dumps(json.loads(metric_data.params)['filter'])
+        if 'filter' in params:
+            metric_filter = json.dumps(params['filter'])
+        elif 'aggs' in params:
+            agg_id = list(params['aggs'].keys())[0]
+            metric_agg = json.dumps(params['aggs'])
+            if metric_agg:
+                metric_agg = ', "aggs": ' + metric_agg
 
     if from_date:
         from_date_iso = from_date.isoformat()
@@ -119,7 +130,7 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
           "terms": {
             "field": "project",
             "size": %i
-          }
+          } %s
         }
       },
       "query": {
@@ -135,7 +146,7 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
       }
     }
 
-    """ % (MAX_PROJECTS, metric_field, metric_name, metric_filter)
+    """ % (MAX_PROJECTS, metric_agg, metric_field, metric_name, metric_filter)
 
     logging.debug(json.dumps(json.loads(es_query), indent=True))
 
@@ -147,8 +158,12 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
     logging.info("Total projects found for %s: %i", metric_name, len(project_buckets))
 
     for pb in project_buckets:
-        metric_value = pb["doc_count"]
-        project_metrics.append({"project": pb['key'], "metric": metric_value})
+        if not metric_agg:
+            metric_value = pb["doc_count"]
+            project_metrics.append({"project": pb['key'], "metric": metric_value})
+        else:
+            metric_value = pb[agg_id]['value']
+            project_metrics.append({"project": pb['key'], "metric": metric_value})
 
     return project_metrics
 
@@ -359,7 +374,18 @@ def publish_assessment(es_url, es_index, assessment):
     return len(scores)
 
 
-def assess(es_url, es_index, model_name, backend_metrics_data, from_date=None):
+def assess(es_url, es_index, model_name, backend_metrics_data, only_attribute=None, from_date=None):
+    """
+    Build the assessment for all projects
+
+    :param es_url: Elasticsearch URL
+    :param es_index: Elasticsearch index with the metrics data
+    :param model_name: Quality model name
+    :param backend_metrics_data: backend to be used for getting the metrics (ossmeter or grimoirelab)
+    :param only_attribute: do the assessment only for this attribute
+    :param from_date: date since which the metrics must be computed
+    :return: a dict with the assessment for all goals and attributes at projects level
+    """
     logging.debug('Building the assessment for projects ...')
 
     assessment = {}  # Includes the assessment for each attribute
@@ -375,6 +401,8 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date=None):
     for goal in model_orm.goals.all():
         assessment[goal.name] = {}
         for attribute in goal.attributes.all():
+            if only_attribute and attribute.name != only_attribute:
+                continue
             res = assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date)
             assessment[goal.name][attribute.name] = res
 
@@ -522,6 +550,6 @@ if __name__ == '__main__':
 
     from_date = None if not args.from_date else parser.parse(args.from_date)
 
-    assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data, from_date)
+    assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data, args.attribute, from_date)
     report = build_report(assessment, "big_number", args.csvfile)
     show_report(report, "big_number", args.plot)
