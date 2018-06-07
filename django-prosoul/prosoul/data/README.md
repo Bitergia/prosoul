@@ -11,6 +11,7 @@ in the developer point of view
 * developer_model_grimoirelab_linuxfoundation2018.json: the Developer Model with the thresholds adjusted to Linux Foundation
 * developer_model_grimoirelab_mozilla.json: the Developer Model with the thresholds adjusted to Mozilla Foundation
 * developer_model_size.json: the Developer Model including the size of the product and the community  
+* developer_model_size_grimoirelab_chaoss.json: Developer Model with size with the thresholds adjusted to CHAOSS
 * grimoirelab_ossmeter_qm.json: the OSSMeter Quality Model in GrimoireLab format
 * grimoirelab_qm.json: a sample Quality Model focused in Community
 * ossmeter_qm.json: the OSSMeter Quality Model
