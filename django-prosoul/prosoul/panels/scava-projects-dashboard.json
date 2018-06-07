@@ -1,0 +1,56 @@
+{
+    "dashboard": {
+        "id": "603eb230-6a11-11e8-8c6e-31f877670b9f",
+        "value": {
+            "description": "",
+            "hits": 0,
+            "kibanaSavedObjectMeta": {
+                "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+            },
+            "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+            "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":6,\"h\":6,\"i\":\"1\"},\"id\":\"7c759b60-68e2-11e8-867e-1106b24dd0d3\",\"type\":\"visualization\",\"version\":\"6.1.0-1\"},{\"panelIndex\":\"2\",\"gridData\":{\"x\":6,\"y\":0,\"w\":6,\"h\":6,\"i\":\"2\"},\"version\":\"6.1.0-1\",\"type\":\"visualization\",\"id\":\"b6a56b90-6a12-11e8-8c6e-31f877670b9f\"}]",
+            "timeRestore": false,
+            "title": "ScavaProjects",
+            "uiStateJSON": "{\"P-2\":{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}}",
+            "version": 1
+        }
+    },
+    "index_patterns": [
+        {
+            "id": "cdeaf2d0-68e0-11e8-867e-1106b24dd0d3",
+            "value": {
+                "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"attribute\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"attribute.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"goal\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"goal.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"metric\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"metric.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"project\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"project.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_GitEnrich\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"cardinality\\\": {\\\"field\\\": \\\"author_uuid\\\"}}}}\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"sum\\\": {\\\"field\\\": \\\"lines_added\\\"}}}}\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"sum\\\": {\\\"field\\\": \\\"lines_removed\\\"}}}}\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_GitHubEnrich\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_GitHubEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"cardinality\\\": {\\\"field\\\": \\\"author_uuid\\\"}}}}\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_GitHubEnrich {\\\"filter\\\": {\\\"term\\\": {\\\"state\\\": \\\"closed\\\"}}}\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+                "title": "grimoirelab_scores"
+            }
+        }
+    ],
+    "searches": [],
+    "visualizations": [
+        {
+            "id": "7c759b60-68e2-11e8-867e-1106b24dd0d3",
+            "value": {
+                "description": "",
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"index\":\"cdeaf2d0-68e0-11e8-867e-1106b24dd0d3\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+                },
+                "title": "RadarScoresVis",
+                "uiStateJSON": "{}",
+                "version": 1,
+                "visState": "{\"title\":\"RadarScoresVis\",\"type\":\"radar\",\"params\":{\"normalize\":false,\"vertexScale\":{\"from\":0,\"to\":5}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_GitEnrich\",\"customLabel\":\"Commits\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"field\",\"params\":{\"field\":\"project.keyword\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"cardinality\\\": {\\\"field\\\": \\\"author_uuid\\\"}}}}\",\"customLabel\":\"Committers\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"sum\\\": {\\\"field\\\": \\\"lines_added\\\"}}}}\",\"customLabel\":\"Lines Added\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"sum\\\": {\\\"field\\\": \\\"lines_removed\\\"}}}}\",\"customLabel\":\"Lines Removed\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_GitHubEnrich\",\"customLabel\":\"Issues\"}},{\"id\":\"7\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_GitHubEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"cardinality\\\": {\\\"field\\\": \\\"author_uuid\\\"}}}}\",\"customLabel\":\"Issue Reporters\"}},{\"id\":\"8\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_GitHubEnrich {\\\"filter\\\": {\\\"term\\\": {\\\"state\\\": \\\"closed\\\"}}}\",\"customLabel\":\"Issues Closed\"}}]}"
+            }
+        },
+        {
+            "id": "b6a56b90-6a12-11e8-8c6e-31f877670b9f",
+            "value": {
+                "description": "",
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"index\":\"cdeaf2d0-68e0-11e8-867e-1106b24dd0d3\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+                },
+                "title": "ScavaProjectsTable",
+                "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+                "version": 1,
+                "visState": "{\"title\":\"ScavaProjectsTable\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"project.keyword\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"_term\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_GitEnrich\",\"customLabel\":\"Commits\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"cardinality\\\": {\\\"field\\\": \\\"author_uuid\\\"}}}}\",\"customLabel\":\"Committers\"}},{\"id\":\"6\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"sum\\\": {\\\"field\\\": \\\"lines_added\\\"}}}}\",\"customLabel\":\"Lines Added\"}},{\"id\":\"7\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_GitEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"sum\\\": {\\\"field\\\": \\\"lines_removed\\\"}}}}\",\"customLabel\":\"Lines Removed\"}},{\"id\":\"8\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_GitHubEnrich\",\"customLabel\":\"Issues\"}},{\"id\":\"9\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_GitHubEnrich {\\\"aggs\\\": { \\\"1\\\": { \\\"cardinality\\\": {\\\"field\\\": \\\"author_uuid\\\"}}}}\",\"customLabel\":\"Issue Reporters\"}},{\"id\":\"10\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_GitHubEnrich {\\\"filter\\\": {\\\"term\\\": {\\\"state\\\": \\\"closed\\\"}}}\",\"customLabel\":\"Issues Closed\"}}]}"
+            }
+        }
+    ]
+}
