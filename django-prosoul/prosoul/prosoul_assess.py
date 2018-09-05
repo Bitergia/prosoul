@@ -49,6 +49,7 @@ from prosoul.prosoul_utils import find_metric_name_field
 THRESHOLDS = ["Very Poor", "Poor", "Fair", "Good", "Very Good"]
 HEADERS_JSON = {"Content-Type": "application/json"}
 MAX_PROJECTS = 10000  # max number of projects to analyze
+HTTPS_CHECK_CERT = False
 
 
 def get_params():
@@ -150,7 +151,7 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
 
     logging.debug(json.dumps(json.loads(es_query), indent=True))
 
-    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, headers=HEADERS_JSON)
+    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT, headers=HEADERS_JSON)
     res.raise_for_status()
 
     project_buckets = res.json()["aggregations"]["3"]["buckets"]
@@ -208,7 +209,7 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
 
     # logging.debug(json.dumps(json.loads(es_query), indent=True))
 
-    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, headers=HEADERS_JSON)
+    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT, headers=HEADERS_JSON)
     res.raise_for_status()
 
     project_buckets = res.json()["aggregations"]["3"]["buckets"]
@@ -355,7 +356,7 @@ def publish_assessment(es_url, es_index, assessment):
 
     scores_index = es_index + "_scores"
 
-    es_conn = Elasticsearch([es_url], timeout=100)
+    es_conn = Elasticsearch([es_url], timeout=100, verify_certs=HTTPS_CHECK_CERT)
 
     scores = []
 
