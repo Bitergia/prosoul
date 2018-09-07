@@ -1,0 +1,71 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "Number of commits (per day)",
+         "data_params": "",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfCommits",
+         "thresholds": "0,100,1000,5000,10000"
+        },
+        {
+         "data_implementation": "Bugs",
+         "data_params": "",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssues",
+         "thresholds": "0,10,100,500,1000"
+        }
+       ],
+       "name": "Vitality",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Product",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": null,
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesAttended",
+         "thresholds": null
+        },
+        {
+         "data_implementation": "Resolved or Closed Bugs",
+         "data_params": "",
+         "data_source_type": null,
+         "description": "",
+         "name": "numberOfIssuesClosed",
+         "thresholds": "0,10,100,500,1000"
+        }
+       ],
+       "name": "Attention",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Community",
+     "subgoals": []
+    }
+   ],
+   "name": "Developer Quality Model"
+  }
+ ]
+}
