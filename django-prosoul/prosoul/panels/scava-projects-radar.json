@@ -1,0 +1,63 @@
+{
+    "dashboard": {
+        "id": "ScavaProjectsRadar",
+        "value": {
+            "description": "",
+            "hits": 0,
+            "kibanaSavedObjectMeta": {
+                "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+            },
+            "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+            "panelsJSON": "[{\"panelIndex\":\"1\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":24,\"i\":\"1\"},\"version\":\"6.3.1\",\"type\":\"visualization\",\"id\":\"45a3f1c0-b50b-11e8-9349-0342bdbc0925\",\"embeddableConfig\":{}},{\"panelIndex\":\"2\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":24,\"i\":\"2\"},\"version\":\"6.3.1\",\"type\":\"visualization\",\"id\":\"83266780-b50b-11e8-9349-0342bdbc0925\",\"embeddableConfig\":{}}]",
+            "refreshInterval": {
+                "display": "Off",
+                "pause": false,
+                "value": 0
+            },
+            "release_date": "2018-09-10T15:14:37.915150",
+            "timeFrom": "now-20y",
+            "timeRestore": true,
+            "timeTo": "now",
+            "title": "ScavaProjectsRadar",
+            "version": 1
+        }
+    },
+    "index_patterns": [
+        {
+            "id": "d9e9aab0-b50a-11e8-9349-0342bdbc0925",
+            "value": {
+                "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"attribute\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"attribute.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"goal\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"goal.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"metric\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"metric.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"project\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"project.keyword\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_Bugs\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_Number of commits (per day)\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"score_Resolved or Closed Bugs\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+                "title": "scava-metrics_scores"
+            }
+        }
+    ],
+    "searches": [],
+    "visualizations": [
+        {
+            "id": "45a3f1c0-b50b-11e8-9349-0342bdbc0925",
+            "value": {
+                "description": "",
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"index\":\"d9e9aab0-b50a-11e8-9349-0342bdbc0925\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+                },
+                "title": "ScavaMetricRadar",
+                "uiStateJSON": "{}",
+                "version": 1,
+                "visState": "{\"title\":\"ScavaMetricRadar\",\"type\":\"radar\",\"params\":{\"normalize\":false,\"vertexScale\":{\"from\":0,\"to\":5}},\"aggs\":[{\"id\":\"2\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_Bugs\",\"customLabel\":\"Bugs\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_Number of commits (per day)\",\"customLabel\":\"Commits\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"max\",\"schema\":\"vertex\",\"params\":{\"field\":\"score_Resolved or Closed Bugs\",\"customLabel\":\"Closed Bugs\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"field\",\"params\":{\"field\":\"project.keyword\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":30,\"order\":\"desc\",\"orderBy\":\"_term\",\"customLabel\":\"Project\"}}]}"
+            }
+        },
+        {
+            "id": "83266780-b50b-11e8-9349-0342bdbc0925",
+            "value": {
+                "description": "",
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"index\":\"d9e9aab0-b50a-11e8-9349-0342bdbc0925\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+                },
+                "title": "ScavaMetricScoresTable",
+                "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+                "version": 1,
+                "visState": "{\"title\":\"ScavaMetricScoresTable\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"2\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_Bugs\",\"customLabel\":\"Bugs\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_Number of commits (per day)\",\"customLabel\":\"Commits\"}},{\"id\":\"4\",\"enabled\":true,\"type\":\"max\",\"schema\":\"metric\",\"params\":{\"field\":\"score_Resolved or Closed Bugs\",\"customLabel\":\"Closed Bugs\"}},{\"id\":\"5\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"project.keyword\",\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"size\":30,\"order\":\"desc\",\"orderBy\":\"2\"}}]}"
+            }
+        }
+    ]
+}
