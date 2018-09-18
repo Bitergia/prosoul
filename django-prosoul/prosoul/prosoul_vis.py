@@ -28,6 +28,8 @@ import json
 import logging
 import os
 
+import requests
+
 import django
 # settings.configure()
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_prosoul.settings'
@@ -42,8 +44,10 @@ from kidash.kidash import feed_dashboard
 def get_params():
     parser = argparse.ArgumentParser(usage="usage: prosoul_vis.py [options]",
                                      description="Create a Kibana Dashboard to show a Quality Model")
-    parser.add_argument("-e", "--elastic-url", required=True,
-                        help="Elasticsearch URL with the metrics")
+    parser.add_argument("-e", "--elastic-url", default="http://localhost:9200",
+                        help="Elasticsearch URL with the metrics (http://localhost:9200 by default)")
+    parser.add_argument("-k", "--kibana-url", default="http://localhost:5601",
+                        help="Kibana URL (http://localhost:9200 by default)")
     parser.add_argument('-g', '--debug', action='store_true')
     parser.add_argument('-i', '--index', required='True', help='Index with the metrics')
     parser.add_argument('-t', '--template-file', required=True,
@@ -56,7 +60,7 @@ def get_params():
     return parser.parse_args()
 
 
-def build_filters(metrics, index, metric_name):
+def build_filters(metrics, metric_name):
     # Basic filter template to be updated
     template = """
     [{"$state": {"store": "appState"},
@@ -77,7 +81,6 @@ def build_filters(metrics, index, metric_name):
 
     filter_json = json.loads(template)
 
-    filter_json[0]['meta']['index'] = index
     filter_json[0]['meta']['params'] = metrics
     filter_json[0]['meta']['value'] = ", ".join(metrics)
     filter_should = []
@@ -88,7 +91,35 @@ def build_filters(metrics, index, metric_name):
     return filter_json
 
 
-def build_dashboard(es_url, es_index, template_filename, goal, attribute,
+def create_alias(es_url, es_index, es_alias):
+    """
+    Create an alias in Elasticsearch
+
+    :param es_url: Elasticsearch URL
+    :param es_index: name of the index
+    :param es_alias: name of the alias to be created
+    :return:
+    """
+
+    add_alias = """{
+        "actions": [
+            {
+                "add": {
+                    "index": "%s",
+                    "alias": "%s"
+                }
+            }
+        ]
+    }""" % (es_index, es_alias)
+
+    res = requests.post(es_url + "/_aliases",
+                        headers={"Content-Type": "application/json", "kbn-xsrf": "true"},
+                        data=add_alias, verify=False)
+    res.raise_for_status()
+    logging.debug("Created alias %s for index %s" % (es_alias, es_index))
+
+
+def build_dashboard(es_url, kibana_url, es_index, template_filename, goal, attribute,
                     backend_metrics_data):
     logging.debug('Building the dashboard for the attribute: %s (goal %s)', attribute, goal)
 
@@ -111,20 +142,24 @@ def build_dashboard(es_url, es_index, template_filename, goal, attribute,
     dashboard = json.load(template_file)
     template_file.close()
 
+    # An alias is created from the index with the metrics to the template index
+    index_pattern_name = dashboard['index_patterns'][0]['id']
+    create_alias(es_url, es_index, index_pattern_name)
+
     # Add the filters to the template dashboard and export it to Kibana
     search_json = json.loads(dashboard['dashboard']['value']['kibanaSavedObjectMeta']['searchSourceJSON'])
     metric_name = find_metric_name_field(backend_metrics_data)
-    search_json['filter'] = build_filters(metrics_data, es_index, metric_name)
+    search_json['filter'] = build_filters(metrics_data, metric_name)
     dashboard['dashboard']['value']['kibanaSavedObjectMeta']['searchSourceJSON'] = json.dumps(search_json)
     dashboard['dashboard']['value']['title'] = goal.name + "_" + attribute.name
     dashboard['dashboard']['id'] = goal.name + "_" + attribute.name
 
-    feed_dashboard(dashboard, es_url)
+    feed_dashboard(dashboard, es_url, kibana_url)
 
     logging.info('Created the attribute dashboard %s', dashboard['dashboard']['value']['title'])
 
 
-def build_dashboards(es_url, es_index, template_file, model_name,
+def build_dashboards(es_url, kibana_url, es_index, template_file, model_name,
                      backend_metrics_data):
 
     logging.debug('Building the dashboards for the model: %s', model_name)
@@ -140,7 +175,7 @@ def build_dashboards(es_url, es_index, template_file, model_name,
     # Build a new dashboard for each attribute in the quality model
     for goal in model_orm.goals.all():
         for attribute in goal.attributes.all():
-            build_dashboard(es_url, es_index, template_file, goal,
+            build_dashboard(es_url, kibana_url, es_index, template_file, goal,
                             attribute, backend_metrics_data)
 
 
@@ -156,5 +191,5 @@ if __name__ == '__main__':
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
 
-    build_dashboards(args.elastic_url, args.index,
+    build_dashboards(args.elastic_url, args.kibana_url, args.index,
                      args.template_file, args.model, args.backend_metrics_data)
