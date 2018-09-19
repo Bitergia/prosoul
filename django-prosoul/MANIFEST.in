@@ -1,5 +1,8 @@
 include LICENSE
 include README.md
+recursive-include prosoul/data *
+recursive-include prosoul/migrations *
+recursive-include prosoul/panels *
 recursive-include prosoul/static *
 recursive-include prosoul/templates *
 recursive-include docs *
