@@ -30,7 +30,13 @@ to the project.
 
 Change VENV_DIR with the path to the folder in which you want to store the virtual environment.
 
+### From source code repository
+
+This is the recommend way if you want to contribute to the development of ProSoul.
+
 ```
+git clone https://github.com/Bitergia/prosoul.git
+cd prosoul/django-prosoul
 prosoul/django-prosoul $ mkdir -p VENV_DIR
 prosoul/django-prosoul $ python3 -m venv VENV_DIR
 prosoul/django-prosoul $ source VENV_DIR/bin/activate
@@ -46,6 +52,46 @@ prosoul/django-prosoul $ python3 manage.py runserver
 ```
 
 By default the applicacion will be accesible in: http://127.0.0.1:8000/
+
+
+### From pip package
+
+There is also a pip package with the Django application. You can just deploy it in a Django site:
+
+```
+mkdir -p VENV_DIR
+python3 -m venv VENV_DIR
+source VENV_DIR/bin/activate
+pip install django
+pip install django-prosoul
+```
+
+and you need to add the application following the normal steps in Django:
+
+```
+django-admin startproject mysite
+cd mysite
+vi mysite/settings.py
+...
+INSTALLED_APPS = [
+    'django.contrib.admin',
+	...
+	'prosoul'
+	]
+
+mysite (venv) $ vi mysite/urls.py
+...
+from django.conf.urls import include, url
+...
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('prosoul/', include('prosoul.urls')),
+]
+mysite (venv) $ python manage.py migrate
+mysite (venv) $ python manage.py runserver
+```
+
+### Using a docker image
 
 A docker image is also available to execute the application:
 
