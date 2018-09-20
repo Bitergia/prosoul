@@ -199,7 +199,7 @@ def gl2viewer(gl_models_json, model_name=None):
         return metrics
 
     viewer_json = {}
-    alambic_json = gl2alambic(gl_models_json, model_name=model_name)
+    alambic_json = gl2alambic(gl_models_json, model_name=model_name, description=True)
 
     attributes_json = {"children": extract_attributes(alambic_json['children'])}
     metrics_json = {"children": extract_metrics(alambic_json['children'])}
@@ -211,38 +211,61 @@ def gl2viewer(gl_models_json, model_name=None):
     return viewer_json
 
 
-def gl2alambic(gl_models_json, model_name=None):
-    """ Convert a GrimoireLab JSON quality model to Alambic format """
+def gl2alambic(gl_models_json, model_name=None, viewer=False):
+    """
+    Convert a GrimoireLab JSON quality model to Alambic format.
+    Alambic format does not include name an description fields in its items,
+    but these fields are needed for the Alambic web quality model viewer,
+    so they are added if the model is going to be used in the quality model viewer.
+    A bit hacky, but there is not a formal definition of the format, and in
+    the quality model used as reference for Alambic, name and description
+    do not exists.
 
-    def attribute2child(attribute):
+    :param gl_models_json: Models in GrimoireLab format
+    :param model_name: model to be converted (alambic only supports one)
+    :param viewer: add extra fields needed by Alambic viewer
+    :return: a dict with the model in alambic format
+    """
+
+    def attribute2child(attribute, viewer=False):
         """ Convert an Alambic child to an attribute """
         al_attribute = {"active": "true", "type": "attribute",
                         "mnemo": attribute['name'],
                         "children": []}
+        if viewer:
+            al_attribute["description"] = attribute['description']
+            al_attribute["name"] = attribute['name']
 
         for metric in attribute['metrics']:
             al_metric = {"active": "true", "type": "metric",
                          "mnemo": metric['name']}
+            if viewer:
+                al_metric["description"] = metric['description']
+                al_metric["name"] = metric['name']
+
             al_attribute['children'].append(al_metric)
 
         if 'subattributes' in attribute:
             for subattribute in attribute['subattributes']:
-                al_attribute['children'].append(attribute2child(subattribute))
+                al_attribute['children'].append(attribute2child(subattribute, viewer))
 
         return al_attribute
 
-    def goal2atributte(goal):
+    def goal2atributte(goal, viewer=False):
         """ In Alambic goals are first level attributes """
 
         goal_attribute = {"active": "true", "type": "attribute",
                           "mnemo": goal['name'], "children": []}
+        if viewer:
+            goal_attribute["description"] = goal['description']
+            goal_attribute["name"] = goal['name']
 
         for attribute in goal['attributes']:
-            goal_attribute["children"].append(attribute2child(attribute))
+            goal_attribute["children"].append(attribute2child(attribute, description))
 
         if 'subgoals' in goal:
             for subgoal in goal['subgoals']:
-                goal_attribute["children"].append(goal2atributte(subgoal))
+                goal_attribute["children"].append(goal2atributte(subgoal, description))
 
         return goal_attribute
 
@@ -253,7 +276,7 @@ def gl2alambic(gl_models_json, model_name=None):
     alambic_json['version'] = '0.1'  # Version exported
 
     for goal in gl_model_json['goals']:
-        alambic_child = goal2atributte(goal)
+        alambic_child = goal2atributte(goal, description)
         alambic_json['children'].append(alambic_child)
 
     return alambic_json
