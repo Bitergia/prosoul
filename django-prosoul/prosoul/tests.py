@@ -21,26 +21,28 @@ class ProsoulImportExport(TestCase):
 
     def off_test_import_export_alambic(self):
         """ Test the import/export process for quality models in alambic format """
-        # TODO is failing now
+        # TODO is failing now because assertDictEqual and keys ordering
         format_ = 'alambic'
         filepath = 'prosoul/data/alambic_quality_model.json'
         fmodel = open(filepath, "r")
         import_models_json = json.load(fmodel)
         fmodel.close()
+        models = import_models_json
         if format_ != "grimoirelab":
-            import_models_json = convert_to_grimoirelab(format_, import_models_json)
-        feed_models(import_models_json)
+            models = convert_to_grimoirelab(format_, import_models_json)
+        feed_models(models)
         compare_models(import_models_json, format_)
 
     def off_test_import_export_ossmeter(self):
         """ Test the import/export process for quality models in ossmeter format """
-        # TODO is failing now
+        # TODO is failing now because assertDictEqual and keys ordering
         format_ = 'ossmeter'
         filepath = 'prosoul/data/ossmeter_qm.json'
         fmodel = open(filepath, "r")
         import_models_json = json.load(fmodel)
         fmodel.close()
+        models = import_models_json
         if format_ != "grimoirelab":
-            import_models_json = convert_to_grimoirelab(format_, import_models_json)
-        feed_models(import_models_json)
+            models = convert_to_grimoirelab(format_, import_models_json)
+        feed_models(models)
         compare_models(import_models_json, format_)

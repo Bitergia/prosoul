@@ -217,14 +217,12 @@ def gl2alambic(gl_models_json, model_name=None):
     def attribute2child(attribute):
         """ Convert an Alambic child to an attribute """
         al_attribute = {"active": "true", "type": "attribute",
-                        "description": attribute['description'],
-                        "mnemo": attribute['name'], "name": attribute['name'],
+                        "mnemo": attribute['name'],
                         "children": []}
 
         for metric in attribute['metrics']:
             al_metric = {"active": "true", "type": "metric",
-                         "description": metric['description'],
-                         "mnemo": metric['name'], "name": metric['name']}
+                         "mnemo": metric['name']}
             al_attribute['children'].append(al_metric)
 
         if 'subattributes' in attribute:
@@ -237,8 +235,6 @@ def gl2alambic(gl_models_json, model_name=None):
         """ In Alambic goals are first level attributes """
 
         goal_attribute = {"active": "true", "type": "attribute",
-                          "description": goal['description'],
-                          "name": goal['name'],
                           "mnemo": goal['name'], "children": []}
 
         for attribute in goal['attributes']:
