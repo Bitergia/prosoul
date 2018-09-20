@@ -199,7 +199,7 @@ def gl2viewer(gl_models_json, model_name=None):
         return metrics
 
     viewer_json = {}
-    alambic_json = gl2alambic(gl_models_json, model_name=model_name, description=True)
+    alambic_json = gl2alambic(gl_models_json, model_name=model_name, viewer=True)
 
     attributes_json = {"children": extract_attributes(alambic_json['children'])}
     metrics_json = {"children": extract_metrics(alambic_json['children'])}
@@ -261,11 +261,11 @@ def gl2alambic(gl_models_json, model_name=None, viewer=False):
             goal_attribute["name"] = goal['name']
 
         for attribute in goal['attributes']:
-            goal_attribute["children"].append(attribute2child(attribute, description))
+            goal_attribute["children"].append(attribute2child(attribute, viewer))
 
         if 'subgoals' in goal:
             for subgoal in goal['subgoals']:
-                goal_attribute["children"].append(goal2atributte(subgoal, description))
+                goal_attribute["children"].append(goal2atributte(subgoal, viewer))
 
         return goal_attribute
 
@@ -276,7 +276,7 @@ def gl2alambic(gl_models_json, model_name=None, viewer=False):
     alambic_json['version'] = '0.1'  # Version exported
 
     for goal in gl_model_json['goals']:
-        alambic_child = goal2atributte(goal, description)
+        alambic_child = goal2atributte(goal, viewer)
         alambic_json['children'].append(alambic_child)
 
     return alambic_json

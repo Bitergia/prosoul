@@ -41,6 +41,8 @@ from prosoul.prosoul_utils import find_metric_name_field
 
 from kidash.kidash import feed_dashboard
 
+ES_HEADERS = {"Content-Type": "application/json", "kbn-xsrf": "true"}
+
 
 def get_params():
     parser = argparse.ArgumentParser(usage="usage: prosoul_vis.py [options]",
@@ -114,7 +116,7 @@ def create_alias(es_url, es_index, es_alias):
     }""" % (es_index, es_alias)
 
     res = requests.post(es_url + "/_aliases",
-                        headers={"Content-Type": "application/json", "kbn-xsrf": "true"},
+                        headers=ES_HEADERS,
                         data=add_alias, verify=False)
     try:
         res.raise_for_status()
@@ -126,6 +128,20 @@ def create_alias(es_url, es_index, es_alias):
 
 def build_dashboard(es_url, kibana_url, es_index, template_filename, goal, attribute,
                     backend_metrics_data):
+    """
+    Build a Kibana dashboard using as template template_filename showing the data for
+    an attribute in a goal from the quality model.
+
+    :param es_url: Elasticsearch URL
+    :param kibana_url: Kibana URL
+    :param es_index: index with the metrics data
+    :param template_filename: template to be used to create the dashboard
+    :param goal: quality model goal to be included
+    :param attribute: atribute in the goal to be included
+    :param backend_metrics_data: metrics backend to be used for getting the data
+    :return: a dict with the dashboard created
+    """
+
     logging.debug('Building the dashboard for the attribute: %s (goal %s)', attribute, goal)
 
     # Check that the model and the template dashboard exists
@@ -161,11 +177,70 @@ def build_dashboard(es_url, kibana_url, es_index, template_filename, goal, attri
 
     logging.info('Created the attribute dashboard %s', dashboard['dashboard']['value']['title'])
 
+    return dashboard
+
+
+def build_menu(es_url, qm_menu):
+    """
+    Build the menu to access the quality model dashboards
+
+    :param es_url: Elasticsearch URL
+    :param qm_menu: dict with the quality model menu to be created
+    :return:
+    """
+
+    logging.debug("Creating the menu for accessing %s" % qm_menu)
+
+    # {'Product_Vitality': 'Product_Vitality', 'Community_Attention': 'Community_Attention'}
+    #
+    # must be converted to
+    #
+    # {
+    #   "metadashboard" : {
+    #     "Community": {
+    #       "Attention": "Community_Attention"
+    #     },
+    #     "Product": {
+    #       "Vitality": "Product_Vitality"
+    #     }
+    #   }
+    # }
+
+    kibana_menu = {"metadashboard": {}}
+    for entry in qm_menu.keys():
+        [goal, attribute] = entry.split("_")
+        if goal not in kibana_menu["metadashboard"]:
+            kibana_menu["metadashboard"][goal] = {}
+        kibana_menu["metadashboard"][goal][attribute] = qm_menu[entry]
+
+    # First step is to fix the .kibana mapping to avoid dynamic mapping for the menu
+    menu_mapping = """
+    {
+        "properties": {
+            "metadashboard" : {
+              "type": "object",
+              "dynamic": "true"
+            }
+        }
+    } """
+
+    res = requests.put(es_url + "/.kibana/_mapping/doc", headers=ES_HEADERS, verify=False,
+                       data=menu_mapping)
+    res.raise_for_status()
+
+    # Upload the menu created
+    res = requests.put(es_url + "/.kibana/doc/metadashboard", headers=ES_HEADERS, verify=False,
+                       data=json.dumps(kibana_menu))
+    res.raise_for_status()
+    logging.debug("Menu created: %s" % json.dumps(kibana_menu, indent=True))
+
 
 def build_dashboards(es_url, kibana_url, es_index, template_file, model_name,
                      backend_metrics_data):
 
     logging.debug('Building the dashboards for the model: %s', model_name)
+
+    kibana_menu = {}  # Kibana menu for accessing the Quality Model dashboards
 
     # Check that the model and the template dashboard exists
     model_orm = None
@@ -178,8 +253,11 @@ def build_dashboards(es_url, kibana_url, es_index, template_file, model_name,
     # Build a new dashboard for each attribute in the quality model
     for goal in model_orm.goals.all():
         for attribute in goal.attributes.all():
-            build_dashboard(es_url, kibana_url, es_index, template_file, goal,
-                            attribute, backend_metrics_data)
+            dash_json = build_dashboard(es_url, kibana_url, es_index, template_file, goal,
+                                        attribute, backend_metrics_data)
+            kibana_menu[dash_json['dashboard']['value']['title']] = dash_json['dashboard']['id']
+
+    build_menu(es_url, kibana_menu)
 
 
 if __name__ == '__main__':
