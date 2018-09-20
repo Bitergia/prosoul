@@ -1,0 +1,240 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Suitability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Accuracy",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Interoperability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Security",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Functionality compliance",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Functionality",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Maturity",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Fault tolerance",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Recoverability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Reliability compliance",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Reliability",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Understandability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Learnability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Operability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Attractiveness",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Usability compliance",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Usability",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Time behaviour",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Resource utilization",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Efficiency compliance",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Efficiency",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Analyzability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Changeability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Stability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Testability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Maintainability compliance",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Maintainability",
+     "subgoals": []
+    },
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Adaptability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Installability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Co-existence",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Replaceability",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [],
+       "name": "Portability compliance",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Portability",
+     "subgoals": []
+    }
+   ],
+   "name": "ISO9126"
+  }
+ ]
+}
