@@ -35,6 +35,7 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_prosoul.settings'
 django.setup()
 
+from prosoul.data import VizTemplatesData
 from prosoul.models import QualityModel
 from prosoul.prosoul_utils import find_metric_name_field
 
@@ -115,8 +116,12 @@ def create_alias(es_url, es_index, es_alias):
     res = requests.post(es_url + "/_aliases",
                         headers={"Content-Type": "application/json", "kbn-xsrf": "true"},
                         data=add_alias, verify=False)
-    res.raise_for_status()
-    logging.debug("Created alias %s for index %s" % (es_alias, es_index))
+    try:
+        res.raise_for_status()
+        logging.debug("Created alias %s for index %s" % (es_alias, es_index))
+    except requests.exceptions.HTTPError:
+        logging.error("Can not create the alias %s for index %s" % (es_alias, es_index))
+        raise
 
 
 def build_dashboard(es_url, kibana_url, es_index, template_filename, goal, attribute,
@@ -138,9 +143,7 @@ def build_dashboard(es_url, kibana_url, es_index, template_filename, goal, attri
 
     # Upload the dashboard created from the template dashboard
     logging.debug("Uploading the template panel %s", template_filename)
-    template_file = open(template_filename, "r")
-    dashboard = json.load(template_file)
-    template_file.close()
+    dashboard = VizTemplatesData.read_template(template_filename)
 
     # An alias is created from the index with the metrics to the template index
     index_pattern_name = dashboard['index_patterns'][0]['id']

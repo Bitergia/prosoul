@@ -63,7 +63,7 @@ class Visualize():
 
                 # Time to execute the visualization creation
                 try:
-                    build_dashboards(es_url, es_index, attribute_template, qmodel_name,
+                    build_dashboards(es_url, kibana_url, es_index, attribute_template, qmodel_name,
                                      backend_metrics_data)
                 except Exception as ex:
                     error = "Problem creating the visualization " + str(ex)
