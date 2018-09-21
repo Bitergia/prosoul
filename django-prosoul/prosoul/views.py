@@ -63,10 +63,11 @@ class Visualize():
 
                 # Time to execute the visualization creation
                 try:
-                    build_dashboards(es_url, kibana_url, es_index, attribute_template, qmodel_name,
-                                     backend_metrics_data)
+                    assess_template = None
+                    build_dashboards(es_url, kibana_url, es_index, attribute_template, assess_template,
+                                     qmodel_name, backend_metrics_data)
                 except Exception as ex:
-                    error = "Problem creating the visualization " + str(ex)
+                    error = "Problem creating the visualizations " + str(ex)
 
                 context.update({"errors": error})
                 if not error:

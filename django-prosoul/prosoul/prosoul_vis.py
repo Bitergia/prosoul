@@ -37,11 +37,13 @@ django.setup()
 
 from prosoul.data import VizTemplatesData
 from prosoul.models import QualityModel
+from prosoul.prosoul_assess import assess
 from prosoul.prosoul_utils import find_metric_name_field
 
 from kidash.kidash import feed_dashboard
 
 ES_HEADERS = {"Content-Type": "application/json", "kbn-xsrf": "true"}
+ASSESS_PANEL = 'panels/scava-projects-radar.json'
 
 
 def get_params():
@@ -55,6 +57,8 @@ def get_params():
     parser.add_argument('-i', '--index', required='True', help='Index with the metrics')
     parser.add_argument('-t', '--template-file', required=True,
                         help='Dashboard template file to be used')
+    parser.add_argument('--template-assess-file', default=ASSESS_PANEL,
+                        help='Dashboard template file to be used for assessment')
     parser.add_argument('-m', '--model', required='True',
                         help='Model to be used to build the Dashboard')
     parser.add_argument('-b', '--backend-metrics-data', default='grimoirelab',
@@ -180,12 +184,13 @@ def build_dashboard(es_url, kibana_url, es_index, template_filename, goal, attri
     return dashboard
 
 
-def build_menu(es_url, qm_menu):
+def build_menu(es_url, qm_menu, assessment_menu):
     """
     Build the menu to access the quality model dashboards
 
     :param es_url: Elasticsearch URL
     :param qm_menu: dict with the quality model menu to be created
+    :param assessment_menu: dict with the assessment menu
     :return:
     """
 
@@ -213,6 +218,9 @@ def build_menu(es_url, qm_menu):
             kibana_menu["metadashboard"][goal] = {}
         kibana_menu["metadashboard"][goal][attribute] = qm_menu[entry]
 
+    # Add the assessment dashboard
+    kibana_menu["metadashboard"].update(assessment_menu)
+
     # First step is to fix the .kibana mapping to avoid dynamic mapping for the menu
     menu_mapping = """
     {
@@ -235,12 +243,28 @@ def build_menu(es_url, qm_menu):
     logging.debug("Menu created: %s" % json.dumps(kibana_menu, indent=True))
 
 
-def build_dashboards(es_url, kibana_url, es_index, template_file, model_name,
-                     backend_metrics_data):
+def build_dashboards(es_url, kibana_url, es_index, template_file, template_assess_file,
+                     model_name, backend_metrics_data):
+    """
+    Create all the dashboards needed to viz a Quality Model
+
+    :param es_url: Elasticsearch URL
+    :param kibana_url: Kibana URL
+    :param es_index: index in elasticsearch with the metrics data
+    :param template_file: template file to be used for building the attribute dashboards
+    :param template_assess_file: template file to be used for the assessment dashboard
+    :param model_name: quality model to use
+    :param backend_metrics_data: backend to use to collect the metrics data
+    :return:
+    """
 
     logging.debug('Building the dashboards for the model: %s', model_name)
 
-    kibana_menu = {}  # Kibana menu for accessing the Quality Model dashboards
+    if not template_assess_file:
+        template_assess_file = ASSESS_PANEL
+
+    qm_menu = {}  # Kibana menu for accessing the Quality Model dashboards
+    assess_menu = {}  # Kibana menu for accessing the assessment dashboard
 
     # Check that the model and the template dashboard exists
     model_orm = None
@@ -255,9 +279,16 @@ def build_dashboards(es_url, kibana_url, es_index, template_file, model_name,
         for attribute in goal.attributes.all():
             dash_json = build_dashboard(es_url, kibana_url, es_index, template_file, goal,
                                         attribute, backend_metrics_data)
-            kibana_menu[dash_json['dashboard']['value']['title']] = dash_json['dashboard']['id']
+            qm_menu[dash_json['dashboard']['value']['title']] = dash_json['dashboard']['id']
 
-    build_menu(es_url, kibana_menu)
+    # Project assessment is included also in the viz
+    assess(es_url, es_index, model_name, backend_metrics_data)
+    # Upload the radar viz to show the assessment
+    assess_dash = VizTemplatesData.read_template(template_assess_file)
+    feed_dashboard(assess_dash, es_url, kibana_url)
+    assess_menu[assess_dash['dashboard']['value']['title']] = assess_dash['dashboard']['id']
+
+    build_menu(es_url, qm_menu, assess_menu)
 
 
 if __name__ == '__main__':
@@ -273,4 +304,5 @@ if __name__ == '__main__':
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     build_dashboards(args.elastic_url, args.kibana_url, args.index,
-                     args.template_file, args.model, args.backend_metrics_data)
+                     args.template_file, args.template_assess_file,
+                     args.model, args.backend_metrics_data)
