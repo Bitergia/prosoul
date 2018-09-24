@@ -1,7 +1,9 @@
 import json
 
 from django import shortcuts
+from django.conf import settings
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.template import loader
 
 from prosoul.prosoul_export import fetch_models, gl2viewer
@@ -15,6 +17,8 @@ class Viewer():
     @staticmethod
     def viewer(request):
         """ Basic Models Viewer just dumping the JSON of all models """
+        if not request.user.is_authenticated:
+            return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
         models = fetch_models()
         if not models['qualityModels']:
             return editor(request)
