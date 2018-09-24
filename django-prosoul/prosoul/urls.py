@@ -33,9 +33,9 @@ urlpatterns_edit = [
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url='viewer')),
     url(r'^viewer$', views.Viewer.viewer, name='viewer'),
-    url(r'^visualize$', views.Visualize.visualize),
+    url(r'^visualize$', views.Visualize.visualize, name="viz"),
     url(r'^create_visualization$', views.Visualize.create),
-    url(r'^assess$', views.Assessment.assess),
+    url(r'^assess$', views.Assessment.assess, name='assess'),
     url(r'^create_assessment$', views.Assessment.create)
 ]
 
