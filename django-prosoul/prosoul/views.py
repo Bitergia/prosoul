@@ -3,6 +3,7 @@ import json
 from django import shortcuts
 from django.http import HttpResponse
 from django.template import loader
+from django.views import View
 
 from prosoul.prosoul_export import fetch_models, gl2viewer
 from prosoul.prosoul_assess import assess
@@ -11,9 +12,9 @@ from prosoul.views_editor import editor
 from prosoul.forms import AssessmentForm, VisualizationForm
 
 
-class Viewer():
-    @staticmethod
-    def viewer(request):
+class Viewer(View):
+
+    def get(self, request):
         """ Basic Models Viewer just dumping the JSON of all models """
         models = fetch_models()
         if not models['qualityModels']:
@@ -39,16 +40,15 @@ class Viewer():
         return HttpResponse(render_index)
 
 
-class Visualize():
-    @staticmethod
-    def visualize(request):
+class Visualize(View):
+
+    def get(self, request):
         template = loader.get_template('prosoul/visualize.html')
         context = {'active_page': "visualize", "vis_config_form": VisualizationForm()}
         render_index = template.render(context, request)
         return HttpResponse(render_index)
 
-    @staticmethod
-    def create(request):
+    def post(self, request):
         error = None
         if request.method == 'POST':
             form = VisualizationForm(request.POST)
@@ -80,10 +80,9 @@ class Visualize():
             return shortcuts.render(request, 'prosoul/visualize.html', {"error": "Use GET method to send data"})
 
 
-class Assessment():
+class Assessment(View):
 
-    @staticmethod
-    def assess(request):
+    def get(self, request):
         template = loader.get_template('prosoul/assessment.html')
         context = {'active_page': "assess", "assess_config_form": AssessmentForm()}
         render_index = template.render(context, request)
@@ -178,8 +177,7 @@ class Assessment():
 
         return tables
 
-    @staticmethod
-    def create(request):
+    def post(self, request):
         error = None
         if request.method == 'POST':
             form = AssessmentForm(request.POST)

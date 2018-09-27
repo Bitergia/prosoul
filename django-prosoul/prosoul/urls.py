@@ -1,7 +1,6 @@
 from django.conf.urls import url
 from django.views.generic import RedirectView
 
-
 from . import views
 from . import views_editor
 
@@ -32,11 +31,11 @@ urlpatterns_edit = [
 
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url='viewer')),
-    url(r'^viewer$', views.Viewer.viewer, name='viewer'),
-    url(r'^visualize$', views.Visualize.visualize),
-    url(r'^create_visualization$', views.Visualize.create),
-    url(r'^assess$', views.Assessment.assess),
-    url(r'^create_assessment$', views.Assessment.create)
+    url(r'^viewer$', views.Viewer.as_view()),
+    url(r'^visualize$', views.Visualize.as_view()),
+    url(r'^create_visualization$', views.Visualize.as_view()),
+    url(r'^assess$', views.Assessment.as_view()),
+    url(r'^create_assessment$', views.Assessment.as_view())
 ]
 
 urlpatterns += urlpatterns_edit
