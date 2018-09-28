@@ -1,7 +1,7 @@
 import json
 
 from django import shortcuts
-from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
@@ -14,12 +14,12 @@ from prosoul.views_editor import editor
 from prosoul.forms import AssessmentForm, VisualizationForm
 
 
-class Viewer(View):
+class Viewer(LoginRequiredMixin, View):
+
+    http_method_names = ['get']
 
     def get(self, request):
         """ Basic Models Viewer just dumping the JSON of all models """
-        if not request.user.is_authenticated:
-            return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
         models = fetch_models()
         if not models['qualityModels']:
             return editor(request)
@@ -44,7 +44,9 @@ class Viewer(View):
         return HttpResponse(render_index)
 
 
-class Visualize(View):
+class Visualize(LoginRequiredMixin, View):
+
+    http_method_names = ['get', 'post']
 
     def get(self, request):
         template = loader.get_template('prosoul/visualize.html')
@@ -84,7 +86,9 @@ class Visualize(View):
             return shortcuts.render(request, 'prosoul/visualize.html', {"error": "Use GET method to send data"})
 
 
-class Assessment(View):
+class Assessment(LoginRequiredMixin, View):
+
+    http_method_names = ['get', 'post']
 
     def get(self, request):
         template = loader.get_template('prosoul/assessment.html')
@@ -183,31 +187,28 @@ class Assessment(View):
 
     def post(self, request):
         error = None
-        if request.method == 'POST':
-            form = AssessmentForm(request.POST)
-            context = {'active_page': "assess", "assess_config_form": form}
-            if form.is_valid():
-                qmodel_name = form.cleaned_data['quality_model']
-                es_url = form.cleaned_data['es_url']
-                es_index = form.cleaned_data['es_index']
-                backend_metrics_data = form.cleaned_data['backend_metrics_data']
+        form = AssessmentForm(request.POST)
+        context = {'active_page': "assess", "assess_config_form": form}
+        if form.is_valid():
+            qmodel_name = form.cleaned_data['quality_model']
+            es_url = form.cleaned_data['es_url']
+            es_index = form.cleaned_data['es_index']
+            backend_metrics_data = form.cleaned_data['backend_metrics_data']
 
-                # Time to execute the assessment creation
-                try:
-                    assessment = assess(es_url, es_index, qmodel_name, backend_metrics_data)
-                except Exception as ex:
-                    error = "Problem creating the assessment " + str(ex)
+            # Time to execute the assessment creation
+            try:
+                assessment = assess(es_url, es_index, qmodel_name, backend_metrics_data)
+            except Exception as ex:
+                error = "Problem creating the assessment " + str(ex)
 
-                context.update({"errors": error})
-                if not error:
-                    assessment_table = Assessment.render_tables(assessment)
-                    if assessment_table:
-                        context.update({"assessment": Assessment.render_tables(assessment)})
-                    else:
-                        context.update({"errors": "Empty assessment. Review the form data."})
-                return shortcuts.render(request, 'prosoul/assessment.html', context)
-            else:
-                context.update({"errors": form.errors})
-                return shortcuts.render(request, 'prosoul/assessment.html', context)
+            context.update({"errors": error})
+            if not error:
+                assessment_table = Assessment.render_tables(assessment)
+                if assessment_table:
+                    context.update({"assessment": Assessment.render_tables(assessment)})
+                else:
+                    context.update({"errors": "Empty assessment. Review the form data."})
+            return shortcuts.render(request, 'prosoul/assessment.html', context)
         else:
-            return shortcuts.render(request, 'prosoul/assessment.html', {"error": "Use POST method to send data"})
+            context.update({"errors": form.errors})
+            return shortcuts.render(request, 'prosoul/assessment.html', context)
