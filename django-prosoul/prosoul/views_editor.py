@@ -5,7 +5,7 @@ from datetime import datetime
 from time import time
 
 from django import shortcuts
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
 
 from django.http import HttpResponse
@@ -235,20 +235,30 @@ class EditorState():
 
 # Login for Views
 
-class JustPostMixin():
+class JustPostByEditorMixin():
     """
     Mixin to add the support only for HTTP Post requests and to execute the action configured
+    if the user is a super user (admin)
     """
 
     http_method_names = ['post']
 
     action = None
 
+    def test_func(self):
+        """
+        It will be called if UserPassesTestMixin is included with JustPostByEditorMixin in a class
+        :return: bool showing if the user can access the URL
+        """
+        return self.request.user.is_superuser
+
+
     def post(self, request):
+
         return self.action(request)
 
 
-class EditorView(LoginRequiredMixin, View):
+class EditorView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequiredMixin, View):
 
     http_method_names = ['get']
 
@@ -261,7 +271,9 @@ class EditorView(LoginRequiredMixin, View):
         return shortcuts.render(request, 'prosoul/editor.html', context)
 
 
-class QualityModelView(LoginRequiredMixin, JustPostMixin, View):
+class QualityModelView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequiredMixin, View):
+
+    permission_denied_message = 'TEST'
 
     @staticmethod
     def select_qmodel(request, context=None):
@@ -343,7 +355,7 @@ class QualityModelView(LoginRequiredMixin, JustPostMixin, View):
         return shortcuts.render(request, 'prosoul/editor.html', context)
 
 
-class MetricDataView(LoginRequiredMixin, JustPostMixin, View):
+class MetricDataView(LoginRequiredMixin, JustPostByEditorMixin, View):
 
     @staticmethod
     def add_metric_data(request):
@@ -376,7 +388,7 @@ class MetricDataView(LoginRequiredMixin, JustPostMixin, View):
             raise Http404
 
 
-class MetricView(LoginRequiredMixin, JustPostMixin, View):
+class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
 
     @staticmethod
     def add_metric(request):
@@ -496,7 +508,7 @@ class MetricView(LoginRequiredMixin, JustPostMixin, View):
             raise Http404
 
 
-class AttributeView(LoginRequiredMixin, JustPostMixin, View):
+class AttributeView(LoginRequiredMixin, JustPostByEditorMixin, View):
 
     @staticmethod
     def add_attribute(request):
@@ -606,7 +618,7 @@ class AttributeView(LoginRequiredMixin, JustPostMixin, View):
             raise Http404
 
 
-class GoalView(LoginRequiredMixin, JustPostMixin, View):
+class GoalView(LoginRequiredMixin, JustPostByEditorMixin, View):
 
     @staticmethod
     def add_goal(request):
