@@ -162,8 +162,6 @@ def export_to_file(request, qmodel=None):
         error_msg = "There are no goals to export"
         return return_error(error_msg)
 
-    return editor(request)
-
 
 def return_error(message):
 
@@ -252,7 +250,6 @@ class JustPostByEditorMixin():
         """
         return self.request.user.is_superuser
 
-
     def post(self, request):
 
         return self.action(request)
@@ -331,7 +328,6 @@ class QualityModelView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequired
         context['errors'] = errors
 
         return shortcuts.render(request, 'prosoul/editor.html', context)
-
 
     @staticmethod
     def update_qmodel(request):
@@ -427,7 +423,6 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
         return shortcuts.render(request, 'prosoul/editor.html',
                                 context)
 
-
     @staticmethod
     def remove_metric(request):
         form = forms_editor.MetricForm(request.POST)
@@ -443,7 +438,6 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             # TODO: Show error
             print(form.errors)
             raise Http404
-
 
     @staticmethod
     def select_metric(request):
@@ -467,7 +461,6 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
         context = build_forms_context(state)
         context.update({"errors": error})
         return shortcuts.render(request, template, context)
-
 
     @staticmethod
     def update_metric(request):
@@ -545,7 +538,6 @@ class AttributeView(LoginRequiredMixin, JustPostByEditorMixin, View):
             # TODO: Show error
             raise Http404
 
-
     @staticmethod
     def select_attribute(request, context=None):
         error = None
@@ -576,7 +568,6 @@ class AttributeView(LoginRequiredMixin, JustPostByEditorMixin, View):
         context.update({"errors": error})
         return shortcuts.render(request, template, context)
 
-
     @staticmethod
     def remove_attribute(request):
         error = None
@@ -595,7 +586,6 @@ class AttributeView(LoginRequiredMixin, JustPostByEditorMixin, View):
             # TODO: Show error
             print("attribute_goal", form.errors)
             raise Http404
-
 
     @staticmethod
     def update_attribute(request):
@@ -693,7 +683,6 @@ class GoalView(LoginRequiredMixin, JustPostByEditorMixin, View):
 
         context.update({"errors": error})
         return shortcuts.render(request, template, context)
-
 
     @staticmethod
     def update_goal(request):
