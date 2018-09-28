@@ -5,6 +5,7 @@ from datetime import datetime
 from time import time
 
 from django import shortcuts
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 
 from django.http import HttpResponse
@@ -14,6 +15,8 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
 from django.db.utils import IntegrityError
+
+from django.views import View
 
 from prosoul.prosoul_export import fetch_models
 from prosoul.prosoul_import import convert_to_grimoirelab, feed_models, SUPPORTED_FORMATS
@@ -89,15 +92,6 @@ def build_forms_context(state=None):
     return context
 
 
-@perfdata
-def editor(request):
-    """ Shows the Prosoul Editor """
-
-    context = build_forms_context()
-
-    return shortcuts.render(request, 'prosoul/editor.html', context)
-
-
 def import_from_file(request):
 
     if request.method == "POST":
@@ -138,7 +132,7 @@ def import_from_file(request):
 def export_to_file(request, qmodel=None):
 
     if (request.method == "GET") and (not qmodel):
-        return editor(request)
+        return shortcuts.redirect("prosoul:editor")
 
     if request.method == "POST":
         qmodel_id = request.POST["id"]
@@ -239,492 +233,472 @@ class EditorState():
         return initial
 
 
-class QualityModelView():
+# Login for Views
+
+class JustPostMixin():
+    """
+    Mixin to add the support only for HTTP Post requests and to execute the action configured
+    """
+
+    http_method_names = ['post']
+
+    action = None
+
+    def post(self, request):
+        return self.action(request)
+
+
+class EditorView(LoginRequiredMixin, View):
+
+    http_method_names = ['get']
+
+    @perfdata
+    def get(self, request):
+        """ Shows the Prosoul Editor """
+
+        context = build_forms_context()
+
+        return shortcuts.render(request, 'prosoul/editor.html', context)
+
+
+class QualityModelView(LoginRequiredMixin, JustPostMixin, View):
 
     @staticmethod
     def select_qmodel(request, context=None):
         template = "prosoul/editor.html"
-        if request.method == 'POST':
-            form = forms_editor.QualityModelsForm(request.POST)
-            if form.is_valid():
-                model_id = form.cleaned_data['id']
-                if not model_id:
-                    return shortcuts.render(request, template, build_forms_context())
-                # Select and qmodel reset the state. Don't pass form=form
-                state = build_forms_context(EditorState(qmodel_id=model_id))
-                if context:
-                    context.update(state)
-                else:
-                    context = state
-                return shortcuts.render(request, template, context)
-            else:
-                # Ignore when the empty option is selected
+        form = forms_editor.QualityModelsForm(request.POST)
+        if form.is_valid():
+            model_id = form.cleaned_data['id']
+            if not model_id:
                 return shortcuts.render(request, template, build_forms_context())
+            # Select and qmodel reset the state. Don't pass form=form
+            state = build_forms_context(EditorState(qmodel_id=model_id))
+            if context:
+                context.update(state)
+            else:
+                context = state
+            return shortcuts.render(request, template, context)
         else:
+            # Ignore when the empty option is selected
             return shortcuts.render(request, template, build_forms_context())
 
     @staticmethod
     def add_qmodel(request):
-        if request.method == 'POST':
-            form = forms_editor.QualityModelForm(request.POST)
-            if form.is_valid():
-                qmodel_name = form.cleaned_data['qmodel_name']
+        form = forms_editor.QualityModelForm(request.POST)
+        if form.is_valid():
+            qmodel_name = form.cleaned_data['qmodel_name']
 
-                try:
-                    qmodel_orm = QualityModel.objects.get(name=qmodel_name)
-                except QualityModel.DoesNotExist:
-                    qmodel_orm = QualityModel(name=qmodel_name)
-                    qmodel_orm.save()
+            try:
+                qmodel_orm = QualityModel.objects.get(name=qmodel_name)
+            except QualityModel.DoesNotExist:
+                qmodel_orm = QualityModel(name=qmodel_name)
+                qmodel_orm.save()
 
-                # Select and qmodel reset the state. Don't pass form=form
-                return shortcuts.render(request, 'prosoul/editor.html',
-                                        build_forms_context(EditorState(qmodel_id=qmodel_orm.id)))
-            else:
-                # TODO: Show error
-                raise Http404
+            # Select and qmodel reset the state. Don't pass form=form
+            return shortcuts.render(request, 'prosoul/editor.html',
+                                    build_forms_context(EditorState(qmodel_id=qmodel_orm.id)))
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            raise Http404
 
     @staticmethod
     def remove_qmodel(request):
         errors = None
-        if request.method == 'POST':
-            form = forms_editor.QualityModelForm(request.POST)
-            if form.is_valid():
-                qmodel_name = form.cleaned_data['qmodel_name']
-                try:
-                    QualityModel.objects.get(name=qmodel_name).delete()
-                except QualityModel.DoesNotExist:
-                    errors = "Can't delete not found quality model %s" % qmodel_name
-            else:
-                error = form.errors
-
-            # Select and qmodel reset the state. Don't pass form=form
-            context = build_forms_context(EditorState(qmodel_id=None))
-            context['errors'] = errors
-
-            return shortcuts.render(request, 'prosoul/editor.html', context)
-
+        form = forms_editor.QualityModelForm(request.POST)
+        if form.is_valid():
+            qmodel_name = form.cleaned_data['qmodel_name']
+            try:
+                QualityModel.objects.get(name=qmodel_name).delete()
+            except QualityModel.DoesNotExist:
+                errors = "Can't delete not found quality model %s" % qmodel_name
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            error = form.errors
+
+        # Select and qmodel reset the state. Don't pass form=form
+        context = build_forms_context(EditorState(qmodel_id=None))
+        context['errors'] = errors
+
+        return shortcuts.render(request, 'prosoul/editor.html', context)
+
 
     @staticmethod
     def update_qmodel(request):
         errors = None
-        if request.method == 'POST':
-            form = forms_editor.QualityModelForm(request.POST)
-            if form.is_valid():
-                qmodel_id = form.cleaned_data['qmodel_state']
-                qmodel_name = form.cleaned_data['qmodel_name']
-                try:
-                    qmodel_orm = QualityModel.objects.get(id=qmodel_id)
-                    qmodel_orm.name = qmodel_name
-                    qmodel_orm.save()
-                except QualityModel.DoesNotExist:
-                    errors = "Can't find quality model %s" % qmodel_id
-            else:
-                error = form.errors
-
-            context = build_forms_context(EditorState(form=form))
-            context['errors'] = errors
-
-            return shortcuts.render(request, 'prosoul/editor.html', context)
-
+        form = forms_editor.QualityModelForm(request.POST)
+        if form.is_valid():
+            qmodel_id = form.cleaned_data['qmodel_state']
+            qmodel_name = form.cleaned_data['qmodel_name']
+            try:
+                qmodel_orm = QualityModel.objects.get(id=qmodel_id)
+                qmodel_orm.name = qmodel_name
+                qmodel_orm.save()
+            except QualityModel.DoesNotExist:
+                errors = "Can't find quality model %s" % qmodel_id
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            error = form.errors
+
+        context = build_forms_context(EditorState(form=form))
+        context['errors'] = errors
+
+        return shortcuts.render(request, 'prosoul/editor.html', context)
 
 
-class MetricDataView():
+class MetricDataView(LoginRequiredMixin, JustPostMixin, View):
 
     @staticmethod
     def add_metric_data(request):
-        if request.method == 'POST':
-            form = forms_editor.MetricDataForm(request.POST)
-            if form.is_valid():
-                state = EditorState(form=form)
-                metric_id = state.metrics[0]
-                implementation = form.cleaned_data['implementation']
-                params = form.cleaned_data['params']
+        form = forms_editor.MetricDataForm(request.POST)
+        if form.is_valid():
+            state = EditorState(form=form)
+            metric_id = state.metrics[0]
+            implementation = form.cleaned_data['implementation']
+            params = form.cleaned_data['params']
 
-                # Try to find a metric data already created
-                try:
-                    metric_data_orm = MetricData.objects.get(implementation=implementation, params=params)
-                except MetricData.DoesNotExist:
-                    # Create a new metric
-                    metric_data_orm = MetricData(implementation=implementation, params=params)
-                    metric_data_orm.save()
+            # Try to find a metric data already created
+            try:
+                metric_data_orm = MetricData.objects.get(implementation=implementation, params=params)
+            except MetricData.DoesNotExist:
+                # Create a new metric
+                metric_data_orm = MetricData(implementation=implementation, params=params)
+                metric_data_orm.save()
 
-                metric_orm = Metric.objects.get(id=metric_id)
-                metric_orm.data = metric_data_orm
-                metric_orm.save()
+            metric_orm = Metric.objects.get(id=metric_id)
+            metric_orm.data = metric_data_orm
+            metric_orm.save()
 
-                # form.cleaned_data['metrics_state'] = []
-                state = EditorState(form=form)
-                return shortcuts.render(request, 'prosoul/editor.html',
-                                        build_forms_context(state))
-            else:
-                # TODO: Show error
-                print(form.errors)
-                raise Http404
+            # form.cleaned_data['metrics_state'] = []
+            state = EditorState(form=form)
+            return shortcuts.render(request, 'prosoul/editor.html',
+                                    build_forms_context(state))
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            print(form.errors)
+            raise Http404
 
 
-class MetricView():
+class MetricView(LoginRequiredMixin, JustPostMixin, View):
 
     @staticmethod
     def add_metric(request):
         error = None
-        if request.method == 'POST':
-            form = forms_editor.MetricForm(request.POST)
-            if form.is_valid():
-                name = form.cleaned_data['metric_name']
-                thresholds = form.cleaned_data['metric_thresholds']
-                attribute_id = form.cleaned_data['attributes']
+        form = forms_editor.MetricForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['metric_name']
+            thresholds = form.cleaned_data['metric_thresholds']
+            attribute_id = form.cleaned_data['attributes']
 
-                attribute_orm = Attribute.objects.get(id=attribute_id)
+            attribute_orm = Attribute.objects.get(id=attribute_id)
 
-                # Try to find a metric already created
-                try:
-                    metric_orm = Metric.objects.get(name=name)
-                    error = "The metric %s already exists" % name
-                    # metric_orm.attribute = attribute_orm
-                    # metric_orm.thresholds = thresholds
-                except Metric.DoesNotExist:
-                    # Create a new metric
-                    metric_orm = Metric(name=name, attribute=attribute_orm,
-                                        thresholds=thresholds)
+            # Try to find a metric already created
+            try:
+                metric_orm = Metric.objects.get(name=name)
+                error = "The metric %s already exists" % name
+                # metric_orm.attribute = attribute_orm
+                # metric_orm.thresholds = thresholds
+            except Metric.DoesNotExist:
+                # Create a new metric
+                metric_orm = Metric(name=name, attribute=attribute_orm,
+                                    thresholds=thresholds)
 
-                metric_orm.save()
+            metric_orm.save()
 
-                attribute_orm.metrics.add(metric_orm)
-                attribute_orm.save()
-            else:
-                error = form.errors
-
-            form.cleaned_data['metrics_state'] = []
-            state = EditorState(form=form)
-            context = build_forms_context(state)
-            context.update({"errors": error})
-
-            return shortcuts.render(request, 'prosoul/editor.html',
-                                    context)
+            attribute_orm.metrics.add(metric_orm)
+            attribute_orm.save()
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            error = form.errors
+
+        form.cleaned_data['metrics_state'] = []
+        state = EditorState(form=form)
+        context = build_forms_context(state)
+        context.update({"errors": error})
+
+        return shortcuts.render(request, 'prosoul/editor.html',
+                                context)
+
 
     @staticmethod
     def remove_metric(request):
-        if request.method == 'POST':
-            form = forms_editor.MetricForm(request.POST)
-            if form.is_valid():
-                if form.cleaned_data['metric_id']:
-                    metric_id = int(form.cleaned_data['metric_id'])
-                    Metric.objects.get(id=metric_id).delete()
-                # Clean from the state the removed metric view
-                form.cleaned_data['metrics_state'] = []
-                return shortcuts.render(request, 'prosoul/editor.html',
-                                        build_forms_context(EditorState(form=form)))
-            else:
-                # TODO: Show error
-                print(form.errors)
-                raise Http404
+        form = forms_editor.MetricForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['metric_id']:
+                metric_id = int(form.cleaned_data['metric_id'])
+                Metric.objects.get(id=metric_id).delete()
+            # Clean from the state the removed metric view
+            form.cleaned_data['metrics_state'] = []
+            return shortcuts.render(request, 'prosoul/editor.html',
+                                    build_forms_context(EditorState(form=form)))
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            print(form.errors)
+            raise Http404
+
 
     @staticmethod
     def select_metric(request):
         error = None
         template = 'prosoul/editor.html'
-        if request.method == 'POST':
-            form = forms_editor.MetricsForm(request.POST)
-            if form.is_valid():
-                metric_id = int(form.cleaned_data['id'])
-                metrics = [metric_id]
-                old_metrics = form.cleaned_data['metrics_state']
-                if old_metrics == str(metric_id):
-                    # Unselect the metric
-                    form.cleaned_data['metrics_state'] = None
-                    metrics = None
+        form = forms_editor.MetricsForm(request.POST)
+        if form.is_valid():
+            metric_id = int(form.cleaned_data['id'])
+            metrics = [metric_id]
+            old_metrics = form.cleaned_data['metrics_state']
+            if old_metrics == str(metric_id):
+                # Unselect the metric
+                form.cleaned_data['metrics_state'] = None
+                metrics = None
 
-                state = EditorState(form=form, metrics=metrics)
-            else:
-                state = EditorState(form=form)
-                error = form.errors
-
-            context = build_forms_context(state)
-            context.update({"errors": error})
-            return shortcuts.render(request, template, context)
-
+            state = EditorState(form=form, metrics=metrics)
         else:
-            return shortcuts.render(request, template, build_forms_context())
+            state = EditorState(form=form)
+            error = form.errors
+
+        context = build_forms_context(state)
+        context.update({"errors": error})
+        return shortcuts.render(request, template, context)
+
 
     @staticmethod
     def update_metric(request):
-        if request.method == 'POST':
-            form = forms_editor.MetricForm(request.POST)
+        form = forms_editor.MetricForm(request.POST)
 
-            if form.is_valid():
-                metric_id = form.cleaned_data['metric_id']
-                name = form.cleaned_data['metric_name']
-                attribute_id = form.cleaned_data['attributes']
-                metric_data_id = form.cleaned_data['metrics_data']
-                old_attribute_id = form.cleaned_data['old_attribute_id']
-                thresholds = form.cleaned_data['metric_thresholds']
+        if form.is_valid():
+            metric_id = form.cleaned_data['metric_id']
+            name = form.cleaned_data['metric_name']
+            attribute_id = form.cleaned_data['attributes']
+            metric_data_id = form.cleaned_data['metrics_data']
+            old_attribute_id = form.cleaned_data['old_attribute_id']
+            thresholds = form.cleaned_data['metric_thresholds']
 
-                metric_orm = Metric.objects.get(id=metric_id)
-                metric_orm.name = name
-                metric_orm.data = None
-                metric_orm.thresholds = thresholds
-                if metric_data_id:
-                    metric_data_orm = MetricData.objects.get(id=metric_data_id)
-                    metric_orm.data = metric_data_orm
-                metric_orm.save()
+            metric_orm = Metric.objects.get(id=metric_id)
+            metric_orm.name = name
+            metric_orm.data = None
+            metric_orm.thresholds = thresholds
+            if metric_data_id:
+                metric_data_orm = MetricData.objects.get(id=metric_data_id)
+                metric_orm.data = metric_data_orm
+            metric_orm.save()
 
-                # Add the metric to the new attribute
-                if attribute_id != old_attribute_id:
-                    attribute = Attribute.objects.get(id=attribute_id)
-                    attribute.metrics.add(metric_orm)
-                    attribute.save()
-                    attribute = Attribute.objects.get(name=old_attribute_id)
-                    attribute.metrics.remove(metric_orm)
-                    attribute.save()
+            # Add the metric to the new attribute
+            if attribute_id != old_attribute_id:
+                attribute = Attribute.objects.get(id=attribute_id)
+                attribute.metrics.add(metric_orm)
+                attribute.save()
+                attribute = Attribute.objects.get(name=old_attribute_id)
+                attribute.metrics.remove(metric_orm)
+                attribute.save()
 
-                state = EditorState(metrics=[metric_id], form=form)
-                return shortcuts.render(request, 'prosoul/editor.html',
-                                        build_forms_context(state))
-            else:
-                # TODO: Show error
-                print(form.errors)
-                raise Http404
+            state = EditorState(metrics=[metric_id], form=form)
+            return shortcuts.render(request, 'prosoul/editor.html',
+                                    build_forms_context(state))
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            print(form.errors)
+            raise Http404
 
 
-class AttributeView():
+class AttributeView(LoginRequiredMixin, JustPostMixin, View):
 
     @staticmethod
     def add_attribute(request):
         error = None
-        if request.method == 'POST':
-            form = forms_editor.AttributeForm(request.POST)
-            if form.is_valid():
-                goal_id = form.cleaned_data['goals_state']
-                parent_id = form.cleaned_data['parent_id']
-                goal_orm = None
+        form = forms_editor.AttributeForm(request.POST)
+        if form.is_valid():
+            goal_id = form.cleaned_data['goals_state']
+            parent_id = form.cleaned_data['parent_id']
+            goal_orm = None
 
-                attribute_name = form.cleaned_data['attribute_name']
-                attribute_orm = Attribute(name=attribute_name)
-                try:
-                    attribute_orm.save()
+            attribute_name = form.cleaned_data['attribute_name']
+            attribute_orm = Attribute(name=attribute_name)
+            try:
+                attribute_orm.save()
 
-                    if parent_id:
-                        # If there is an attribute parent use it instead of goal
-                        parent_orm = Attribute.objects.get(name=parent_id)
-                        parent_orm.subattributes.add(attribute_orm)
-                        parent_orm.save()
-                    elif goal_id:
-                        goal_orm = Goal.objects.get(id=goal_id)
-                        goal_orm.attributes.add(attribute_orm)
-                        goal_orm.save()
-                except IntegrityError:
-                    attribute_orm = Attribute.objects.get(name=attribute_name)
-                    error = "Attribute %s alredy exists" % (attribute_name)
+                if parent_id:
+                    # If there is an attribute parent use it instead of goal
+                    parent_orm = Attribute.objects.get(name=parent_id)
+                    parent_orm.subattributes.add(attribute_orm)
+                    parent_orm.save()
+                elif goal_id:
+                    goal_orm = Goal.objects.get(id=goal_id)
+                    goal_orm.attributes.add(attribute_orm)
+                    goal_orm.save()
+            except IntegrityError:
+                attribute_orm = Attribute.objects.get(name=attribute_name)
+                error = "Attribute %s alredy exists" % (attribute_name)
 
-                context = EditorState(attributes=[attribute_orm.id], form=form)
-                send_context = build_forms_context(context)
-                send_context.update({"errors": error})
-                return shortcuts.render(request, 'prosoul/editor.html', send_context)
-            else:
-                # TODO: Show error
-                raise Http404
+            context = EditorState(attributes=[attribute_orm.id], form=form)
+            send_context = build_forms_context(context)
+            send_context.update({"errors": error})
+            return shortcuts.render(request, 'prosoul/editor.html', send_context)
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            raise Http404
+
 
     @staticmethod
     def select_attribute(request, context=None):
         error = None
         template = 'prosoul/editor.html'
-        if request.method == 'POST':
-            form = forms_editor.AttributesForm(request.POST)
-            if form.is_valid():
-                attr_id = form.cleaned_data['id']
-                attributes = [attr_id] if attr_id else []
-                old_attributes = form.cleaned_data['attributes_state']
-                if old_attributes == attr_id:
-                    # Unselect the attribute and its metrics
-                    form.cleaned_data['attributes_state'] = None
-                    form.cleaned_data['metrics_state'] = None
-                    attributes = None
-                state = EditorState(form=form, attributes=attributes)
+        form = forms_editor.AttributesForm(request.POST)
+        if form.is_valid():
+            attr_id = form.cleaned_data['id']
+            attributes = [attr_id] if attr_id else []
+            old_attributes = form.cleaned_data['attributes_state']
+            if old_attributes == attr_id:
+                # Unselect the attribute and its metrics
+                form.cleaned_data['attributes_state'] = None
+                form.cleaned_data['metrics_state'] = None
+                attributes = None
+            state = EditorState(form=form, attributes=attributes)
 
-                return shortcuts.render(request, template,
-                                        build_forms_context(state))
-            else:
-                state = EditorState(form=form)
-                error = form.errors
-
-            if context:
-                context.update(build_forms_context(state))
-            else:
-                context = build_forms_context(state)
-
-            context.update({"errors": error})
-            return shortcuts.render(request, template, context)
-
+            return shortcuts.render(request, template,
+                                    build_forms_context(state))
         else:
-            return shortcuts.render(request, template, build_forms_context())
+            state = EditorState(form=form)
+            error = form.errors
+
+        if context:
+            context.update(build_forms_context(state))
+        else:
+            context = build_forms_context(state)
+
+        context.update({"errors": error})
+        return shortcuts.render(request, template, context)
+
 
     @staticmethod
     def remove_attribute(request):
         error = None
-        if request.method == 'POST':
-            form = forms_editor.AttributeForm(request.POST)
-            if form.is_valid():
-                attribute_name = form.cleaned_data['attribute_name']
-                current_id = form.cleaned_data['current_id']
-                try:
-                    Attribute.objects.get(id=current_id).delete()
-                except Attribute.DoesNotExist:
-                    error = "Can't remove %s. Attribute does not exists." % attribute_name
-                send_context = build_forms_context(EditorState(form=form, attributes=[]))
-                send_context.update({"errors": error})
-                return shortcuts.render(request, 'prosoul/editor.html', send_context)
-            else:
-                # TODO: Show error
-                print("attribute_goal", form.errors)
-                raise Http404
+        form = forms_editor.AttributeForm(request.POST)
+        if form.is_valid():
+            attribute_name = form.cleaned_data['attribute_name']
+            current_id = form.cleaned_data['current_id']
+            try:
+                Attribute.objects.get(id=current_id).delete()
+            except Attribute.DoesNotExist:
+                error = "Can't remove %s. Attribute does not exists." % attribute_name
+            send_context = build_forms_context(EditorState(form=form, attributes=[]))
+            send_context.update({"errors": error})
+            return shortcuts.render(request, 'prosoul/editor.html', send_context)
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            print("attribute_goal", form.errors)
+            raise Http404
+
 
     @staticmethod
     def update_attribute(request):
-        if request.method == 'POST':
-            form = forms_editor.AttributeForm(request.POST)
+        form = forms_editor.AttributeForm(request.POST)
 
-            if form.is_valid():
-                name = form.cleaned_data['attribute_name']
-                current_id = form.cleaned_data['current_id']
+        if form.is_valid():
+            name = form.cleaned_data['attribute_name']
+            current_id = form.cleaned_data['current_id']
 
-                attribute_orm = Attribute.objects.get(id=current_id)
-                attribute_orm.name = name
-                attribute_orm.save()
+            attribute_orm = Attribute.objects.get(id=current_id)
+            attribute_orm.name = name
+            attribute_orm.save()
 
-                state = EditorState(attributes=[current_id], form=form)
-                return shortcuts.render(request, 'prosoul/editor.html',
-                                        build_forms_context(state))
-            else:
-                # TODO: Show error
-                print(form.errors)
-                raise Http404
+            state = EditorState(attributes=[current_id], form=form)
+            return shortcuts.render(request, 'prosoul/editor.html',
+                                    build_forms_context(state))
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            print(form.errors)
+            raise Http404
 
 
-class GoalView():
+class GoalView(LoginRequiredMixin, JustPostMixin, View):
 
     @staticmethod
     def add_goal(request):
         error = None
-        if request.method == 'POST':
-            form = forms_editor.GoalForm(request.POST)
-            if form.is_valid():
-                qmodel_id = form.cleaned_data['qmodel_state']
-                qmodel_orm = None
-                goal_name = form.cleaned_data['goal_name']
-                goal_orm = Goal(name=goal_name)
-                try:
-                    goal_orm.save()
-                    if qmodel_id:
-                        qmodel_orm = QualityModel.objects.get(id=qmodel_id)
-                        qmodel_orm.goals.add(goal_orm)
-                        qmodel_orm.save()
-                except IntegrityError:
-                    error = "Goal %s alredy exists" % (goal_name)
-                    goal_orm = Goal.objects.get(name=goal_name)
+        form = forms_editor.GoalForm(request.POST)
+        if form.is_valid():
+            qmodel_id = form.cleaned_data['qmodel_state']
+            qmodel_orm = None
+            goal_name = form.cleaned_data['goal_name']
+            goal_orm = Goal(name=goal_name)
+            try:
+                goal_orm.save()
+                if qmodel_id:
+                    qmodel_orm = QualityModel.objects.get(id=qmodel_id)
+                    qmodel_orm.goals.add(goal_orm)
+                    qmodel_orm.save()
+            except IntegrityError:
+                error = "Goal %s alredy exists" % (goal_name)
+                goal_orm = Goal.objects.get(name=goal_name)
 
-                context = EditorState(goals=[goal_orm.id], form=form)
-                send_context = build_forms_context(context)
-                send_context.update({"errors": error})
-                return shortcuts.render(request, 'prosoul/editor.html', send_context)
-            else:
-                # TODO: Show error
-                raise Http404
+            context = EditorState(goals=[goal_orm.id], form=form)
+            send_context = build_forms_context(context)
+            send_context.update({"errors": error})
+            return shortcuts.render(request, 'prosoul/editor.html', send_context)
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            raise Http404
 
     @staticmethod
     def remove_goal(request):
         error = None
-        if request.method == 'POST':
-            form = forms_editor.GoalForm(request.POST)
-            if form.is_valid():
-                goal_name = form.cleaned_data['goal_name']
-                current_id = form.cleaned_data['current_id']
-                try:
-                    Goal.objects.get(id=current_id).delete()
-                except Goal.DoesNotExist:
-                    error = "Can't remove %s. Goal does not exists." % goal_name
-                send_context = build_forms_context(EditorState(goals=[], form=form))
-                send_context.update({"errors": error})
-                return shortcuts.render(request, 'prosoul/editor.html', send_context)
-            else:
-                # TODO: Show error
-                print("remove_goal", form.errors)
-                raise Http404
+        form = forms_editor.GoalForm(request.POST)
+        if form.is_valid():
+            goal_name = form.cleaned_data['goal_name']
+            current_id = form.cleaned_data['current_id']
+            try:
+                Goal.objects.get(id=current_id).delete()
+            except Goal.DoesNotExist:
+                error = "Can't remove %s. Goal does not exists." % goal_name
+            send_context = build_forms_context(EditorState(goals=[], form=form))
+            send_context.update({"errors": error})
+            return shortcuts.render(request, 'prosoul/editor.html', send_context)
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            print("remove_goal", form.errors)
+            raise Http404
 
     @staticmethod
     def select_goal(request, context=None):
         error = None
         template = 'prosoul/editor.html'
-        if request.method == 'POST':
-            form = forms_editor.GoalsForm(request.POST)
-            if form.is_valid():
-                old_goals = form.cleaned_data['goals_state']
-                goal_id = form.cleaned_data['id']
-                goals = [goal_id]
-                if old_goals == goal_id:
-                    # Unselect the goal and its attributes and metrics
-                    form.cleaned_data['goals_state'] = None
-                    form.cleaned_data['attributes_state'] = None
-                    form.cleaned_data['metrics_state'] = None
-                    goals = None
-                state = EditorState(goals=goals, form=form)
-            else:
-                state = EditorState(form=form)
-                error = form.errors
-
-            if context:
-                context.update(build_forms_context(state))
-            else:
-                context = build_forms_context(state)
-
-            context.update({"errors": error})
-            return shortcuts.render(request, template, context)
-
+        form = forms_editor.GoalsForm(request.POST)
+        if form.is_valid():
+            old_goals = form.cleaned_data['goals_state']
+            goal_id = form.cleaned_data['id']
+            goals = [goal_id]
+            if old_goals == goal_id:
+                # Unselect the goal and its attributes and metrics
+                form.cleaned_data['goals_state'] = None
+                form.cleaned_data['attributes_state'] = None
+                form.cleaned_data['metrics_state'] = None
+                goals = None
+            state = EditorState(goals=goals, form=form)
         else:
-            return shortcuts.render(request, template, build_forms_context())
+            state = EditorState(form=form)
+            error = form.errors
+
+        if context:
+            context.update(build_forms_context(state))
+        else:
+            context = build_forms_context(state)
+
+        context.update({"errors": error})
+        return shortcuts.render(request, template, context)
+
 
     @staticmethod
     def update_goal(request):
-        if request.method == 'POST':
-            form = forms_editor.GoalForm(request.POST)
+        form = forms_editor.GoalForm(request.POST)
 
-            if form.is_valid():
-                goal_name = form.cleaned_data['goal_name']
-                current_id = form.cleaned_data['current_id']
+        if form.is_valid():
+            goal_name = form.cleaned_data['goal_name']
+            current_id = form.cleaned_data['current_id']
 
-                goal_orm = Goal.objects.get(id=current_id)
-                goal_orm.name = goal_name
-                goal_orm.save()
+            goal_orm = Goal.objects.get(id=current_id)
+            goal_orm.name = goal_name
+            goal_orm.save()
 
-                state = EditorState(goals=[current_id], form=form)
-                return shortcuts.render(request, 'prosoul/editor.html',
-                                        build_forms_context(state))
-            else:
-                # TODO: Show error
-                print(form.errors)
-                raise Http404
+            state = EditorState(goals=[current_id], form=form)
+            return shortcuts.render(request, 'prosoul/editor.html',
+                                    build_forms_context(state))
         else:
-            return shortcuts.render(request, 'prosoul/editor.html', build_forms_context())
+            # TODO: Show error
+            print(form.errors)
+            raise Http404
