@@ -4,6 +4,7 @@ from django.views.generic import RedirectView
 from . import views
 from . import views_editor
 
+app_name = 'prosoul'
 
 urlpatterns_edit = [
     url(r'^editor$', views_editor.editor, name='editor'),
@@ -31,10 +32,10 @@ urlpatterns_edit = [
 
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url='viewer')),
-    url(r'^viewer$', views.Viewer.as_view()),
-    url(r'^visualize$', views.Visualize.as_view()),
+    url(r'^viewer$', views.Viewer.as_view(), name='viewer'),
+    url(r'^visualize$', views.Visualize.as_view(), name='viz'),
     url(r'^create_visualization$', views.Visualize.as_view()),
-    url(r'^assess$', views.Assessment.as_view()),
+    url(r'^assess$', views.Assessment.as_view(), name='assess'),
     url(r'^create_assessment$', views.Assessment.as_view())
 ]
 

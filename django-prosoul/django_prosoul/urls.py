@@ -24,5 +24,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls, name="admin"),
     url(r'^accounts/login/$', auth_views.LoginView.as_view()),
     url('^', include('django.contrib.auth.urls')),
-    url(r'^prosoul/', include('prosoul.urls'))
+    url(r'^prosoul/', include('prosoul.urls', namespace='prosoul'))
 ]
