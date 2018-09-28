@@ -2,32 +2,33 @@ from django.conf.urls import url
 from django.views.generic import RedirectView
 
 from . import views
-from . import views_editor
+from prosoul.views_editor import AttributeView, EditorView, GoalView, MetricView, MetricDataView, QualityModelView
+from prosoul.views_editor import import_from_file, export_to_file
 
 app_name = 'prosoul'
 
 urlpatterns_edit = [
-    url(r'^editor$', views_editor.editor, name='editor'),
-    url(r'^import$', views_editor.import_from_file),
-    url(r'^export/qmodel=(?P<qmodel>[\w ]+)', views_editor.export_to_file),
-    url(r'^export$', views_editor.export_to_file),
-    url(r'^add_qmodel$', views_editor.QualityModelView.add_qmodel),
-    url(r'^remove_qmodel$', views_editor.QualityModelView.remove_qmodel),
-    url(r'^select_qmodel$', views_editor.QualityModelView.select_qmodel),
-    url(r'^update_qmodel$', views_editor.QualityModelView.update_qmodel),
-    url(r'^add_goal$', views_editor.GoalView.add_goal),
-    url(r'^remove_goal$', views_editor.GoalView.remove_goal),
-    url(r'^select_goal$', views_editor.GoalView.select_goal),
-    url(r'^update_goal$', views_editor.GoalView.update_goal),
-    url(r'^add_attribute$', views_editor.AttributeView.add_attribute),
-    url(r'^remove_attribute$', views_editor.AttributeView.remove_attribute),
-    url(r'^select_attribute$', views_editor.AttributeView.select_attribute),
-    url(r'^update_attribute$', views_editor.AttributeView.update_attribute),
-    url(r'^add_metric$', views_editor.MetricView.add_metric),
-    url(r'^remove_metric$', views_editor.MetricView.remove_metric),
-    url(r'^select_metric$', views_editor.MetricView.select_metric),
-    url(r'^update_metric$', views_editor.MetricView.update_metric),
-    url(r'^add_metric_data$', views_editor.MetricDataView.add_metric_data)
+    url(r'^editor$', EditorView.as_view(), name='editor'),
+    url(r'^import$', import_from_file),
+    url(r'^export/qmodel=(?P<qmodel>[\w ]+)', export_to_file),
+    url(r'^export$', export_to_file),
+    url(r'^add_qmodel$', QualityModelView.as_view(action=QualityModelView.add_qmodel)),
+    url(r'^remove_qmodel$', QualityModelView.as_view(action=QualityModelView.remove_qmodel)),
+    url(r'^select_qmodel$', QualityModelView.as_view(action=QualityModelView.select_qmodel)),
+    url(r'^update_qmodel$', QualityModelView.as_view(action=QualityModelView.update_qmodel)),
+    url(r'^add_goal$', GoalView.as_view(action=GoalView.add_goal)),
+    url(r'^remove_goal$', GoalView.as_view(action=GoalView.remove_goal)),
+    url(r'^select_goal$', GoalView.as_view(action=GoalView.select_goal)),
+    url(r'^update_goal$', GoalView.as_view(action=GoalView.update_goal)),
+    url(r'^add_attribute$', AttributeView.as_view(action=AttributeView.add_attribute)),
+    url(r'^remove_attribute$', AttributeView.as_view(action=AttributeView.remove_attribute)),
+    url(r'^select_attribute$', AttributeView.as_view(action=AttributeView.select_attribute)),
+    url(r'^update_attribute$', AttributeView.as_view(action=AttributeView.update_attribute)),
+    url(r'^add_metric$', MetricView.as_view(action=MetricView.add_metric)),
+    url(r'^remove_metric$', MetricView.as_view(action=MetricView.remove_metric)),
+    url(r'^select_metric$', MetricView.as_view(action=MetricView.select_metric)),
+    url(r'^update_metric$', MetricView.as_view(action=MetricView.update_metric)),
+    url(r'^add_metric_data$', MetricDataView.as_view(action=MetricDataView.add_metric_data))
 ]
 
 urlpatterns = [

@@ -3,14 +3,13 @@ import json
 from django import shortcuts
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import redirect
 from django.template import loader
 from django.views import View
+from django.views.generic import RedirectView
 
 from prosoul.prosoul_export import fetch_models, gl2viewer
 from prosoul.prosoul_assess import assess
 from prosoul.prosoul_vis import build_dashboards
-from prosoul.views_editor import editor
 from prosoul.forms import AssessmentForm, VisualizationForm
 
 
@@ -22,7 +21,7 @@ class Viewer(LoginRequiredMixin, View):
         """ Basic Models Viewer just dumping the JSON of all models """
         models = fetch_models()
         if not models['qualityModels']:
-            return editor(request)
+            return shortcuts.redirect('prosoul:editor')
         model_selected = models['qualityModels'][0]['name']
         if request.method == 'GET' and 'qmodel_selected' in request.GET:
             model_selected = request.GET['qmodel_selected']
