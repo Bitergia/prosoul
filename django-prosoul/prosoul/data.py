@@ -4,7 +4,7 @@ import os.path
 
 import pkg_resources
 
-PANELS_DIR = 'panels'
+PANELS_DIR = 'panels/templates'
 
 
 class VizTemplatesData():
