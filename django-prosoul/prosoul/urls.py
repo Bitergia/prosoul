@@ -1,9 +1,13 @@
-from django.conf.urls import url
+from django.conf.urls import include, url
 from django.views.generic import RedirectView
+
+from rest_framework import routers
 
 from . import views
 from prosoul.views_editor import AttributeView, EditorView, GoalView, MetricView, MetricDataView, QualityModelView
 from prosoul.views_editor import import_from_file, export_to_file
+
+from prosoul.rest import AttributeViewSet, GoalViewSet, QualityModelViewSet
 
 app_name = 'prosoul'
 
@@ -41,3 +45,15 @@ urlpatterns = [
 ]
 
 urlpatterns += urlpatterns_edit
+
+#############
+# REST routes support
+
+# Routers provide an easy way of automatically determining the URL conf.
+router = routers.DefaultRouter()
+router.register(r'qualitymodels', QualityModelViewSet)
+router.register(r'attributes', AttributeViewSet)
+router.register(r'goal', GoalViewSet)
+#############
+
+urlpatterns += [url(r'^api/', include(router.urls))]

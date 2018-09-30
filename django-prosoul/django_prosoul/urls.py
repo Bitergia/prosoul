@@ -18,40 +18,13 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic import RedirectView
 
-from prosoul.models import QualityModel
-
-#############
-# REST routes support
-# Serializers define the API representation.
-
-from rest_framework import routers, serializers, viewsets
-
-
-class QualityModelSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = QualityModel
-        fields = ('id', 'name', 'active', 'description', 'created_at', 'updated_at')
-        # fields = ('id', 'name', 'active', 'description', 'created_by', 'created_at', 'updated_at')
-
-
-# ViewSets define the view behavior.
-class QualityModelViewSet(viewsets.ModelViewSet):
-    queryset = QualityModel.objects.all()
-    serializer_class = QualityModelSerializer
-
-
-# Routers provide an easy way of automatically determining the URL conf.
-router = routers.DefaultRouter()
-router.register(r'qualitymodels', QualityModelViewSet)
-#############
-
 
 urlpatterns = [
     url(r'^$', RedirectView.as_view(url='/prosoul')),
     url(r'^admin/', admin.site.urls, name="admin"),
     url(r'^accounts/login/$', auth_views.LoginView.as_view()),
     url('^', include('django.contrib.auth.urls')),
-    url('^', include(router.urls)),
-    url(r'^prosoul/', include('prosoul.urls', namespace='prosoul')),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^prosoul/', include('prosoul.urls', namespace='prosoul'))
 ]
+
+urlpatterns += [url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))]
