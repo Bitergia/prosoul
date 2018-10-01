@@ -8,7 +8,7 @@ from prosoul.views_editor import AttributeView, EditorView, GoalView, MetricView
 from prosoul.views_editor import import_from_file, export_to_file
 
 from prosoul.rest import AttributeViewSet, DataSourceTypeViewSet, FactoidViewSet, GoalViewSet
-from prosoul.rest import MetricViewSet, MetricDataViewSet, QualityModelViewSet
+from prosoul.rest import MetricViewSet, MetricDataViewSet, QualityModelViewSet, UserViewSet
 
 app_name = 'prosoul'
 
@@ -59,6 +59,7 @@ router.register(r'datasourcetype', DataSourceTypeViewSet)
 router.register(r'metric', MetricViewSet)
 router.register(r'metricdata', MetricDataViewSet)
 router.register(r'qualitymodels', QualityModelViewSet)
+router.register(r'users', UserViewSet)
 #############
 
 urlpatterns += [url(r'^api/', include(router.urls))]
