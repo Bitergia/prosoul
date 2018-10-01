@@ -7,7 +7,8 @@ from . import views
 from prosoul.views_editor import AttributeView, EditorView, GoalView, MetricView, MetricDataView, QualityModelView
 from prosoul.views_editor import import_from_file, export_to_file
 
-from prosoul.rest import AttributeViewSet, GoalViewSet, QualityModelViewSet
+from prosoul.rest import AttributeViewSet, DataSourceTypeViewSet, FactoidViewSet, GoalViewSet
+from prosoul.rest import MetricViewSet, MetricDataViewSet, QualityModelViewSet
 
 app_name = 'prosoul'
 
@@ -51,9 +52,13 @@ urlpatterns += urlpatterns_edit
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
-router.register(r'qualitymodels', QualityModelViewSet)
 router.register(r'attributes', AttributeViewSet)
+router.register(r'factoid', FactoidViewSet)
 router.register(r'goal', GoalViewSet)
+router.register(r'datasourcetype', DataSourceTypeViewSet)
+router.register(r'metric', MetricViewSet)
+router.register(r'metricdata', MetricDataViewSet)
+router.register(r'qualitymodels', QualityModelViewSet)
 #############
 
 urlpatterns += [url(r'^api/', include(router.urls))]
