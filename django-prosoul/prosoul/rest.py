@@ -1,75 +1,133 @@
 # Serializers define the API representation.
 
 from django.contrib.auth.models import User
+from django.contrib.auth.validators import UnicodeUsernameValidator
+
 
 from prosoul.models import Attribute, DataSourceType, Factoid, Goal, Metric, MetricData, QualityModel
 from rest_framework import serializers, viewsets
 
 
-PROSOUL_FIELDS = ('id', 'name', 'active', 'description', 'created_at', 'updated_at')
+PROSOUL_FIELDS = ('id', 'name', 'active', 'description', 'created_at', 'updated_at', 'created_by')
 
 
-class AttributeSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Attribute
-        fields = PROSOUL_FIELDS
-        # fields+= ('metrics', 'factoids', 'subattributes')
+        model = User
+        fields = ['username']
+        # https://medium.com/django-rest-framework/dealing-with-unique-constraints-in-nested-serializers-dade33b831d9
+        extra_kwargs = {
+            'username': {
+                'validators': [UnicodeUsernameValidator()],
+            }
+        }
+
+
+class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+
+    class Meta:
+        model = MetricData
+        fields = tuple(f for f in PROSOUL_FIELDS if f != 'name')
+        fields += ('implementation', 'params')
 
 
 class DataSourceTypeSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+
     class Meta:
         model = DataSourceType
         fields = PROSOUL_FIELDS
-        # fields+= ('', )
+        # fields += ('', )
+
+
+class MetricSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+    data = MetricDataSerializer()
+    data_source_type = DataSourceTypeSerializer()
+
+    class Meta:
+        model = Metric
+        fields = PROSOUL_FIELDS
+        fields += ('data', 'data_source_type', 'thresholds')
 
 
 class FactoidSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+    data_source_type = DataSourceTypeSerializer()
+
     class Meta:
         model = Factoid
         fields = PROSOUL_FIELDS
-        # fields+= ('', )
+        fields += ('data_source_type', )
 
 
-class GoalSerializer(serializers.HyperlinkedModelSerializer):
+class SubAttributeSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+    metrics = MetricSerializer(many=True)
+    factoids = FactoidSerializer(many=True)
+
+    class Meta:
+        model = Attribute
+        fields = PROSOUL_FIELDS
+        fields += ('metrics', 'factoids')
+
+
+class AttributeSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+    metrics = MetricSerializer(many=True)
+    factoids = FactoidSerializer(many=True)
+    subattributes = SubAttributeSerializer(many=True)
+
+    class Meta:
+        model = Attribute
+        fields = PROSOUL_FIELDS
+        fields += ('metrics', 'factoids', 'subattributes')
+
+
+class SubGoalSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+
     attributes = AttributeSerializer(many=True)
-    # subgoals = GoalSerializer(many=True)
+
     class Meta:
         model = Goal
         fields = PROSOUL_FIELDS
         fields += ('attributes', )
-        # fields+= ('attributes', 'subgoals')
 
 
-class MetricSerializer(serializers.HyperlinkedModelSerializer):
+class GoalSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+
+    attributes = AttributeSerializer(many=True)
+    subgoals = SubGoalSerializer(many=True)
+
     class Meta:
-        model = Metric
+        model = Goal
         fields = PROSOUL_FIELDS
-        # fields+= ('', )
+        fields += ('attributes', 'subgoals', )
 
-
-class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = MetricData
-        fields = tuple(f for f in PROSOUL_FIELDS if f != 'name')
-        # fields+= ('', )
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'username')
+    def create(self, validated_data):
+        user_data = validated_data.pop('created_by')
+        user = User.objects.get_or_create(username=user_data['username'])[0]
+        goal = Goal.objects.create(created_by=user, **validated_data)
+        return goal
 
 
 class QualityModelSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer()
-    goals = GoalSerializer(many=True)
+    goals = GoalSerializer(many=True, read_only=True)
 
     class Meta:
         model = QualityModel
         fields = PROSOUL_FIELDS
         fields += ('goals', )
-        fields += ('created_by', )
 
+    def create(self, validated_data):
+        user_data = validated_data.pop('created_by')
+        user = User.objects.get_or_create(username=user_data['username'])[0]
+        quality_model = QualityModel.objects.create(created_by=user, **validated_data)
+        return quality_model
 
 
 # ViewSets define the view behavior.
