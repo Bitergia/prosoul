@@ -1,5 +1,7 @@
 # Serializers define the API representation.
 
+from django.contrib.auth.models import User
+
 from prosoul.models import Attribute, DataSourceType, Factoid, Goal, Metric, MetricData, QualityModel
 from rest_framework import serializers, viewsets
 
@@ -29,9 +31,12 @@ class FactoidSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class GoalSerializer(serializers.HyperlinkedModelSerializer):
+    attributes = AttributeSerializer(many=True)
+    # subgoals = GoalSerializer(many=True)
     class Meta:
         model = Goal
         fields = PROSOUL_FIELDS
+        fields += ('attributes', )
         # fields+= ('attributes', 'subgoals')
 
 
@@ -49,12 +54,22 @@ class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
         # fields+= ('', )
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username')
+
+
 class QualityModelSerializer(serializers.HyperlinkedModelSerializer):
+    created_by = UserSerializer()
+    goals = GoalSerializer(many=True)
+
     class Meta:
         model = QualityModel
         fields = PROSOUL_FIELDS
-        # fields += ('goals', )
-        # fields += ('created_by', )
+        fields += ('goals', )
+        fields += ('created_by', )
+
 
 
 # ViewSets define the view behavior.
@@ -91,3 +106,8 @@ class MetricDataViewSet(viewsets.ModelViewSet):
 class QualityModelViewSet(viewsets.ModelViewSet):
     queryset = QualityModel.objects.all()
     serializer_class = QualityModelSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
