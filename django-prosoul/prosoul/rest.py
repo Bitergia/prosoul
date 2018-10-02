@@ -24,12 +24,26 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
+    created_by = UserSerializer(required=False)
 
     class Meta:
         model = MetricData
         fields = tuple(f for f in PROSOUL_FIELDS if f != 'name')
         fields += ('implementation', 'params')
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('created_by')
+        user = User.objects.get_or_create(username=user_data['username'])[0]
+        mdata = MetricData.objects.create(created_by=user, **validated_data)
+        return mdata
+
+    def update(self, instance, validated_data):
+        for field in ['active', 'description', 'implementation', 'params']:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+        instance.save()
+
+        return instance
 
 
 class DataSourceTypeSerializer(serializers.HyperlinkedModelSerializer):
@@ -100,12 +114,13 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer()
 
     attributes = AttributeSerializer(many=True)
-    subgoals = SubGoalSerializer(many=True)
+    # subgoals = SubGoalSerializer(many=True)
 
     class Meta:
         model = Goal
         fields = PROSOUL_FIELDS
-        fields += ('attributes', 'subgoals', )
+        fields += ('attributes', )
+        # fields += ('attributes', 'subgoals', )
 
     def create(self, validated_data):
         user_data = validated_data.pop('created_by')
@@ -116,7 +131,7 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
 
 class QualityModelSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer()
-    goals = GoalSerializer(many=True, read_only=True)
+    goals = GoalSerializer(many=True)
 
     class Meta:
         model = QualityModel
