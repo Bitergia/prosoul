@@ -46,7 +46,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-prosoul',
-    version='0.2.0',
+    version='0.4.0',
     packages=['prosoul'],
     include_package_data=True,
     license='GPLv3',
