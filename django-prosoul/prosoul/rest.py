@@ -8,6 +8,7 @@ from rest_framework import serializers, viewsets
 
 
 PROSOUL_FIELDS = ('id', 'name', 'active', 'description', 'created_at', 'updated_at', 'created_by')
+PROSOUL_FIELDS_UPDATE = ('name', 'active', 'description')  # Fields updated
 
 
 class MetaNameMixin():
@@ -23,6 +24,67 @@ class MetaNameMixin():
     }
 
 
+class CreateUpdateNestedMixin():
+    """
+    Mixin used to implement the persistence of nested objects
+    """
+
+    class Meta():
+        nested_fields = []  # Fields with nested objects
+        nested_fields_model = []  # Mapping between fields and the nested object model
+
+    def extract_nested_objects_data(self, validated_data):
+        """
+        Extract the data for nested objects from validated_data
+
+        :param validated_data: data received by HTTP protocol already validated
+        :return: a dict with the nested object field as key and a the list of nested objects data as value
+        """
+
+        related_objects_data = {}
+        for field in self.Meta.nested_fields:
+            related_objects_data[field] = None
+            if field in validated_data:
+                field_data = validated_data.pop(field)
+                related_objects_data[field] = field_data
+
+        return related_objects_data
+
+    def update_nested_objects(self, instance, nested_objects_data):
+        """
+        Add to the instance object fields the nested objects
+
+        :param instance: an object model instance in which to add the nested objects (i.e. Attribute instance)
+        :param nested_objects_data: a dict with the fields and their nested objects data needed to find the objects.
+        For each field in the dict there is a list of nested objects data.
+        :return:
+        """
+
+        for field in nested_objects_data:
+            if nested_objects_data[field] is None:
+                # It could be a list or a single value
+                try:
+                    setattr(instance, field, None)
+                except TypeError:
+                    getattr(instance, field).set([])
+
+                continue
+
+            if not isinstance(nested_objects_data[field], list):
+                nested_object = None
+                if nested_objects_data[field]:
+                    nested_object = self.Meta.nested_fields_model[field].objects.get(**nested_objects_data[field])
+                setattr(instance, field, nested_object)
+            else:
+                # Empty the nested objects for this field (i.e. Attribute.metrics.set([])
+                getattr(instance, field).set([])
+                if nested_objects_data[field]:
+                    for object_data in nested_objects_data[field]:
+                        # Create the object model from the data
+                        object = self.Meta.nested_fields_model[field].objects.get(**object_data)
+                        getattr(instance, field).add(object)
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
@@ -35,7 +97,7 @@ class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
     class Meta(MetaNameMixin):
         model = MetricData
         fields = tuple(f for f in PROSOUL_FIELDS if f != 'name')
-        fields += ('id', 'implementation', 'params')
+        fields += ('implementation', 'params')
 
     def create(self, validated_data):
         username = self.context['request'].user.username
@@ -66,7 +128,7 @@ class DataSourceTypeSerializer(serializers.HyperlinkedModelSerializer):
         return data_source_type
 
     def update(self, instance, validated_data):
-        for field in ['active', 'description', 'name']:
+        for field in PROSOUL_FIELDS:
             if field in validated_data:
                 setattr(instance, field, validated_data[field])
         instance.save()
@@ -74,46 +136,35 @@ class DataSourceTypeSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
-class MetricSerializer(serializers.HyperlinkedModelSerializer):
+class MetricSerializer(serializers.HyperlinkedModelSerializer, CreateUpdateNestedMixin):
     created_by = UserSerializer(read_only=True)
     data = MetricDataSerializer(required=False)
     data_source_type = DataSourceTypeSerializer(required=False)
 
     class Meta(MetaNameMixin):
         model = Metric
-        fields = PROSOUL_FIELDS
-        fields += ('data', 'data_source_type', 'thresholds')
+        fields = PROSOUL_FIELDS + ('thresholds', )
+        nested_fields = ('data', 'data_source_type', )
+        nested_fields_model = {"data": MetricData, "data_source_type": DataSourceType}
+        fields += nested_fields
 
     def create(self, validated_data):
         username = self.context['request'].user.username
         user = User.objects.get_or_create(username=username)[0]
-        # extract metric data
-        metric_data = None
-        if 'data' in validated_data:
-            metric_data_data = validated_data.pop('data')
-            metric_data = MetricData.objects.get(**metric_data_data)
-        # extract data source type data
-        ds = None
-        if 'data_source_type' in validated_data:
-            ds_data = validated_data.pop('data_source_type')
-            ds = DataSourceType.objects.get(**ds_data)
-        # Create the metric object
-        metric = Metric.objects.create(created_by=user, data=metric_data, data_source_type=ds, **validated_data)
+
+        nested_objects_data = self.extract_nested_objects_data(validated_data)
+        metric = Metric.objects.create(created_by=user, **validated_data)
+        self.update_nested_objects(metric, nested_objects_data)
+
         return metric
 
     def update(self, instance, validated_data):
-        for field in ['active', 'description', 'name', 'thresholds']:
+        for field in PROSOUL_FIELDS_UPDATE + ('thresholds',):
             if field in validated_data:
                 setattr(instance, field, validated_data[field])
-        # extract metric data
-        if 'data' in validated_data:
-            metric_data_data = validated_data.pop('data')
-            metric_data = MetricData.objects.get(**metric_data_data)
-            instance.data = metric_data
-        if 'data_source_type' in validated_data:
-            ds_data = validated_data.pop('data_source_type')
-            ds = DataSourceType.objects.get(**ds_data)
-            instance.data_source_type = ds
+
+        nested_objects_data = self.extract_nested_objects_data(validated_data)
+        self.update_nested_objects(instance, nested_objects_data)
 
         instance.save()
 
@@ -141,7 +192,7 @@ class FactoidSerializer(serializers.HyperlinkedModelSerializer):
         return factoid
 
     def update(self, instance, validated_data):
-        for field in ['active', 'description', 'name']:
+        for field in PROSOUL_FIELDS_UPDATE:
             if field in validated_data:
                 setattr(instance, field, validated_data[field])
         if 'data_source_type' in validated_data:
@@ -164,57 +215,40 @@ class SubAttributeSerializer(serializers.HyperlinkedModelSerializer):
         fields = PROSOUL_FIELDS
         fields += ('metrics', 'factoids')
 
- 
-class AttributeSerializer(serializers.HyperlinkedModelSerializer):
+
+class AttributeSerializer(serializers.HyperlinkedModelSerializer, CreateUpdateNestedMixin):
     created_by = UserSerializer(read_only=True)
-    metrics = MetricSerializer(many=True)
-    factoids = FactoidSerializer(many=True)
-    subattributes = SubAttributeSerializer(many=True)
+    metrics = MetricSerializer(many=True, required=False)
+    factoids = FactoidSerializer(many=True, required=False)
+    subattributes = SubAttributeSerializer(many=True, required=False)
 
     class Meta(MetaNameMixin):
         model = Attribute
 
-        extra_fields = ('metrics', 'factoids', 'subattributes')
-        extra_fields_model = {"metrics": Metric, "factoids": Factoid, "subattributes": Attribute}
+        nested_fields = ('metrics', 'factoids', 'subattributes')
+        nested_fields_model = {"metrics": Metric, "factoids": Factoid, "subattributes": Attribute}
         fields = PROSOUL_FIELDS
-        fields += extra_fields
-
-    def __find_related_objects_data(self, validated_data):
-        related_objects_data = {}
-        for field in self.Meta.extra_fields:
-            related_objects_data[field] = None
-            if field in validated_data:
-                related_objects_data[field] = validated_data.pop(field)
-        return related_objects_data
-
-    def __update_related_objects(self, instance, related_objects_data):
-        # Update the related objects
-        for field in related_objects_data:
-            if related_objects_data[field]:
-                for object_data in related_objects_data[field]:
-                    # Create the object model from the data
-                    object = self.Meta.extra_fields_model[field].objects.get(**object_data)
-                    getattr(instance, field).add(object)
+        fields += nested_fields
 
     def create(self, validated_data):
         username = self.context['request'].user.username
         user = User.objects.get_or_create(username=username)[0]
 
-        related_objects_data = self.__find_related_objects_data(validated_data)
+        nested_objects_data = self.extract_nested_objects_data(validated_data)
 
         attribute = Attribute.objects.create(created_by=user, **validated_data)
 
-        self.__update_related_objects(attribute, related_objects_data)
+        self.update_nested_objects(attribute, nested_objects_data)
 
         return attribute
 
     def update(self, instance, validated_data):
-        for field in ['active', 'description', 'name']:
+        for field in PROSOUL_FIELDS_UPDATE:
             if field in validated_data:
                 setattr(instance, field, validated_data[field])
 
-        related_objects_data = self.__find_related_objects_data(validated_data)
-        self.__update_related_objects(instance, related_objects_data)
+        nested_objects_data = self.extract_nested_objects_data(validated_data)
+        self.update_nested_objects(instance, nested_objects_data)
 
         instance.save()
 
@@ -222,9 +256,9 @@ class AttributeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SubGoalSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer(read_only=True)
+    created_by = UserSerializer(read_only=True, required=False)
 
-    attributes = AttributeSerializer(many=True)
+    attributes = AttributeSerializer(many=True, required=False)
 
     class Meta(MetaNameMixin):
         model = Goal
@@ -232,40 +266,78 @@ class SubGoalSerializer(serializers.HyperlinkedModelSerializer):
         fields += ('attributes', )
 
 
-class GoalSerializer(serializers.HyperlinkedModelSerializer):
+class GoalSerializer(serializers.HyperlinkedModelSerializer, CreateUpdateNestedMixin):
     created_by = UserSerializer(read_only=True)
 
-    attributes = AttributeSerializer(many=True)
-    # subgoals = SubGoalSerializer(many=True)
+    attributes = AttributeSerializer(many=True, required=False)
+    subgoals = SubGoalSerializer(many=True, required=False)
 
     class Meta(MetaNameMixin):
         model = Goal
         fields = PROSOUL_FIELDS
-        extra_fields = ('attributes', 'subgoals')
-        extra_fields_model = {"subgoals": Goal, "attributes": Attribute}
-        fields += extra_fields
+        nested_fields = ('attributes', 'subgoals')
+        nested_fields_model = {"attributes": Attribute, "subgoals": Goal}
+        fields += nested_fields
 
     def create(self, validated_data):
-        user_data = validated_data.pop('created_by')
-        user = User.objects.get_or_create(username=user_data['username'])[0]
+        username = self.context['request'].user.username
+        user = User.objects.get_or_create(username=username)[0]
+
+        nested_objects_data = self.extract_nested_objects_data(validated_data)
+
         goal = Goal.objects.create(created_by=user, **validated_data)
+
+        self.update_nested_objects(goal, nested_objects_data)
+
         return goal
 
+    def update(self, instance, validated_data):
+        for field in PROSOUL_FIELDS_UPDATE:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
 
-class QualityModelSerializer(serializers.HyperlinkedModelSerializer):
+        nested_objects_data = self.extract_nested_objects_data(validated_data)
+        self.update_nested_objects(instance, nested_objects_data)
+
+        instance.save()
+
+        return instance
+
+
+class QualityModelSerializer(serializers.HyperlinkedModelSerializer, CreateUpdateNestedMixin):
     created_by = UserSerializer(read_only=True)
     goals = GoalSerializer(many=True)
 
     class Meta(MetaNameMixin):
         model = QualityModel
         fields = PROSOUL_FIELDS
-        fields += ('goals', )
+        nested_fields = ('goals',)
+        nested_fields_model = {"goals": Goal}
+        fields += nested_fields
 
     def create(self, validated_data):
-        user_data = validated_data.pop('created_by')
-        user = User.objects.get_or_create(username=user_data['username'])[0]
+        username = self.context['request'].user.username
+        user = User.objects.get_or_create(username=username)[0]
+
+        nested_objects_data = self.extract_nested_objects_data(validated_data)
+
         quality_model = QualityModel.objects.create(created_by=user, **validated_data)
+
+        self.update_nested_objects(quality_model, nested_objects_data)
+
         return quality_model
+
+    def update(self, instance, validated_data):
+        for field in PROSOUL_FIELDS_UPDATE:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+
+        nested_objects_data = self.extract_nested_objects_data(validated_data)
+        self.update_nested_objects(instance, nested_objects_data)
+
+        instance.save()
+
+        return instance
 
 
 # ViewSets define the view behavior.
