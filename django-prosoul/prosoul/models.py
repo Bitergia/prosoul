@@ -30,9 +30,12 @@ class MetricData(ProsoulModel):
     params = models.CharField(max_length=1024, null=True, blank=True)
 
     def __str__(self):
+        metric_data_str = str(self.id)
+        if self.implementation:
+            metric_data_str += " " + self.implementation
         if self.params:
-            return self.implementation + " " + self.params
-        return self.implementation
+            metric_data_str += " " + self.params
+        return metric_data_str
 
 
 class Metric(ProsoulModel):
@@ -60,7 +63,7 @@ class Factoid(ProsoulModel):
 
 
 class Attribute(ProsoulModel):
-    name = models.CharField(max_length=200, unique=False)
+    name = models.CharField(max_length=200, unique=True)
     # Relations
     metrics = models.ManyToManyField(Metric, blank=True)
     factoids = models.ManyToManyField(Factoid, blank=True)
@@ -71,7 +74,7 @@ class Attribute(ProsoulModel):
 
 
 class Goal(ProsoulModel):
-    name = models.CharField(max_length=200, unique=False)
+    name = models.CharField(max_length=200, unique=True)
     # Relations
     attributes = models.ManyToManyField(Attribute)
     subgoals = models.ManyToManyField("Goal", blank=True)
