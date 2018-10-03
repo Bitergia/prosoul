@@ -10,22 +10,29 @@ from rest_framework import serializers, viewsets
 PROSOUL_FIELDS = ('id', 'name', 'active', 'description', 'created_at', 'updated_at', 'created_by')
 
 
+class MetaNameMixin():
+    # In POST operations which include a list of object names to be included
+    # those names must not be unique because they already exist, so removing this validator.
+    # This can bite us when creating new objects, where this validator is useful!
+
+    # https://medium.com/django-rest-framework/dealing-with-unique-constraints-in-nested-serializers-dade33b831d9
+    extra_kwargs = {
+        'name': {
+            'validators': [UnicodeUsernameValidator()],
+        }
+    }
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ['username']
-        # https://medium.com/django-rest-framework/dealing-with-unique-constraints-in-nested-serializers-dade33b831d9
-        extra_kwargs = {
-            'username': {
-                'validators': [UnicodeUsernameValidator()],
-            }
-        }
 
 
 class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer(read_only=True)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = MetricData
         fields = tuple(f for f in PROSOUL_FIELDS if f != 'name')
         fields += ('id', 'implementation', 'params')
@@ -48,16 +55,9 @@ class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
 class DataSourceTypeSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer(read_only=True)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = DataSourceType
         fields = PROSOUL_FIELDS
-
-        # https://medium.com/django-rest-framework/dealing-with-unique-constraints-in-nested-serializers-dade33b831d9
-        extra_kwargs = {
-            'name': {
-                'validators': [UnicodeUsernameValidator()],
-            }
-        }
 
     def create(self, validated_data):
         username = self.context['request'].user.username
@@ -79,7 +79,7 @@ class MetricSerializer(serializers.HyperlinkedModelSerializer):
     data = MetricDataSerializer(required=False)
     data_source_type = DataSourceTypeSerializer(required=False)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = Metric
         fields = PROSOUL_FIELDS
         fields += ('data', 'data_source_type', 'thresholds')
@@ -124,7 +124,7 @@ class FactoidSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer(read_only=True)
     data_source_type = DataSourceTypeSerializer(required=False)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = Factoid
         fields = PROSOUL_FIELDS
         fields += ('data_source_type', )
@@ -156,25 +156,69 @@ class FactoidSerializer(serializers.HyperlinkedModelSerializer):
 
 class SubAttributeSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer(read_only=True)
-    metrics = MetricSerializer(many=True)
-    factoids = FactoidSerializer(many=True)
+    metrics = MetricSerializer(many=True, required=False)
+    factoids = FactoidSerializer(many=True, required=False)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = Attribute
         fields = PROSOUL_FIELDS
         fields += ('metrics', 'factoids')
 
-
+ 
 class AttributeSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer(read_only=True)
     metrics = MetricSerializer(many=True)
     factoids = FactoidSerializer(many=True)
     subattributes = SubAttributeSerializer(many=True)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = Attribute
+
+        extra_fields = ('metrics', 'factoids', 'subattributes')
+        extra_fields_model = {"metrics": Metric, "factoids": Factoid, "subattributes": Attribute}
         fields = PROSOUL_FIELDS
-        fields += ('metrics', 'factoids', 'subattributes')
+        fields += extra_fields
+
+    def __find_related_objects_data(self, validated_data):
+        related_objects_data = {}
+        for field in self.Meta.extra_fields:
+            related_objects_data[field] = None
+            if field in validated_data:
+                related_objects_data[field] = validated_data.pop(field)
+        return related_objects_data
+
+    def __update_related_objects(self, instance, related_objects_data):
+        # Update the related objects
+        for field in related_objects_data:
+            if related_objects_data[field]:
+                for object_data in related_objects_data[field]:
+                    # Create the object model from the data
+                    object = self.Meta.extra_fields_model[field].objects.get(**object_data)
+                    getattr(instance, field).add(object)
+
+    def create(self, validated_data):
+        username = self.context['request'].user.username
+        user = User.objects.get_or_create(username=username)[0]
+
+        related_objects_data = self.__find_related_objects_data(validated_data)
+
+        attribute = Attribute.objects.create(created_by=user, **validated_data)
+
+        self.__update_related_objects(attribute, related_objects_data)
+
+        return attribute
+
+    def update(self, instance, validated_data):
+        for field in ['active', 'description', 'name']:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+
+        related_objects_data = self.__find_related_objects_data(validated_data)
+        self.__update_related_objects(instance, related_objects_data)
+
+        instance.save()
+
+        return instance
 
 
 class SubGoalSerializer(serializers.HyperlinkedModelSerializer):
@@ -182,7 +226,7 @@ class SubGoalSerializer(serializers.HyperlinkedModelSerializer):
 
     attributes = AttributeSerializer(many=True)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = Goal
         fields = PROSOUL_FIELDS
         fields += ('attributes', )
@@ -194,11 +238,12 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
     attributes = AttributeSerializer(many=True)
     # subgoals = SubGoalSerializer(many=True)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = Goal
         fields = PROSOUL_FIELDS
-        fields += ('attributes', )
-        # fields += ('attributes', 'subgoals', )
+        extra_fields = ('attributes', 'subgoals')
+        extra_fields_model = {"subgoals": Goal, "attributes": Attribute}
+        fields += extra_fields
 
     def create(self, validated_data):
         user_data = validated_data.pop('created_by')
@@ -211,7 +256,7 @@ class QualityModelSerializer(serializers.HyperlinkedModelSerializer):
     created_by = UserSerializer(read_only=True)
     goals = GoalSerializer(many=True)
 
-    class Meta:
+    class Meta(MetaNameMixin):
         model = QualityModel
         fields = PROSOUL_FIELDS
         fields += ('goals', )
