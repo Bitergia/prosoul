@@ -3,7 +3,6 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
-
 from prosoul.models import Attribute, DataSourceType, Factoid, Goal, Metric, MetricData, QualityModel
 from rest_framework import serializers, viewsets
 
@@ -24,18 +23,18 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer(required=False)
+    created_by = UserSerializer(read_only=True)
 
     class Meta:
         model = MetricData
         fields = tuple(f for f in PROSOUL_FIELDS if f != 'name')
-        fields += ('implementation', 'params')
+        fields += ('id', 'implementation', 'params')
 
     def create(self, validated_data):
-        user_data = validated_data.pop('created_by')
-        user = User.objects.get_or_create(username=user_data['username'])[0]
-        mdata = MetricData.objects.create(created_by=user, **validated_data)
-        return mdata
+        username = self.context['request'].user.username
+        user = User.objects.get_or_create(username=username)[0]
+        metric_data = MetricData.objects.create(created_by=user, **validated_data)
+        return metric_data
 
     def update(self, instance, validated_data):
         for field in ['active', 'description', 'implementation', 'params']:
@@ -47,37 +46,116 @@ class MetricDataSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class DataSourceTypeSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
+    created_by = UserSerializer(read_only=True)
 
     class Meta:
         model = DataSourceType
         fields = PROSOUL_FIELDS
-        # fields += ('', )
+
+        # https://medium.com/django-rest-framework/dealing-with-unique-constraints-in-nested-serializers-dade33b831d9
+        extra_kwargs = {
+            'name': {
+                'validators': [UnicodeUsernameValidator()],
+            }
+        }
+
+    def create(self, validated_data):
+        username = self.context['request'].user.username
+        user = User.objects.get_or_create(username=username)[0]
+        data_source_type = DataSourceType.objects.create(created_by=user, **validated_data)
+        return data_source_type
+
+    def update(self, instance, validated_data):
+        for field in ['active', 'description', 'name']:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+        instance.save()
+
+        return instance
 
 
 class MetricSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
-    data = MetricDataSerializer()
-    data_source_type = DataSourceTypeSerializer()
+    created_by = UserSerializer(read_only=True)
+    data = MetricDataSerializer(required=False)
+    data_source_type = DataSourceTypeSerializer(required=False)
 
     class Meta:
         model = Metric
         fields = PROSOUL_FIELDS
         fields += ('data', 'data_source_type', 'thresholds')
 
+    def create(self, validated_data):
+        username = self.context['request'].user.username
+        user = User.objects.get_or_create(username=username)[0]
+        # extract metric data
+        metric_data = None
+        if 'data' in validated_data:
+            metric_data_data = validated_data.pop('data')
+            metric_data = MetricData.objects.get(**metric_data_data)
+        # extract data source type data
+        ds = None
+        if 'data_source_type' in validated_data:
+            ds_data = validated_data.pop('data_source_type')
+            ds = DataSourceType.objects.get(**ds_data)
+        # Create the metric object
+        metric = Metric.objects.create(created_by=user, data=metric_data, data_source_type=ds, **validated_data)
+        return metric
+
+    def update(self, instance, validated_data):
+        for field in ['active', 'description', 'name', 'thresholds']:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+        # extract metric data
+        if 'data' in validated_data:
+            metric_data_data = validated_data.pop('data')
+            metric_data = MetricData.objects.get(**metric_data_data)
+            instance.data = metric_data
+        if 'data_source_type' in validated_data:
+            ds_data = validated_data.pop('data_source_type')
+            ds = DataSourceType.objects.get(**ds_data)
+            instance.data_source_type = ds
+
+        instance.save()
+
+        return instance
+
 
 class FactoidSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
-    data_source_type = DataSourceTypeSerializer()
+    created_by = UserSerializer(read_only=True)
+    data_source_type = DataSourceTypeSerializer(required=False)
 
     class Meta:
         model = Factoid
         fields = PROSOUL_FIELDS
         fields += ('data_source_type', )
 
+    def create(self, validated_data):
+        username = self.context['request'].user.username
+        user = User.objects.get_or_create(username=username)[0]
+        ds = None
+        if 'data_source_type' in validated_data:
+            ds_data = validated_data.pop('data_source_type')
+            ds = DataSourceType.objects.get(**ds_data)
+        # Create the metric object
+        factoid = Factoid.objects.create(created_by=user, data_source_type=ds, **validated_data)
+        return factoid
+
+    def update(self, instance, validated_data):
+        for field in ['active', 'description', 'name']:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+        if 'data_source_type' in validated_data:
+            ds_data = validated_data.pop('data_source_type')
+            ds = DataSourceType.objects.get(**ds_data)
+            instance.data_source_type = ds
+
+        instance.save()
+
+        return instance
+
 
 class SubAttributeSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
+    created_by = UserSerializer(read_only=True)
     metrics = MetricSerializer(many=True)
     factoids = FactoidSerializer(many=True)
 
@@ -88,7 +166,7 @@ class SubAttributeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AttributeSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
+    created_by = UserSerializer(read_only=True)
     metrics = MetricSerializer(many=True)
     factoids = FactoidSerializer(many=True)
     subattributes = SubAttributeSerializer(many=True)
@@ -100,7 +178,7 @@ class AttributeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SubGoalSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
+    created_by = UserSerializer(read_only=True)
 
     attributes = AttributeSerializer(many=True)
 
@@ -111,7 +189,7 @@ class SubGoalSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class GoalSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
+    created_by = UserSerializer(read_only=True)
 
     attributes = AttributeSerializer(many=True)
     # subgoals = SubGoalSerializer(many=True)
@@ -130,7 +208,7 @@ class GoalSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class QualityModelSerializer(serializers.HyperlinkedModelSerializer):
-    created_by = UserSerializer()
+    created_by = UserSerializer(read_only=True)
     goals = GoalSerializer(many=True)
 
     class Meta:
