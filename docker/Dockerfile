@@ -45,6 +45,7 @@ RUN pip3 install gunicorn
 RUN pip3 install matplotlib
 RUN pip3 install requests
 RUN pip3 install kidash
+RUN pip3 install djangorestframework
 
 ADD stage ${DEPLOY_USER_DIR}/stage
 RUN chmod 755 ${DEPLOY_USER_DIR}/stage
