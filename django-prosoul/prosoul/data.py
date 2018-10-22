@@ -20,6 +20,8 @@ class VizTemplatesData():
         templates = pkg_resources.resource_listdir(__name__, PANELS_DIR)
 
         for tfilename in templates:
+            if not tfilename.endswith(".json"):
+                continue
             resource_path = '/'.join((PANELS_DIR, tfilename))
             if pkg_resources.resource_isdir(__name__, resource_path):
                 continue
