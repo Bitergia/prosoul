@@ -12,7 +12,7 @@ from prosoul.prosoul_vis import build_dashboards
 from prosoul.forms import AssessmentForm, VisualizationForm
 
 
-class Viewer(LoginRequiredMixin, View):
+class Viewer(View):
 
     http_method_names = ['get']
 
