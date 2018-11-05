@@ -6,7 +6,7 @@ from . import data_editor
 from prosoul.prosoul_utils import BACKEND_METRICS_DATA
 
 CROSSMINER_URL = 'https://crossminer.biterg.io'
-CROSSMINER_METRICS_INDEX = 'ossmeter'
+CROSSMINER_METRICS_INDEX = 'scava-metrics'
 
 
 class VisualizationForm(forms.Form):
