@@ -1,0 +1,72 @@
+{
+ "qualityModels": [
+  {
+   "goals": [
+    {
+     "attributes": [
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "bugs.averageSentiment",
+         "data_params": "",
+         "data_source_type": null,
+         "description": "",
+         "name": "Avg. sentiment",
+         "thresholds": "0,1,10"
+        }
+       ],
+       "name": "Average sentiment",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "bugs.sentiment",
+         "data_params": "",
+         "data_source_type": null,
+         "description": "",
+         "name": "Bugs sentiment",
+         "thresholds": "0,1,10"
+        }
+       ],
+       "name": "Bugs sentiment",
+       "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "data_implementation": "bugs.sentimentAtThreadBeggining",
+         "data_params": "",
+         "data_source_type": null,
+         "description": "",
+         "name": "Thread start",
+         "thresholds": "1,2,5"
+        },
+        {
+         "data_implementation": "bugs.sentimentAtThreadEnd",
+         "data_params": "",
+         "data_source_type": null,
+         "description": "",
+         "name": "Thread end",
+         "thresholds": "1,2,5"
+        }
+       ],
+       "name": "Sentiment at thread",
+       "subattributes": []
+      }
+     ],
+     "description": "",
+     "name": "Sentiment",
+     "subgoals": []
+    }
+   ],
+   "name": "Sentiment"
+  }
+ ]
+}
