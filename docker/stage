@@ -3,7 +3,11 @@
 echo "Running Prosoul"
 
 git clone https://github.com/Bitergia/prosoul.git
-cd prosoul/django-prosoul/
+cd prosoul/
+# Fill the secret key, debug false and allow hosts
+./config_deployment.py
+
+cd django-prosoul/
 
 # Create the data models
 python3 manage.py makemigrations
