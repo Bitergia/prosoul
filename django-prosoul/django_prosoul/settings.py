@@ -25,8 +25,7 @@ SECRET_KEY = 'u1*y8wy#a!tahh!lj0fk6n)22%0_g$y-8r5q_13gf_!i8veswq'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['prosoul', 'localhost', '172.17.0.1', '127.0.0.1']
-
+ALLOWED_HOSTS = []
 
 # Application definition
 
