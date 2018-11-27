@@ -46,4 +46,4 @@ with open(settings_file) as f:
 with open(settings_file, "w") as f:
     f.write(settings)
 
-print("Django configured for deployment (secret, debug, allowed_hosts) in", settings_file)
+print("Django configured for deployment (debug, allowed_hosts) in", settings_file)

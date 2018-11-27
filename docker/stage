@@ -4,7 +4,11 @@ echo "Running Prosoul"
 
 git clone https://github.com/Bitergia/prosoul.git
 cd prosoul/django-prosoul/
-# Fill the secret key, debug false and allow hosts
+
+# Set exec permission for config_deployment.py
+sudo chmod 770 config_deployment.py
+
+# debug false and allow hosts
 ./config_deployment.py
 
 # Create the data models
