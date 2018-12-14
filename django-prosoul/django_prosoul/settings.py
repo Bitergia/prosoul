@@ -116,9 +116,13 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
-
+# https://docs.djangoproject.com/en/2.0/howto/static-files/
+# Used by the collectstatic task
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# Next config is used used by staticfiles application
 STATIC_URL = '/static/'
+# This DIRS are used by the dev server to find static contents
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'django_prosoul/static/'), os.path.join(BASE_DIR, 'prosoul/static/prosoul'))
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
