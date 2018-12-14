@@ -6,7 +6,141 @@
 {% block head %}
     {{ block.super }}
     {% load static %}
-    <link rel="stylesheet" href="{% static "prosoul/viewer.css" %}">
+    <style>
+      .al-h1 {
+          margin: 30px 100px 20px 0px;
+          text-align: right;
+          color: orange;
+      }
+
+      .desc {
+          margin-left: 20px;
+      }
+
+      .desc-title {
+          font-size: 120%;
+          font-weight: bold;
+      }
+
+      .navbar-default .navbar-brand {
+          color: #ffffff;
+          font-weight: bold;
+      }
+
+      .navbar {
+          color: #ffffff;
+          background-color: #3E3F3A;
+      }
+
+      body {
+          color: #3E3F3A;
+      }
+
+      .sidebar ul li a {
+          color: #3e3f3a;
+          text-decoration: none;
+      }
+
+      div#tree {
+      }
+
+      .label-scale {
+          font-weight: bold;
+          color: black;
+          padding: 0px 15px;
+          margin: 0px 10px;
+      }
+
+      .node {
+        cursor: pointer;
+        margin: 0px;
+      }
+
+      .node circle {
+        fill: #fff;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+      }
+
+      .node text {
+        font: 10px sans-serif;
+        background-color: #ffffff;
+      }
+
+      .link {
+        fill: none;
+        stroke: #ccc; /*#717171; #ccc; */
+        stroke-width: 1.5px;
+      }
+
+      div.progress-bar {
+        color: black;
+        font-weight: bold;
+      }
+
+      div.panel-heading {
+        font-weight: bold;
+      }
+
+      div#details-box {
+        width: 600px;
+        margin: 10px 40px 10px 40px;
+        background-color: white;
+        opacity: 0.8;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: steelblue;
+
+        padding: 20px;
+        float: right;
+        clear: right;
+        position: fixed;
+        bottom: 50px;
+        right: 5px;
+      }
+
+      div#details-box-project {
+        margin: 10px 40px 10px 40px;
+        background-color: white;
+        opacity: 0.8;
+
+        border-style: solid;
+        border-width: 1px;
+        border-color: steelblue;
+
+        padding: 20px;
+        right: 5px;
+      }
+
+      .title {
+        font-weight: bold;
+        font-size: 120%;
+        margin: 10px 0px;
+      }
+
+      .details {
+        color: black;
+        margin: 10px;
+        font-weight: normal;
+      }
+
+      .fa-rotate-p45 {
+          -webkit-transform: rotate(45deg);
+          -moz-transform: rotate(45deg);
+          -ms-transform: rotate(45deg);
+          -o-transform: rotate(45deg);
+          transform: rotate(45deg);
+      }
+
+      .fa-rotate-m45 {
+          -webkit-transform: rotate(-45deg);
+          -moz-transform: rotate(-45deg);
+          -ms-transform: rotate(-45deg);
+          -o-transform: rotate(-45deg);
+          transform: rotate(-45deg);
+      }
+    </style>
 {% endblock %}
 
 {% block body %}
