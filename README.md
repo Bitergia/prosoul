@@ -99,7 +99,53 @@ A docker image is also available to execute the application:
 prosoul/docker $ docker-compose up
 ```
 
-## Basic Usage
+## How to
+
+This section explains how to create a quality model (QM), visualize it in Kibana and assess it on a set of projects.
+A QM is identified by a title and composed of several `Goals`, which aim at measuring specific aspects of your projects, 
+such as `Activity`, `Community` and `Processes`. Each goal is defined by a set of `Attributes`, they aim at characterizing
+a given goal. For instance, the `Activity` goal could include `Code` and `Bugs`, while `Community` could have `Coders` and
+`Reporters` as attributes. Each attribute is then mapped to one or more `Metrics`. A `Metric` has a name, a 5-level 
+threshold (used to rate the project wrt a metric) and the data implementing the metric. In the case of 
+CROSSMINER, the metric implementation is the `metric_name` field of the metrics extracted from SCAVA and stored in 
+the index `scava-metrics`. For example, the attribute `Code` previously created could be mapped on the SCAVA metric `Patches`, 
+while the attribute `Bugs` could be represented by the SCAVA metrics `Bugs`, `Won't-Fix Bugs` and `Fixed Bugs`.
+
+In the following sections, the Edit, Visualize and Assess views are described.
+
+### Edit
+
+The Edit view allows to create (modify and import) a QM. 
+
+To create a QM, click on the first `Add` button and set a name for 
+your QM (e.g., `MyFirstQM`) in the window that popped up. Then, Prosoul will automatically open a chain of windows to 
+to let you insert your first `Goal`, its `Attributes` and the corresponding `Metrics`. For each metric, you will have to
+map it to an existing metric in your data. In the case of CROSSMINER, this is done via the `metric_name` attribute stored
+in the index `scava-metrics`. 
+
+### Visualize
+The Visualize view allows to materialize your QM in Kibana through dashboards, which are created based on templates 
+available [here](https://github.com/Bitergia/prosoul/tree/master/django-prosoul/prosoul/panels/templates).
+
+In the form, you have just to select the target QM, the ElasticSearch and Kibana URLs, the ElasticSearch index 
+where the data is stored, the attribute template and the metrics data backend (which tells Prosoul how to process the 
+data in the index). In the case of CROSSMINER, all form fields except the `Quality Model` one are already set to be used
+with the default Docker configuration of the [scava-deployment](https://github.com/crossminer/scava-deployment/tree/dev#scava-deployment).
+
+Once the form is filled, by clicking on the `Create` button, a set of dashboards (one per each attribute) are uploaded
+to Kibana and available in the menu `Dashboard`. 
+
+### Assess
+The Assess view allows to perform an assessment of the QM over the projects included in your data.
+
+In the form, you have just to select the target QM, the ElasticSearch URL, the index where the data is stored and
+the metrics data backend. In the case of CROSSMINER, all form fields except the `Quality Model` one are already set to be used
+with the default Docker configuration of the [scava-deployment](https://github.com/crossminer/scava-deployment/tree/dev#scava-deployment).
+
+Once the form is filled, by clicking on the `Create` button, you will be redirected to a page summarizing how the projects
+in your data comply to the QM selected.
+
+## Tutorials
 
 There is two introductory videos: showing the import and view feature, and howto use the editor for adding a new quality model:
 

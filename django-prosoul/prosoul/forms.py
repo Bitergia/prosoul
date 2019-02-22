@@ -5,17 +5,18 @@ from . import data
 from . import data_editor
 from prosoul.prosoul_utils import BACKEND_METRICS_DATA
 
-CROSSMINER_URL = 'https://crossminer.biterg.io'
-CROSSMINER_METRICS_INDEX = 'scava-metrics'
+ES_URL = 'https://admin:admin@localhost:9200'
+KIBANA_URL = 'http://localhost:80'
+METRICS_INDEX = 'scava-metrics'
 
 
 class VisualizationForm(forms.Form):
     """ A form to collect the params needed to build a quality model visualization """
 
     # Temporal default values to make easier the config process
-    KIBANA_URL = CROSSMINER_URL
-    ELASTIC_URL = CROSSMINER_URL + '/data'
-    INDEX_DATA = CROSSMINER_METRICS_INDEX
+    KIBANA_URL = KIBANA_URL
+    ELASTIC_URL = ES_URL
+    INDEX_DATA = METRICS_INDEX
     ATTRIBUTE_TEMPLATE = 'AttributeTemplate'
 
     def __init__(self, *args, **kwargs):
@@ -62,8 +63,8 @@ class AssessmentForm(forms.Form):
     """ A form to collect the params needed to build an assessment of projects """
 
     # Temporal default values to make easier the config process
-    ELASTIC_URL = CROSSMINER_URL + '/data'
-    INDEX_DATA = CROSSMINER_METRICS_INDEX
+    ELASTIC_URL = ES_URL
+    INDEX_DATA = METRICS_INDEX
 
     def __init__(self, *args, **kwargs):
         kwargs['initial'] = {"es_url": self.ELASTIC_URL,

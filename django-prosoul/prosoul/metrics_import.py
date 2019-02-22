@@ -63,7 +63,7 @@ def search_agg():
       "aggs": {
         "2": {
           "terms": {
-            "field": "metric_class.keyword",
+            "field": "metric_class",
             "size": 10000,
             "order": {
               "_count": "desc"
@@ -72,7 +72,7 @@ def search_agg():
           "aggs": {
             "3": {
               "terms": {
-                "field": "metric_name.keyword",
+                "field": "metric_name",
                 "size": 10000,
                 "order": {
                   "_count": "desc"
@@ -81,7 +81,7 @@ def search_agg():
               "aggs": {
                 "4": {
                   "terms": {
-                    "field": "metric_es_name.keyword",
+                    "field": "metric_name",
                     "size": 10000,
                     "order": {
                       "_count": "desc"
