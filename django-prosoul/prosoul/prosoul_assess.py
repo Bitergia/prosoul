@@ -193,7 +193,7 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
       "aggs": {
         "3": {
           "terms": {
-            "field": "project.keyword"
+            "field": "project"
           },
           "aggs": {
             "2": {
@@ -229,6 +229,8 @@ def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_da
         metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data)
     elif backend_metrics_data == "grimoirelab":
         metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data, from_date)
+    elif backend_metrics_data == "scava-metrics":
+        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data)
 
     return metric_per_project
 

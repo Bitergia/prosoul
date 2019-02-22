@@ -61,8 +61,8 @@ def get_params():
                         help='Dashboard template file to be used for assessment')
     parser.add_argument('-m', '--model', required='True',
                         help='Model to be used to build the Dashboard')
-    parser.add_argument('-b', '--backend-metrics-data', default='grimoirelab',
-                        help='Backend metrics data to use (grimoirelab, ossmeter, ...)')
+    parser.add_argument('-b', '--backend-metrics-data', default='scava-metrics',
+                        help='Backend metrics data to use (Scava metrics, grimoirelab, ossmeter, ...)')
 
     return parser.parse_args()
 
