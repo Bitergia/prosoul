@@ -4,6 +4,8 @@ import json
 from datetime import datetime
 from time import time
 
+from elasticsearch import Elasticsearch
+
 from django import shortcuts
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import Http404
@@ -20,9 +22,13 @@ from django.views import View
 
 from prosoul.prosoul_export import fetch_models
 from prosoul.prosoul_import import convert_to_grimoirelab, feed_models, SUPPORTED_FORMATS
+from prosoul.forms import ES_URL, METRICS_INDEX
 from prosoul.models import Attribute, Goal, Metric, MetricData, QualityModel
 
 from . import forms_editor
+
+HEADERS_JSON = {"Content-Type": "application/json"}
+HTTPS_CHECK_CERT = False
 
 
 #
@@ -36,6 +42,7 @@ def perfdata(func):
         data = func(*args, **kwargs)
         print("%s: %0.3f sec" % (func, time() - task_init))
         return data
+
     return decorator
 
 
@@ -93,7 +100,6 @@ def build_forms_context(state=None):
 
 
 def import_from_file(request):
-
     if request.method == "POST":
         myfile = request.FILES["imported_file"]
         cur_dt = datetime.now().strftime("%Y-%m-%d_%H%M%S")
@@ -130,7 +136,6 @@ def import_from_file(request):
 
 
 def export_to_file(request, qmodel=None):
-
     if (request.method == "GET") and (not qmodel):
         return shortcuts.redirect("prosoul:editor")
 
@@ -164,11 +169,11 @@ def export_to_file(request, qmodel=None):
 
 
 def return_error(message):
-
     template = loader.get_template('prosoul/error.html')
     context = {"alert_message": message}
     render_error = template.render(context)
     return HttpResponse(render_error)
+
 
 #
 # Classes implementing the logic
@@ -251,17 +256,17 @@ class JustPostByEditorMixin():
         return self.request.user.is_superuser
 
     def post(self, request):
-
         return self.action(request)
 
 
 class EditorView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequiredMixin, View):
-
     http_method_names = ['get']
 
     @perfdata
     def get(self, request):
         """ Shows the Prosoul Editor """
+
+        get_metrics_data()
 
         context = build_forms_context()
 
@@ -269,7 +274,6 @@ class EditorView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequiredMixin,
 
 
 class QualityModelView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequiredMixin, View):
-
     permission_denied_message = 'TEST'
 
     @staticmethod
@@ -703,3 +707,41 @@ class GoalView(LoginRequiredMixin, JustPostByEditorMixin, View):
             # TODO: Show error
             print(form.errors)
             raise Http404
+
+
+def get_metrics_data():
+    es = Elasticsearch([ES_URL], timeout=120, max_retries=20, retry_on_timeout=True, verify_certs=HTTPS_CHECK_CERT)
+
+    metrics_names = set()
+
+    page = es.search(
+        index=METRICS_INDEX,
+        scroll="1m",
+        size=10,
+        body={
+            "_source": ["metric_name"],
+            "query": {
+                "match_all": {}
+            }
+        }
+    )
+
+    sid = page['_scroll_id']
+    scroll_size = page['hits']['total']
+
+    if scroll_size == 0:
+        print("No data found!")
+        return
+
+    while scroll_size > 0:
+
+        for scava_metric in page['hits']['hits']:
+            metrics_names.add(scava_metric['_source']['metric_name'])
+
+        page = es.scroll(scroll_id=sid, scroll='1m')
+        sid = page['_scroll_id']
+        scroll_size = len(page['hits']['hits'])
+
+    for id, m in enumerate(metrics_names):
+        if not MetricData.objects.filter(implementation=m).exists():
+            MetricData.objects.create(id=id, implementation=m)
