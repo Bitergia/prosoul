@@ -398,6 +398,7 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             name = form.cleaned_data['metric_name']
             thresholds = form.cleaned_data['metric_thresholds']
             attribute_id = form.cleaned_data['attributes']
+            metric_data_id = form.cleaned_data['metrics_data']
 
             attribute_orm = Attribute.objects.get(id=attribute_id)
 
@@ -411,6 +412,9 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
                 # Create a new metric
                 metric_orm = Metric(name=name, attribute=attribute_orm,
                                     thresholds=thresholds)
+            if metric_data_id:
+                metric_data_orm = MetricData.objects.get(id=metric_data_id)
+                metric_orm.data = metric_data_orm
 
             metric_orm.save()
 
