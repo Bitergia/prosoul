@@ -270,7 +270,7 @@ class MetricForm(ProsoulEditorForm):
         choices = ()
 
         for metric_data in data_editor.MetricsDataData(state=None).fetch():
-            choices += ((metric_data.id, str(metric_data)),)
+            choices += ((metric_data.id, str(metric_data.implementation)),)
 
         empty_choice = [('', '')]
         choices = empty_choice + sorted(choices, key=lambda x: x[1])
