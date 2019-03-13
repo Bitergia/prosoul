@@ -11,6 +11,8 @@ from prosoul.prosoul_assess import assess
 from prosoul.prosoul_vis import build_dashboards
 from prosoul.forms import AssessmentForm, VisualizationForm
 
+KIBANA_URL = 'http://localhost:80'
+
 
 class Viewer(View):
 
@@ -184,7 +186,7 @@ class Assessment(LoginRequiredMixin, View):
     def post(self, request):
         error = None
         form = AssessmentForm(request.POST)
-        context = {'active_page': "assess", "assess_config_form": form}
+        context = {'active_page': "assess", "assess_config_form": form, 'kibana_url': KIBANA_URL}
         if form.is_valid():
             qmodel_name = form.cleaned_data['quality_model']
             es_url = form.cleaned_data['es_url']
