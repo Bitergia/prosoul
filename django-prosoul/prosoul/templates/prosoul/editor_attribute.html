@@ -29,12 +29,6 @@
                 <span class="input-group-addon">Name</span>
                 {{ attribute_form.attribute_name }}
               </div>
-              {% if not attributes_form.initial.name %}
-              <div class="input-group">
-                <span class="input-group-addon">Parent</span>
-                {{ attribute_form.parent }}
-              </div>
-              {% endif %}
             </div>
             <div class="modal-footer">
               <div class="form-actions pull-right">
