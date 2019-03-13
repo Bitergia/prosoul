@@ -222,7 +222,7 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
 
 def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data, from_date=None):
     """ Compute the value of a metric for all projects available """
-    metric_name = str(metric_data)
+
     metric_per_project = None
     metric_field = find_metric_name_field(backend_metrics_data)
     if backend_metrics_data == "ossmeter":
@@ -263,13 +263,13 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     logging.debug("Metrics to be included: %s (%s attribute)", metrics_with_data, attribute.name)
 
     for metric in metrics_with_data:
-        atribute_assessment[str(metric.data)] = {}
+        atribute_assessment[metric.data.implementation] = {}
         metric_value = compute_metric_per_project(es_url, es_index, metric.data, backend_metrics_data, from_date)
         if metric_value:
             for project_metric in metric_value:
                 pname = project_metric['project']
                 pmetric = project_metric['metric']
-                logging.debug("Project %s metric %s value %i", pname, str(metric.data), pmetric)
+                logging.debug("Project %s metric %s value %i", pname, metric.data.implementation, pmetric)
                 logging.debug("Doing the assesment ...")
                 score = 0
                 if metric.thresholds:
@@ -278,8 +278,8 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
                             score += 1
                     threshold = score - 1 if score else 0
                     logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
-                                  str(metric.data), score, THRESHOLDS[threshold])
-                atribute_assessment[str(metric.data)][pname] = score
+                                  metric.data.implementation, score, THRESHOLDS[threshold])
+                atribute_assessment[metric.data.implementation][pname] = score
         else:
             logging.debug("Can't find value for for %s", metric)
 
@@ -341,7 +341,8 @@ def enrich_assessment(assessment):
                         "attribute": attr,
                         "metric": metric,
                         "project": project,
-                        "score_" + metric: assessment[goal][attr][metric][project]
+                        "score_" + metric: assessment[goal][attr][metric][project],
+                        "score": assessment[goal][attr][metric][project]
                     }
                     yield aitem
 

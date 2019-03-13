@@ -102,14 +102,12 @@ class Assessment(LoginRequiredMixin, View):
         for metric in metrics:
             # Clean the metric name
             # "GitHubEnrich {\"filter\": {\"term\": {\"state\": \"closed\"}}}
-            if len(metric.split()) == 1:
-                table += "<th>%s</th>" % metric
-            else:
-                table += "<th>%s + filter</th>" % metric.split()[0]
+            table += "<th>%s</th>" % metric
+
         table += "</thead>"
         for attribute in goal:
             # One row per atribute with its metrics
-            table += "<tr><th scope='row'>%s</td>" % attribute
+            table += "<tr><th scope='row'>%s</th>" % attribute
             # Let's find the metrics to fill the metrics columns
             for metric_col in metrics:
                 metric_col_found = False
@@ -119,7 +117,7 @@ class Assessment(LoginRequiredMixin, View):
                         metric_col_found = True
                         break
                 if not metric_col_found:
-                    table += "<td></td>"
+                    table += "<td>-</td>"
             table += "</tr>"
         table += "</table>"
 
