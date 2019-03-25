@@ -1,3 +1,5 @@
+import os
+
 from django import forms
 from django.core.validators import URLValidator
 
@@ -5,8 +7,9 @@ from . import data
 from . import data_editor
 from prosoul.prosoul_utils import BACKEND_METRICS_DATA
 
-ES_URL = 'https://admin:admin@localhost:9200'
-KIBANA_URL = 'http://localhost:80'
+# Fetch URLs by env variables from docker or define it with "localhost" by default
+ES_URL = str(os.getenv('ES_URL', 'https://admin:admin@localhost:9200'))
+KIBANA_URL = str(os.getenv('KIBITER_URL', 'http://localhost:80'))
 METRICS_INDEX = 'scava-metrics'
 
 
