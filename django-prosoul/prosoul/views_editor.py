@@ -718,6 +718,10 @@ def get_metrics_data():
 
     metrics_names = set()
 
+    if not es.indices.exists(index=METRICS_INDEX):
+        print("Index %s doesnt exist!" % METRICS_INDEX)
+        return
+
     page = es.search(
         index=METRICS_INDEX,
         scroll="1m",
