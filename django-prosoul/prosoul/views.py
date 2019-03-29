@@ -9,9 +9,7 @@ from django.views import View
 from prosoul.prosoul_export import fetch_models, gl2viewer
 from prosoul.prosoul_assess import assess
 from prosoul.prosoul_vis import build_dashboards
-from prosoul.forms import AssessmentForm, VisualizationForm
-
-KIBANA_URL = 'http://localhost:80'
+from prosoul.forms import AssessmentForm, VisualizationForm, KIBANA_URL
 
 
 class Viewer(View):
