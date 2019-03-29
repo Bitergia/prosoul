@@ -70,8 +70,13 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     install_requires=[
-        'django>=2.0', 'matplotlib', 'grimoire-elk', 'sortinghat', 'kidash', 'djangorestframework', 'grimoirelab'
-                                                                                                    '-toolkit '
+        'django>=2.0',
+        'matplotlib',
+        'grimoire-elk',
+        'sortinghat',
+        'kidash',
+        'djangorestframework',
+        'grimoirelab-toolkit'
     ],
     python_requires='>=3.4'
 
