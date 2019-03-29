@@ -387,6 +387,9 @@ def publish_assessment(es_url, es_index, assessment):
 
     es_conn = Elasticsearch([es_url], timeout=100, verify_certs=HTTPS_CHECK_CERT)
 
+    if es_conn.indices.exists(index=scores_index):
+        es_conn.indices.delete(index=scores_index)
+
     scores = []
 
     # Uploading info to the new ES
