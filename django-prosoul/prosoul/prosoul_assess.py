@@ -74,7 +74,7 @@ def get_params():
     return parser.parse_args()
 
 
-def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data, from_date=None):
+def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data, from_date, to_date):
     """
     In the current implementation the metrics supported are just counting metrics with
     an optional filtering defined in metric_params.
@@ -104,17 +104,23 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
             if metric_agg:
                 metric_agg = ', "aggs": ' + metric_agg
 
-    if from_date:
+    if from_date and to_date:
         from_date_iso = from_date.isoformat()
+        to_date_iso = to_date.isoformat()
         filter_date = """
         {"range" :
             {
                 "grimoire_creation_date" : {
-                    "gte" : "%s"
+                    "gte" : "%s",
+                    "format": "yyyy-MM-dd"
+                },
+                "grimoire_creation_date" : {
+                    "lte" : "%s",
+                    "format": "yyyy-MM-dd"
                 }
             }
         }
-        """ % from_date_iso
+        """ % (from_date_iso, to_date_iso)
         metric_filter = metric_filter + "," + filter_date if metric_filter else filter_date
 
     if metric_filter:
@@ -169,7 +175,7 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
     return project_metrics
 
 
-def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data):
+def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data, from_date, to_date):
     # Get the total aggregated value for a metric in the OSSMeter
     # Elasticsearch index with metrics
 
@@ -186,6 +192,22 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
               "term": {
                 "%s": "%s"
               }
+            },
+            {
+                "range": {
+                    "datetime": {
+                        "gte": "%s",
+                        "format": "yyyy-MM-dd"
+                    }
+                }
+            },
+            {
+                "range": {
+                    "datetime": {
+                        "lte": "%s",
+                        "format": "yyyy-MM-dd"
+                    }
+                }
             }
           ]
         }
@@ -205,7 +227,7 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
         }
       }
     }
-    """ % (metric_field, metric_name)
+    """ % (metric_field, metric_name, from_date.isoformat(), to_date.isoformat())
 
     # logging.debug(json.dumps(json.loads(es_query), indent=True))
 
@@ -220,22 +242,25 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
     return project_metrics
 
 
-def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data, from_date=None):
+def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data, from_date, to_date):
     """ Compute the value of a metric for all projects available """
 
     metric_per_project = None
     metric_field = find_metric_name_field(backend_metrics_data)
     if backend_metrics_data == "ossmeter":
-        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data)
+        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data,
+                                                                 from_date, to_date)
     elif backend_metrics_data == "grimoirelab":
-        metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data, from_date)
+        metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data,
+                                                                     from_date, to_date)
     elif backend_metrics_data == "scava-metrics":
-        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data)
+        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data, from_date,
+                                                                 to_date)
 
     return metric_per_project
 
 
-def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date=None):
+def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date, to_date):
     """
     Do the assessment for an attribute in the quality model. If a metric does not have thresholds,
     the score for it is 0.
@@ -245,6 +270,7 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     :param attribute: name of the attribute from which to compute the metrics
     :param backend_metrics_data: grimoirelab and ossmeter are the backend supported now
     :param from_date: initial date from which to compute the metrics
+    :param from_date: end date from which to compute the metrics
     :return: a dict with metrics as keys and the projects score per each metric as value
     """
 
@@ -264,7 +290,7 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
 
     for metric in metrics_with_data:
         atribute_assessment[metric.data.implementation] = {}
-        metric_value = compute_metric_per_project(es_url, es_index, metric.data, backend_metrics_data, from_date)
+        metric_value = compute_metric_per_project(es_url, es_index, metric.data, backend_metrics_data, from_date, to_date)
         if metric_value:
             for project_metric in metric_value:
                 pname = project_metric['project']
@@ -378,7 +404,7 @@ def publish_assessment(es_url, es_index, assessment):
     return len(scores)
 
 
-def assess(es_url, es_index, model_name, backend_metrics_data, only_attribute=None, from_date=None):
+def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute=None):
     """
     Build the assessment for all projects
 
@@ -388,6 +414,7 @@ def assess(es_url, es_index, model_name, backend_metrics_data, only_attribute=No
     :param backend_metrics_data: backend to be used for getting the metrics (ossmeter or grimoirelab)
     :param only_attribute: do the assessment only for this attribute
     :param from_date: date since which the metrics must be computed
+    :param to_date: date until which the metrics must be computed
     :return: a dict with the assessment for all goals and attributes at projects level
     """
     logging.debug('Building the assessment for projects ...')
@@ -407,7 +434,7 @@ def assess(es_url, es_index, model_name, backend_metrics_data, only_attribute=No
         for attribute in goal.attributes.all():
             if only_attribute and attribute.name != only_attribute:
                 continue
-            res = assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date)
+            res = assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_date, to_date)
             assessment[goal.name][attribute.name] = res
 
     logging.debug(json.dumps(assessment, indent=True))

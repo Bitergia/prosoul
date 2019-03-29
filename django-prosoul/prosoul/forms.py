@@ -6,6 +6,8 @@ from . import data
 from . import data_editor
 from prosoul.prosoul_utils import BACKEND_METRICS_DATA
 
+from grimoirelab_toolkit.datetime import (str_to_datetime)
+
 # Fetch URLs by env variables from docker or define it with "localhost" by default
 ES_URL = str(os.getenv('ES_URL', 'https://admin:admin@localhost:9200'))
 KIBANA_URL = str(os.getenv('KIBITER_URL', 'http://localhost:80'))
@@ -32,6 +34,8 @@ class VisualizationForm(forms.Form):
         es_attrs = {'class': 'form-control'}
         widget = forms.TextInput(attrs=es_attrs)
         widget_select = forms.Select(attrs=es_attrs)
+        widget_date_from = forms.SelectDateWidget(attrs=es_attrs, years=range(1970, 2101))
+        widget_date_to = forms.SelectDateWidget(attrs=es_attrs, years=range(1970, 2101))
 
         qmodels = [('', '')]  # Initial empty choice
         for qmodel in data_editor.QualityModelsData().fetch():
@@ -57,6 +61,9 @@ class VisualizationForm(forms.Form):
         self.fields['es_url'] = forms.CharField(label='Elasticsearch URL', max_length=100, widget=widget)
         self.fields['kibana_url'] = forms.CharField(label='Kibana URL', max_length=100, widget=widget)
         self.fields['es_index'] = forms.CharField(label='Index with metrics data', max_length=100, widget=widget)
+        self.fields['from_date'] = forms.DateField(label='From date', widget=widget_date_from)
+        self.fields['to_date'] = forms.DateField(label='To date', widget=widget_date_to, initial=str_to_datetime(
+            "2100-01-01"))
 
 
 class AssessmentForm(forms.Form):
@@ -75,6 +82,8 @@ class AssessmentForm(forms.Form):
         es_attrs = {'class': 'form-control'}
         widget = forms.TextInput(attrs=es_attrs)
         widget_select = forms.Select(attrs=es_attrs)
+        widget_date_from = forms.SelectDateWidget(attrs=es_attrs, years=range(1970, 2101))
+        widget_date_to = forms.SelectDateWidget(attrs=es_attrs, years=range(1970, 2101))
 
         qmodels = [('', '')]  # Initial empty choice
 
@@ -92,3 +101,6 @@ class AssessmentForm(forms.Form):
                                                                 widget=widget_select, choices=backends)
         self.fields['es_url'] = forms.CharField(label='Elasticsearch URL', max_length=100, widget=widget)
         self.fields['es_index'] = forms.CharField(label='Index with metrics data', max_length=100, widget=widget)
+        self.fields['from_date'] = forms.DateField(label='From date', widget=widget_date_from)
+        self.fields['to_date'] = forms.DateField(label='To date', widget=widget_date_to, initial=str_to_datetime(
+            "2100-01-01"))

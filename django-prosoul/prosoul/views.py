@@ -64,12 +64,14 @@ class Visualize(LoginRequiredMixin, View):
                 es_index = form.cleaned_data['es_index']
                 attribute_template = form.cleaned_data['attribute_template']
                 backend_metrics_data = form.cleaned_data['backend_metrics_data']
+                from_date = form.cleaned_data['from_date']
+                to_date = form.cleaned_data['to_date']
 
                 # Time to execute the visualization creation
                 try:
                     assess_template = None
                     build_dashboards(es_url, kibana_url, es_index, attribute_template, assess_template,
-                                     qmodel_name, backend_metrics_data)
+                                     qmodel_name, backend_metrics_data, from_date, to_date)
                 except Exception as ex:
                     error = "Problem creating the visualizations " + str(ex)
 
@@ -190,10 +192,12 @@ class Assessment(LoginRequiredMixin, View):
             es_url = form.cleaned_data['es_url']
             es_index = form.cleaned_data['es_index']
             backend_metrics_data = form.cleaned_data['backend_metrics_data']
+            from_date = form.cleaned_data['from_date']
+            to_date = form.cleaned_data['to_date']
 
             # Time to execute the assessment creation
             try:
-                assessment = assess(es_url, es_index, qmodel_name, backend_metrics_data)
+                assessment = assess(es_url, es_index, qmodel_name, backend_metrics_data, from_date, to_date)
             except Exception as ex:
                 error = "Problem creating the assessment " + str(ex)
 

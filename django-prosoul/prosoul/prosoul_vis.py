@@ -244,7 +244,7 @@ def build_menu(es_url, qm_menu, assessment_menu):
 
 
 def build_dashboards(es_url, kibana_url, es_index, template_file, template_assess_file,
-                     model_name, backend_metrics_data):
+                     model_name, backend_metrics_data, from_date, to_date):
     """
     Create all the dashboards needed to viz a Quality Model
 
@@ -255,6 +255,8 @@ def build_dashboards(es_url, kibana_url, es_index, template_file, template_asses
     :param template_assess_file: template file to be used for the assessment dashboard
     :param model_name: quality model to use
     :param backend_metrics_data: backend to use to collect the metrics data
+    :param from_date: date since which the metrics must be computed
+    :param to_date: date until which the metrics must be computed
     :return:
     """
 
@@ -282,7 +284,7 @@ def build_dashboards(es_url, kibana_url, es_index, template_file, template_asses
             qm_menu[dash_json['dashboard']['value']['title']] = dash_json['dashboard']['id']
 
     # Project assessment is included also in the viz
-    assess(es_url, es_index, model_name, backend_metrics_data)
+    assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date)
     # Upload the radar viz to show the assessment
     assess_dash = VizTemplatesData.read_template(template_assess_file)
     feed_dashboard(assess_dash, es_url, kibana_url)
