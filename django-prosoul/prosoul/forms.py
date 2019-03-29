@@ -56,9 +56,7 @@ class VisualizationForm(forms.Form):
                                                                 widget=widget_select, choices=backends)
         # self.fields['quality_model'].widget = forms.Select()
         self.fields['es_url'] = forms.CharField(label='Elasticsearch URL', max_length=100, widget=widget)
-        self.fields['es_url'].validators = [URLValidator()]
         self.fields['kibana_url'] = forms.CharField(label='Kibana URL', max_length=100, widget=widget)
-        self.fields['kibana_url'].validators = [URLValidator()]
         self.fields['es_index'] = forms.CharField(label='Index with metrics data', max_length=100, widget=widget)
 
 
