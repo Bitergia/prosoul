@@ -744,6 +744,12 @@ def get_metrics_data():
     while scroll_size > 0:
 
         for scava_metric in page['hits']['hits']:
+            # This check is needed to make sure that the METRICS_INDEX doesn't
+            # contain anything else beyond metric data.
+            if 'metric_name' not in scava_metric['_source']:
+                print("Item %s is not a metric, skipping it. Clean the index %s" % (str(scava_metric), METRICS_INDEX))
+                continue
+
             metrics_names.add(scava_metric['_source']['metric_name'])
 
         page = es.scroll(scroll_id=sid, scroll='1m')
