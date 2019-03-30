@@ -14,8 +14,13 @@ kibiter:
    - "5601:5601"
 
 prosoul:
-  image: acsdocker/prosoul
+  image: bitergia/prosoul
   ports:
    - "8000:8000"
+  depends_on:
+   - kibiter
+   - elasticsearch
   environment:
-   - ALLOWED_HOSTS="prosoul localhost 172.17.0.1 127.0.0.1"
+   - ALLOWED_HOSTS=prosoul localhost 127.0.0.1
+   - ES_URL=https://admin:admin@elasticsearch:9200
+   - KIBITER_URL=https://kibiter:80
