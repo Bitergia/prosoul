@@ -1,3 +1,4 @@
+import csv
 import json
 
 from django import shortcuts
@@ -97,7 +98,7 @@ class Assessment(LoginRequiredMixin, View):
         return HttpResponse(render_index)
 
     @staticmethod
-    def render_attribute_table(metrics, goal):
+    def render_attribute_table(metrics, goal, project, goal_p, csv_writter):
         table = "<table class='table'>"
         # Headers
         table += "<thead><th scope='col'>Attribute</th>"
@@ -117,9 +118,11 @@ class Assessment(LoginRequiredMixin, View):
                     if metric == metric_col:
                         table += "<td>%s</td>" % goal[attribute][metric]
                         metric_col_found = True
+                        csv_writter.writerow([goal_p, attribute, project, goal[attribute][metric]])
                         break
                 if not metric_col_found:
                     table += "<td>-</td>"
+                    csv_writter.writerow([goal_p, attribute, project, "-"])
             table += "</tr>"
         table += "</table>"
 
@@ -175,11 +178,16 @@ class Assessment(LoginRequiredMixin, View):
         metrics = list(set(metrics))
         # TODO: move this table rendering to Django templates
         tables = ""
-        for project in projects_data:
-            tables += "<h3>Project: " + project + "</h3>"
-            for goal in projects_data[project]:
-                tables += "<h5>Goal: " + goal + "</h5>"
-                tables += Assessment.render_attribute_table(metrics, projects_data[project][goal])
+
+        # Write to CSV
+        with open('prosoul/static/prosoul/assessment_csv.csv', 'w') as csvfile:  # Just use 'w' mode in 3.x
+            csvwritter = csv.writer(csvfile)
+            for project in projects_data:
+                tables += "<h3>Project: " + project + "</h3>"
+                for goal in projects_data[project]:
+                    tables += "<h5>Goal: " + goal + "</h5>"
+                    tables += Assessment.render_attribute_table(metrics, projects_data[project][goal], project, goal,
+                                                                csvwritter)
 
         return tables
 
