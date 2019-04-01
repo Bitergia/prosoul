@@ -1,55 +1,257 @@
-
-
-
 {% load staticfiles %}
 {% if assessment %}
 {% if kibana_url %}
 <div class="row">
-  <div class="col-sm-12">
-    Your <a href="{{ kibana_url }}/app/kibana#/dashboards">Assessment dashboard</a>. Enjoy it!
-  </div>
+    <div class="col-sm-12">
+        Your <a href="{{ kibana_url }}/app/kibana#/dashboards">Assessment dashboard</a>. Enjoy it!
+    </div>
 </div>
+<hr>
 {% endif %}
 
 <div class="row">
-  <div class="col-sm-12">
-    <h1>Projects Assessment - <a class="btn btn-primary" href="{% static 'prosoul/assessment_csv.csv' %}"> Download as CSV</a></h1>
-    {{ assessment | safe}}
-  </div>
+    <div class="col-sm-12 form-group row">
+        <label class="mr-sm-2" for="projectSelect">Select a project to see the assessment:</label>
+        <select style="width:20%;" name="qmodel_selected" id="projectSelect" class="form-control mr-sm-2">
+            <option></option>
+            {% for project in projects %}
+            <option>{{project}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div style="margin-left: 100px" id="tree" hidden>
+    </div>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+
+    <script>
+        var myassessment = {{assessment_raw|safe}}
+        $('#projectSelect').on('change', function() {
+          show_tree( this.value );
+        });
+
+        function convertJSON(object) {
+          for (var key in object) {
+            if (typeof(object[key]) == "object") {
+              var obj = convertJSON(object[key]);
+              obj.key = obj.name ? obj.name : "";
+              obj.name = key;
+              if (!object["children"])
+                object["children"] = [];
+              object["children"].push(obj);
+              delete object[key];
+            }
+          }
+          return object;
+        }
+
+        myassessment = convertJSON(myassessment);
+
+        function show_tree(project) {
+            $("#tree").html("")
+
+            var margin = {top: 20, right: 120, bottom: 20, left: 10},
+                width = 1100 - margin.right - margin.left,
+                height = 1024 - margin.top - margin.bottom;
+
+            var i = 0,
+                duration = 750,
+                root;
+
+            var tree = d3.layout.tree()
+                .size([height, width]);
+
+            var diagonal = d3.svg.diagonal()
+                .projection(function(d) { return [d.y, d.x]; });
+
+            var svg = d3.select("div#tree").append("svg")
+                .attr("width", width + margin.right + margin.left)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+            show_tree_chart(project)
+            function show_tree_chart(project) {
+              if(project){
+                $('#tree').removeAttr('hidden');
+              }else{
+                $("#tree").attr("hidden",true);
+              }
+              root = myassessment;
+              root.x0 = height / 2;
+              root.y0 = 0;
+
+              function collapse(d) {
+                if (d.children) {
+                  d._children = d.children;
+                  d._children.forEach(collapse);
+                  d.children = null;
+                }
+              }
+
+              function firstCollapse(d) {
+                if (d.children) {
+                  d._children = d.children;
+                  for(i=0;i<d._children.length;i++) {
+                    d._children[i].children.forEach(collapse);
+                  }
+                }
+              }
+
+              //root.children.forEach(firstCollapse);
+              update(root, project);
+            }
+
+
+            function update(source, project) {
+
+              var tabs = [0, 100, 200, 400, 630, 700];
+
+              // Compute the new tree layout.
+              var nodes = tree.nodes(root).reverse(),
+                  links = tree.links(nodes);
+
+              // Normalize for fixed-depth.
+              nodes.forEach(function(d, i) {
+                d.y = tabs[d.depth];
+              });
+
+              // Update the nodes…
+              var node = svg.selectAll("g.node")
+                  .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+              // Enter any new nodes at the parent's previous position.
+              var nodeEnter = node.enter().append("g")
+                  .attr("class", "node")
+                  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+
+              nodeEnter.append("circle")
+                  .attr("r", 1e-6)
+                  .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+              nodeEnter.append("text")
+                  .attr("x", function(d) { return d.children || d._children ? -20 : 20; })
+                  .attr("dy", function(d) { return d.children || d._children ? "-0.5em" : ".35em" })
+                  .attr("text-anchor", function(d) { return d.children || d.children ? "end" : "start"; })
+                  .attr("fill", function(d) { return d.active == "true" ? "black" : "gray";})
+                  .text(function(d) {
+                    if(d[project]) {
+                      return d.name + " - " + d[project]
+                    } else {
+                      return d.name
+                    }
+                  })
+                  .style("fill-opacity", 1e-6);
+
+              // Transition nodes to their new position.
+              var nodeUpdate = node.transition()
+                  .duration(duration)
+                  .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+              nodeUpdate.select("circle")
+                  .attr("r", 5)
+                  .style("fill", function(d) { return d._children ? "red" : "#fff"; });
+
+              nodeUpdate.select("text")
+                  .style("fill-opacity", 1);
+
+              // Transition exiting nodes to the parent's new position.
+              var nodeExit = node.exit().transition()
+                  .duration(duration)
+                  .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+                  .remove();
+
+              nodeExit.select("circle")
+                  .attr("r", 1e-6);
+
+              nodeExit.select("text")
+                  .style("fill-opacity", 1e-6);
+
+              // Update the links…
+              var link = svg.selectAll("path.link")
+                  .data(links, function(d) { return d.target.id; });
+
+              // Enter any new links at the parent's previous position.
+              link.enter().insert("path", "g")
+                  .attr("class", "link")
+                  .attr("d", function(d) {
+                    var o = {x: source.x0, y: source.y0};
+                    return diagonal({source: o, target: o});
+                  });
+
+              // Transition links to their new position.
+              link.transition()
+                  .duration(duration)
+                  .attr("d", diagonal);
+
+              // Transition exiting nodes to the parent's new position.
+              link.exit().transition()
+                  .duration(duration)
+                  .attr("d", function(d) {
+                    var o = {x: source.x, y: source.y};
+                    return diagonal({source: o, target: o});
+                  })
+                  .remove();
+
+              // Stash the old positions for transition.
+              nodes.forEach(function(d) {
+                d.x0 = d.x;
+                d.y0 = d.y;
+              });
+            }
+        }
+
+    </script>
+
 </div>
+<hr>
 <div class="row">
     <div class="col-sm-12">
-          Each metric assess has 5 levels according to thresholds defined
-          in the quality model.
+        <h1>Projects Assessment Table - <a class="btn btn-primary" href="{% static 'prosoul/assessment_csv.csv' %}"> Download as CSV</a></h1>
+        {{ assessment | safe}}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        Each metric assess has 5 levels according to thresholds defined
+        in the quality model.
     </div>
 </div>
 {% endif %}
 
 
 <div class="row">
-  <div class="col-sm-12">
-      <form action="./create_assessment" method="post">
-          <fieldset id="config-vis" {% if assessment %} hidden {% endif %}>
-            {% csrf_token %}
-            <div class="modal-body">
-              <div class="input-group"><span class="input-group-addon">
-                {{ assess_config_form.quality_model.label }}</span>{{ assess_config_form.quality_model }}</div>
-              <div class="input-group"><span class="input-group-addon">
-                {{ assess_config_form.es_url.label }}</span>{{ assess_config_form.es_url }}</div>
-              <div class="input-group"><span class="input-group-addon">
-                {{ assess_config_form.es_index.label }}</span>{{ assess_config_form.es_index }}</div>
-              <div class="input-group" hidden><span class="input-group-addon">
-                {{ assess_config_form.backend_metrics_data.label }}</span>{{ assess_config_form.backend_metrics_data }}</div>
-              <div class="input-group"><span class="input-group-addon">
-                {{ assess_config_form.from_date.label }}</span>{{ assess_config_form.from_date }}</div>
-              <div class="input-group"><span class="input-group-addon">
-                {{ assess_config_form.to_date.label }}</span>{{ assess_config_form.to_date }}</div>
-            </div>
-            <div class="form-group">
-              <button type="submit" class="btn btn-primary btn-sm" id="create-assess-btn"><span>
+    <div class="col-sm-12">
+        <form action="./create_assessment" method="post">
+            <fieldset id="config-vis" {% if assessment %} hidden {% endif %}>
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="input-group"><span class="input-group-addon">
+                {{ assess_config_form.quality_model.label }}</span>{{ assess_config_form.quality_model }}
+                    </div>
+                    <div class="input-group"><span class="input-group-addon">
+                {{ assess_config_form.es_url.label }}</span>{{ assess_config_form.es_url }}
+                    </div>
+                    <div class="input-group"><span class="input-group-addon">
+                {{ assess_config_form.es_index.label }}</span>{{ assess_config_form.es_index }}
+                    </div>
+                    <div class="input-group" hidden><span class="input-group-addon">
+                {{ assess_config_form.backend_metrics_data.label }}</span>{{ assess_config_form.backend_metrics_data }}
+                    </div>
+                    <div class="input-group"><span class="input-group-addon">
+                {{ assess_config_form.from_date.label }}</span>{{ assess_config_form.from_date }}
+                    </div>
+                    <div class="input-group"><span class="input-group-addon">
+                {{ assess_config_form.to_date.label }}</span>{{ assess_config_form.to_date }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-sm" id="create-assess-btn"><span>
                 <i class="fa fa-check"></i></span> Create<span class="sr-only"> Assessment<span></button>
-            </div>
-          </fieldset>
-      </form>
-  </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
 </div>

@@ -118,11 +118,11 @@ class Assessment(LoginRequiredMixin, View):
                     if metric == metric_col:
                         table += "<td>%s</td>" % goal[attribute][metric]
                         metric_col_found = True
-                        csv_writter.writerow([goal_p, attribute, project, goal[attribute][metric]])
+                        csv_writter.writerow([goal_p, attribute, metric, project, goal[attribute][metric]])
                         break
                 if not metric_col_found:
                     table += "<td>-</td>"
-                    csv_writter.writerow([goal_p, attribute, project, "-"])
+                    csv_writter.writerow([goal_p, attribute, metric, project, "-"])
             table += "</tr>"
         table += "</table>"
 
@@ -159,6 +159,7 @@ class Assessment(LoginRequiredMixin, View):
 
         projects_data = {}
         metrics = []
+        projects_list = []
 
         for goal in assessment:
             for attribute in assessment[goal]:
@@ -184,12 +185,13 @@ class Assessment(LoginRequiredMixin, View):
             csvwritter = csv.writer(csvfile)
             for project in projects_data:
                 tables += "<h3>Project: " + project + "</h3>"
+                projects_list.append(project)
                 for goal in projects_data[project]:
                     tables += "<h5>Goal: " + goal + "</h5>"
                     tables += Assessment.render_attribute_table(metrics, projects_data[project][goal], project, goal,
                                                                 csvwritter)
 
-        return tables
+        return tables, projects_list
 
     def post(self, request):
         error = None
@@ -211,9 +213,10 @@ class Assessment(LoginRequiredMixin, View):
 
             context.update({"errors": error})
             if not error:
-                assessment_table = Assessment.render_tables(assessment)
+                (assessment_table, projects) = Assessment.render_tables(assessment)
                 if assessment_table:
-                    context.update({"assessment": Assessment.render_tables(assessment)})
+                    context.update({"assessment": assessment_table, "projects": projects,
+                                    "assessment_raw": json.dumps(assessment)})
                 else:
                     context.update({"errors": "Empty assessment. Review the form data."})
             return shortcuts.render(request, 'prosoul/assessment.html', context)

@@ -4,6 +4,30 @@
 
 {% block head %}
     {{ block.super }}
+    {% load static %}
+    <style>
+      .node {
+        cursor: pointer;
+        margin: 0px;
+      }
+
+      .node circle {
+        fill: #fff;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+      }
+
+      .node text {
+        font: 10px sans-serif;
+        background-color: #ffffff;
+      }
+
+      .link {
+        fill: none;
+        stroke: #ccc; /*#717171; #ccc; */
+        stroke-width: 1.5px;
+      }
+    </style>
 {% endblock %}
 
 {% block body %}
