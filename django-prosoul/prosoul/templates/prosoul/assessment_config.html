@@ -139,7 +139,12 @@
                     if(d[project]) {
                       return d.name + " - " + d[project]
                     } else {
-                      return d.name
+                        if(d.children){
+                            med = analyzeAssess(d, project)
+                            return d.name + " - " + med
+                        } else {
+                            return d.name
+                        }
                     }
                   })
                   .style("fill-opacity", 1e-6);
@@ -200,6 +205,20 @@
                 d.y0 = d.y;
               });
             }
+        }
+
+        function analyzeAssess(node, project) {
+            value = 0
+            node.children.forEach(function(e) {
+                if (e.children) {
+                    value += analyzeAssess(e, project)
+                }else{
+                    if (e[project]){
+                        value += e[project]
+                    }
+                }
+            });
+            return value/node.children.length
         }
 
     </script>
