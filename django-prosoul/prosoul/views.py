@@ -12,6 +12,7 @@ from prosoul.prosoul_assess import assess
 from prosoul.prosoul_vis import build_dashboards
 from prosoul.forms import AssessmentForm, VisualizationForm, KIBANA_URL
 
+ATTR_TEMPLATE = 'panels/templates/attribute-template.json'
 
 class Viewer(View):
 
@@ -63,7 +64,7 @@ class Visualize(LoginRequiredMixin, View):
                 es_url = form.cleaned_data['es_url']
                 kibana_url = form.cleaned_data['kibana_url']
                 es_index = form.cleaned_data['es_index']
-                attribute_template = form.cleaned_data['attribute_template']
+                attribute_template = ATTR_TEMPLATE
                 backend_metrics_data = form.cleaned_data['backend_metrics_data']
                 from_date = form.cleaned_data['from_date']
                 to_date = form.cleaned_data['to_date']
