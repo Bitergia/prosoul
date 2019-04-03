@@ -42,7 +42,8 @@ urlpatterns = [
     url(r'^visualize$', views.Visualize.as_view(), name='viz'),
     url(r'^create_visualization$', views.Visualize.as_view()),
     url(r'^assess$', views.Assessment.as_view(), name='assess'),
-    url(r'^create_assessment$', views.Assessment.as_view())
+    url(r'^create_assessment$', views.Assessment.as_view()),
+    url(r'^download_assessment_csv', views.download_csv)
 ]
 
 urlpatterns += urlpatterns_edit

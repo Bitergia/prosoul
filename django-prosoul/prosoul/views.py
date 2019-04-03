@@ -1,9 +1,10 @@
 import csv
 import json
+import os
 
 from django import shortcuts
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.template import loader
 from django.views import View
 
@@ -13,6 +14,9 @@ from prosoul.prosoul_vis import build_dashboards
 from prosoul.forms import AssessmentForm, VisualizationForm, KIBANA_URL
 
 ATTR_TEMPLATE = 'panels/templates/attribute-template.json'
+
+ASSESSMENT_CSV_FILE_PATH = 'prosoul/static/prosoul/assessment_csv.csv'
+
 
 class Viewer(View):
 
@@ -182,7 +186,7 @@ class Assessment(LoginRequiredMixin, View):
         tables = ""
 
         # Write to CSV
-        with open('prosoul/static/prosoul/assessment_csv.csv', 'w') as csvfile:  # Just use 'w' mode in 3.x
+        with open(ASSESSMENT_CSV_FILE_PATH, 'w') as csvfile:  # Just use 'w' mode in 3.x
             csvwritter = csv.writer(csvfile)
             for project in projects_data:
                 tables += "<h3>Project: " + project + "</h3>"
@@ -224,3 +228,13 @@ class Assessment(LoginRequiredMixin, View):
         else:
             context.update({"errors": form.errors})
             return shortcuts.render(request, 'prosoul/assessment.html', context)
+
+
+def download_csv(request):
+    file_path = ASSESSMENT_CSV_FILE_PATH
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            return response
+    raise Http404
