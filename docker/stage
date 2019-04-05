@@ -1,9 +1,15 @@
 #!/bin/bash
 
 echo "Running Prosoul"
+REPOSRC=https://github.com/Bitergia/prosoul.git
+LOCALREPO=prosoul/django-prosoul/
 
-git clone https://github.com/Bitergia/prosoul.git
-cd prosoul/django-prosoul/
+if [ ! -d $LOCALREPO ]
+then
+    git clone $REPOSRC
+fi
+
+cd $LOCALREPO
 
 # Set exec permission for config_deployment.py
 sudo chmod 770 config_deployment.py
