@@ -238,7 +238,7 @@ class Assessment(LoginRequiredMixin, View):
             return shortcuts.render(request, 'prosoul/assessment.html', context)
 
 
-def download_csv(request, project):
+def download_csv(request, project=None):
     if project:
         file_path = ASSESSMENT_CSV_DIR_PATH + "assessment_csv_" + project + ".csv"
     else:
