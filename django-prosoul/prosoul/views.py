@@ -15,7 +15,8 @@ from prosoul.forms import AssessmentForm, VisualizationForm, KIBANA_URL
 
 ATTR_TEMPLATE = 'panels/templates/attribute-template.json'
 
-ASSESSMENT_CSV_FILE_PATH = 'prosoul/static/prosoul/assessment_csv.csv'
+ASSESSMENT_CSV_DIR_PATH = 'prosoul/static/prosoul/'
+ASSESSMENT_CSV_FILE_NAME = 'assessment_csv.csv'
 
 
 class Viewer(View):
@@ -104,32 +105,37 @@ class Assessment(LoginRequiredMixin, View):
 
     @staticmethod
     def render_attribute_table(metrics, goal, project, goal_p, csv_writter):
-        table = "<table class='table'>"
-        # Headers
-        table += "<thead><th scope='col'>Attribute</th>"
-        for metric in metrics:
-            # Clean the metric name
-            # "GitHubEnrich {\"filter\": {\"term\": {\"state\": \"closed\"}}}
-            table += "<th>%s</th>" % metric
+        # Write project assessment to CSV
+        with open(ASSESSMENT_CSV_DIR_PATH + "assessment_csv_" + project + ".csv", 'w') as csvprojectfile:
+            csv_writter_project = csv.writer(csvprojectfile)
+            table = "<table class='table'>"
+            # Headers
+            table += "<thead><th scope='col'>Attribute</th>"
+            for metric in metrics:
+                # Clean the metric name
+                # "GitHubEnrich {\"filter\": {\"term\": {\"state\": \"closed\"}}}
+                table += "<th>%s</th>" % metric
 
-        table += "</thead>"
-        for attribute in goal:
-            # One row per atribute with its metrics
-            table += "<tr><th scope='row'>%s</th>" % attribute
-            # Let's find the metrics to fill the metrics columns
-            for metric_col in metrics:
-                metric_col_found = False
-                for metric in goal[attribute]:
-                    if metric == metric_col:
-                        table += "<td>%s</td>" % goal[attribute][metric]
-                        metric_col_found = True
-                        csv_writter.writerow([goal_p, attribute, metric, project, goal[attribute][metric]])
-                        break
-                if not metric_col_found:
-                    table += "<td>-</td>"
-                    csv_writter.writerow([goal_p, attribute, metric, project, "-"])
-            table += "</tr>"
-        table += "</table>"
+            table += "</thead>"
+            for attribute in goal:
+                # One row per atribute with its metrics
+                table += "<tr><th scope='row'>%s</th>" % attribute
+                # Let's find the metrics to fill the metrics columns
+                for metric_col in metrics:
+                    metric_col_found = False
+                    for metric in goal[attribute]:
+                        if metric == metric_col:
+                            table += "<td>%s</td>" % goal[attribute][metric]
+                            metric_col_found = True
+                            csv_writter.writerow([goal_p, attribute, metric, project, goal[attribute][metric]])
+                            csv_writter_project.writerow([goal_p, attribute, metric, project, goal[attribute][metric]])
+                            break
+                    if not metric_col_found:
+                        table += "<td>-</td>"
+                        csv_writter.writerow([goal_p, attribute, metric, project, "-"])
+                        csv_writter_project.writerow([goal_p, attribute, metric, project, "-"])
+                table += "</tr>"
+            table += "</table>"
 
         return table
 
@@ -186,10 +192,12 @@ class Assessment(LoginRequiredMixin, View):
         tables = ""
 
         # Write to CSV
-        with open(ASSESSMENT_CSV_FILE_PATH, 'w') as csvfile:  # Just use 'w' mode in 3.x
+        with open(ASSESSMENT_CSV_DIR_PATH + ASSESSMENT_CSV_FILE_NAME, 'w') as csvfile:  # Just use 'w' mode in 3.x
             csvwritter = csv.writer(csvfile)
             for project in projects_data:
-                tables += "<h3>Project: " + project + "</h3>"
+                tables += "<h3>Project: " + project + " <a class='btn btn-primary' " \
+                                                      "href='./download_project_assessment_csv/" + project \
+                          + "'> Download as CSV</a></h3> "
                 projects_list.append(project)
                 for goal in projects_data[project]:
                     tables += "<h5>Goal: " + goal + "</h5>"
@@ -230,8 +238,11 @@ class Assessment(LoginRequiredMixin, View):
             return shortcuts.render(request, 'prosoul/assessment.html', context)
 
 
-def download_csv(request):
-    file_path = ASSESSMENT_CSV_FILE_PATH
+def download_csv(request, project):
+    if project:
+        file_path = ASSESSMENT_CSV_DIR_PATH + "assessment_csv_" + project + ".csv"
+    else:
+        file_path = ASSESSMENT_CSV_DIR_PATH + ASSESSMENT_CSV_FILE_NAME
     if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
