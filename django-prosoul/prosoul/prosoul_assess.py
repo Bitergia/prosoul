@@ -65,6 +65,8 @@ def get_params():
                         help='Backend metrics data to use (grimoirelab, ossmeter, ...)')
     parser.add_argument('--from-date', default='1970-01-01',
                         help='Start date from which to compute the metrics (1970-01-01 by default)')
+    parser.add_argument('--to-date', default='2100-01-01',
+                        help='End date to compute the metrics (2100-01-01 by default)')
     parser.add_argument('--plot', action='store_true',
                         help='Show a plot with the metrics values')
     parser.add_argument('--csvfile', required=False,
@@ -583,7 +585,9 @@ if __name__ == '__main__':
     logging.getLogger("requests").setLevel(logging.WARNING)
 
     from_date = None if not args.from_date else parser.parse(args.from_date)
+    to_date = None if not args.to_date else parser.parse(args.to_date)
 
-    assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data, args.attribute, from_date)
+    assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data,
+                        from_date, to_date, args.attribute)
     report = build_report(assessment, "big_number", args.csvfile)
     show_report(report, "big_number", args.plot)
