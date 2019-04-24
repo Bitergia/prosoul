@@ -25,6 +25,7 @@
 
 import argparse
 import csv
+import datetime
 import json
 import logging
 import operator
@@ -37,7 +38,7 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_prosoul.settings'
 django.setup()
 
-from dateutil import parser
+from grimoirelab_toolkit.datetime import (str_to_datetime)
 
 import matplotlib.pyplot as plot
 
@@ -107,8 +108,8 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
                 metric_agg = ', "aggs": ' + metric_agg
 
     if from_date and to_date:
-        from_date_iso = from_date.isoformat()
-        to_date_iso = to_date.isoformat()
+        from_date_iso = from_date
+        to_date_iso = to_date
         filter_date = """
         {"range" :
             {
@@ -229,7 +230,7 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
         }
       }
     }
-    """ % (metric_field, metric_name, from_date.isoformat(), to_date.isoformat())
+    """ % (metric_field, metric_name, from_date, to_date)
 
     # logging.debug(json.dumps(json.loads(es_query), indent=True))
 
@@ -247,17 +248,20 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
 def compute_metric_per_project(es_url, es_index, metric_data, backend_metrics_data, from_date, to_date):
     """ Compute the value of a metric for all projects available """
 
+    from_date_str = from_date.strftime('%Y-%m-%d')
+    to_date_str = to_date.strftime('%Y-%m-%d')
+
     metric_per_project = None
     metric_field = find_metric_name_field(backend_metrics_data)
     if backend_metrics_data == "ossmeter":
         metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data,
-                                                                 from_date, to_date)
+                                                                 from_date_str, to_date_str)
     elif backend_metrics_data == "grimoirelab":
         metric_per_project = compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metric_data,
-                                                                     from_date, to_date)
+                                                                     from_date_str, to_date_str)
     elif backend_metrics_data == "scava-metrics":
-        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data, from_date,
-                                                                 to_date)
+        metric_per_project = compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data,
+                                                                 from_date_str, to_date_str)
 
     return metric_per_project
 
@@ -584,8 +588,8 @@ if __name__ == '__main__':
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
 
-    from_date = None if not args.from_date else parser.parse(args.from_date)
-    to_date = None if not args.to_date else parser.parse(args.to_date)
+    from_date = None if not args.from_date else str_to_datetime(args.from_date)
+    to_date = None if not args.to_date else str_to_datetime(args.to_date)
 
     assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data,
                         from_date, to_date, args.attribute)
