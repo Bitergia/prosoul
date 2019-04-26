@@ -46,6 +46,8 @@ from elasticsearch import helpers, Elasticsearch
 from prosoul.models import QualityModel
 from prosoul.prosoul_utils import find_metric_name_field
 
+ASSESSMENT_CSV_DIR_PATH = 'prosoul/static/prosoul/'
+ASSESSMENT_CSV_FILE_NAME = 'assessment_csv.csv'
 THRESHOLDS = ["Very Poor", "Poor", "Fair", "Good", "Very Good"]
 HEADERS_JSON = {"Content-Type": "application/json"}
 MAX_PROJECTS = 10000  # max number of projects to analyze
@@ -449,6 +451,9 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
 
     publish_assessment(es_url, es_index, assessment)
 
+    projects_data = goals2projects(assessment)
+    dump_csv(projects_data)
+
     return assessment
 
 
@@ -487,7 +492,7 @@ def build_project_big_number(project):
     return average
 
 
-def dump_csv(csv_file, projects_data):
+def dump_csv(projects_data):
     """
     Dump the project metric scores to a CSV file
 
@@ -505,21 +510,19 @@ def dump_csv(csv_file, projects_data):
                     if metric not in fieldnames:
                         fieldnames.append(metric)
 
-    with open(csv_file, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
-        writer.writeheader()
-
+    with open(ASSESSMENT_CSV_DIR_PATH + ASSESSMENT_CSV_FILE_NAME, 'w') as csvfile:  # Just use 'w' mode in 3.x
+        csvwritter = csv.writer(csvfile)
         for project in projects_data:
-            row_dict = {"project": project}
-            for goal in projects_data[project]:
-                for attr in projects_data[project][goal]:
-                    for metric in projects_data[project][goal][attr]:
-                        row_dict[metric] = projects_data[project][goal][attr][metric]
-            writer.writerow(row_dict)
+            with open(ASSESSMENT_CSV_DIR_PATH + "assessment_csv_" + project + ".csv", 'w') as csvprojectfile:
+                csvwritter_project = csv.writer(csvprojectfile)
+                for goal in projects_data[project]:
+                    for attr in projects_data[project][goal]:
+                        for metric in projects_data[project][goal][attr]:
+                            csvwritter.writerow([goal, attr, metric, project, projects_data[project][goal][attr][metric]])
+                            csvwritter_project.writerow([goal, attr, metric, project, projects_data[project][goal][attr][metric]])
 
 
-def build_report(assessment, kind, csv_file=None):
+def build_report(assessment, kind):
     """
 
     :param assessment: dict with the goals assessment based on a quality model
@@ -537,8 +540,6 @@ def build_report(assessment, kind, csv_file=None):
     if kind == 'big_number':
         # Average of all metrics
         projects_data = goals2projects(assessment)
-        if csv_file:
-            dump_csv(csv_file, projects_data)
 
         for project in projects_data:
             projects_report[project] = build_project_big_number(projects_data[project])
@@ -592,5 +593,5 @@ if __name__ == '__main__':
 
     assessment = assess(args.elastic_url, args.index, args.model, args.backend_metrics_data,
                         from_date, to_date, args.attribute)
-    report = build_report(assessment, "big_number", args.csvfile)
+    report = build_report(assessment, "big_number")
     show_report(report, "big_number", args.plot)
