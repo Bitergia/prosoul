@@ -37,6 +37,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'django_prosoul.settings'
 django.setup()
 
 from prosoul.models import QualityModel
+from django.db.models import Q
 
 
 def get_params():
@@ -133,13 +134,13 @@ def fetch_model(model_name):
     return model_json
 
 
-def fetch_models(model_name=None):
+def fetch_models(model_name=None, user=None):
     models_json = {"qualityModels": []}
 
     if model_name:
         models_json["qualityModels"].append(fetch_model(model_name))
     else:
-        models = QualityModel.objects.all()
+        models = QualityModel.objects.all().filter(Q(created_by=user) | Q(created_by=None))
         for model in models:
             models_json["qualityModels"].append(fetch_model(model.name))
 

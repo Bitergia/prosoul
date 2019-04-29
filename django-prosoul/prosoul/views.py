@@ -15,13 +15,13 @@ from prosoul.forms import AssessmentForm, VisualizationForm, KIBANA_URL
 ATTR_TEMPLATE = 'panels/templates/attribute-template.json'
 
 
-class Viewer(View):
+class Viewer(LoginRequiredMixin, View):
 
     http_method_names = ['get']
 
     def get(self, request):
         """ Basic Models Viewer just dumping the JSON of all models """
-        models = fetch_models()
+        models = fetch_models(None, request.user)
         if not models['qualityModels']:
             return shortcuts.redirect('prosoul:editor')
         model_selected = models['qualityModels'][0]['name']

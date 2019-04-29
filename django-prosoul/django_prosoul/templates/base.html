@@ -40,6 +40,14 @@
                   <a class="nav-link {% if active_page == 'admin' %} active {% endif %}" href="{% url 'admin:index' %}">Admin (admin/admin for login)</a>
               </li>
             </ul>
+            {% if user.is_authenticated %}
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}?next={% url 'prosoul:viewer' %}" class="navbar-text" style="display: right">Logout</a>
+                </li>
+            </ul>
+            {% endif %}
+
         </nav>
         <div class="container-fluid">
             {% if err != None %}

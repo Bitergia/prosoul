@@ -302,9 +302,9 @@ class QualityModelView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequired
             qmodel_name = form.cleaned_data['qmodel_name']
 
             try:
-                qmodel_orm = QualityModel.objects.get(name=qmodel_name)
+                qmodel_orm = QualityModel.objects.get(name=qmodel_name, created_by=request.user)
             except QualityModel.DoesNotExist:
-                qmodel_orm = QualityModel(name=qmodel_name)
+                qmodel_orm = QualityModel(name=qmodel_name, created_by=request.user)
                 qmodel_orm.save()
 
             # Select and qmodel reset the state. Don't pass form=form
@@ -321,7 +321,7 @@ class QualityModelView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequired
         if form.is_valid():
             qmodel_name = form.cleaned_data['qmodel_name']
             try:
-                QualityModel.objects.get(name=qmodel_name).delete()
+                QualityModel.objects.get(name=qmodel_name, created_by=request.user).delete()
             except QualityModel.DoesNotExist:
                 errors = "Can't delete not found quality model %s" % qmodel_name
         else:
