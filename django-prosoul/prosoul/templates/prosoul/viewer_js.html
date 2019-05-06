@@ -28,10 +28,10 @@ var svg = d3.select("div#tree").append("svg")
 var myattrs = {};
 var mymetrics = {};
 
-var myattrs = JSON.parse('{{attributes_data_str|safe}}')['children'];
-var mymetrics = JSON.parse('{{metrics_data_str|safe}}')['children'];
+var myattrs = JSON.parse("{{attributes_data_str|safe}}")['children'];
+var mymetrics = JSON.parse("{{metrics_data_str|safe}}")['children'];
 // Only one quality model supported yet. Get the first one.
-var qm = JSON.parse('{{qm_data_str|safe}}');
+var qm = JSON.parse("{{qm_data_str|safe}}");
 
 show_tree();
 
