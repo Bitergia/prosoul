@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from time import time
 
+from django.db.models import Count
 from elasticsearch import Elasticsearch
 
 from django import shortcuts
@@ -756,6 +757,8 @@ def get_metrics_data():
         sid = page['_scroll_id']
         scroll_size = len(page['hits']['hits'])
 
+    count = MetricData.objects.aggregate(last_id_inserted=Count('id'))['last_id_inserted'] + 1
     for id, m in enumerate(metrics_names):
         if not MetricData.objects.filter(implementation=m).exists():
-            MetricData.objects.create(id=id, implementation=m)
+            MetricData.objects.create(id=count, implementation=m)
+            count = count + 1
