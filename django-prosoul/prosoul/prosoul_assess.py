@@ -180,9 +180,18 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
 
 
 def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data, from_date, to_date):
-    # Get the total aggregated value for a metric in the OSSMeter
-    # Elasticsearch index with metrics
+    """
+    Compute a value for a given SCAVA metric (`metric_data`) stored in `es_url/es_index`
+    between `from_date` and `to_date`. The value is the maximum of the metric values in
+    that given time range.
 
+    :param es_url: URL of the ElasticSearch
+    :param es_index: Metric index name (e.g., scava-metrics)
+    :param metric_field: name of the metric field (e.g., metric_name)
+    :param metric_data: name of the metric (e.g., commits, bugs)
+    :param from_date: start date of the timeframe
+    :param to_date: end date of the time frame
+    """
     metric_name = metric_data.implementation
 
     project_metrics = []
@@ -233,8 +242,6 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
     }
     """ % (metric_field, metric_name, from_date, to_date)
 
-    # logging.debug(json.dumps(json.loads(es_query), indent=True))
-
     res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT, headers=HEADERS_JSON)
     res.raise_for_status()
 
@@ -272,6 +279,11 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     Do the assessment for an attribute in the quality model. If a metric does not have thresholds,
     the score for it is 0.
 
+    The attribute value is the normalization of the metric value calculated by the method
+    `compute_metric_per_project` with a 6-level threshold (i.e., 0-5). Each metric value is
+    compared with each threshold value, and if the metric value is greater than the threshold
+    value, the attribute value is increased by one.
+
     :param es_url: Elasticsearch URL
     :param es_index: Index with the metrics data
     :param attribute: name of the attribute from which to compute the metrics
@@ -280,7 +292,6 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     :param from_date: end date from which to compute the metrics
     :return: a dict with metrics as keys and the projects score per each metric as value
     """
-
     logging.debug('Doing the assessment for attribute: %s', attribute.name)
     # Collect all metrics that are included in the models
     metrics_with_data = []
