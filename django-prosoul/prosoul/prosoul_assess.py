@@ -393,7 +393,29 @@ def enrich_assessment(assessment):
 
 def publish_assessment(es_url, es_index, assessment):
     """
-    Publish all the scores for the metrics in assessment
+    Publish all the scores for the metrics in assessment in the
+    target index: `es_index`+ '_scores' (e.g., scava-metrics_scores). Note
+    that the target index is deleted and recreated every time, since the
+    assessment is calculated on a given time span.
+
+    An item in the target index is as the one below. It includes the name
+    of the metric, attribute, goal, metric score normalized (i.e.,
+    `score`, `score_Threads`) wrt the 6-level thresholds.
+
+    {
+        "_index" : "scava-metrics_scores",
+        "_type" : "item",
+        "_id" : "OtRLlmoBsN4hsIriFChp",
+        "_score" : 1.0,
+        "_source" : {
+          "metric" : "Threads",
+          "project" : "netty",
+          "goal" : "activity",
+          "score_Threads" : 5,
+          "score" : 5,
+          "attribute" : "interactions"
+        }
+      }
 
     :param es_url: URL for Elasticsearch
     :param es_index: index in Elasticsearch
