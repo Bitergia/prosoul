@@ -181,9 +181,9 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
 
 def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_data, from_date, to_date):
     """
-    Compute a value for a given SCAVA metric (`metric_data`) stored in `es_url/es_index`
-    between `from_date` and `to_date`. The value is the maximum of the metric values in
-    that given time range.
+    Compute the non-normalized QM metric value for a given SCAVA metric (`metric_data`) stored in
+    `es_url/es_index` between `from_date` and `to_date`. The value is the maximum of the SCAVA
+    metric values in that given time range.
 
     :param es_url: URL of the ElasticSearch
     :param es_index: Metric index name (e.g., scava-metrics)
@@ -279,10 +279,12 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     Do the assessment for an attribute in the quality model. If a metric does not have thresholds,
     the score for it is 0.
 
-    The attribute value is the normalization of the metric value calculated by the method
-    `compute_metric_per_project` with a 6-level threshold (i.e., 0-5). Each metric value is
-    compared with each threshold value, and if the metric value is greater than the threshold
-    value, the attribute value is increased by one.
+    Given an attribute defined in the QM, all metrics are retrieved (i.e., QM metrics).
+    Each QM metric value is the normalization on a 6-level threshold (i.e., 0-5) of the
+    the maximum of the values of a given SCAVA metric between a `from_date` and `to_date`
+    (see method `compute_metric_per_project`). The normalization is performed by comparing the
+    maximum value obtained against each threshold level value (e.g., 20-40-60-80-100), if the
+    value is greater than the threshold level value, the QM metric value is increased by one.
 
     :param es_url: Elasticsearch URL
     :param es_index: Index with the metrics data
