@@ -5,7 +5,7 @@
 
 <script>
 
-var margin = {top: 20, right: 120, bottom: 20, left: 10},
+var margin = {top: 20, right: 120, bottom: 20, left: 30},
     width = 1100 - margin.right - margin.left,
     height = 1024 - margin.top - margin.bottom;
 
@@ -83,7 +83,18 @@ function update(source) {
   var nodeEnter = node.enter().append("g")
       .attr("class", "node")
       .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-      .on("click", click);
+      .on("click", click)
+      .on("mouseover", function(d){tooltip.text(d.name); return tooltip.style("visibility", "visible");})
+      .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+      .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+
+      var tooltip = d3.select("body")
+        .append("div")
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("visibility", "hidden")
+        .style("background", "#FFF1C2")
+        .text("a simple tooltip");
 
   nodeEnter.append("circle")
       .attr("r", 1e-6)
@@ -91,10 +102,12 @@ function update(source) {
 
   nodeEnter.append("text")
       .attr("x", function(d) { return d.children || d._children ? -20 : 20; })
-      .attr("dy", function(d) { return d.children || d._children ? "-0.5em" : ".35em" })
-      .attr("text-anchor", function(d) { return d.children || d.children ? "end" : "start"; })
+      .attr("dy", function(d) { return d.children || d._children ? "-0.8em" : ".35em" })
       .attr("fill", function(d) { return d.active == "true" ? "black" : "gray";})
       .text(function(d) {
+        if(d.children){
+            return (d.name.length > 18) ? d.name.substr(0, 18-1) + '...' : d.name;
+        }
         return d.value ? d.name + " (" + d.value + ")" : d.name;
       })
       .style("fill-opacity", 1e-6);
