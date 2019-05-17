@@ -190,7 +190,7 @@ A draft diagram for the architecture is:
 
 There is a specific guide for [using prosoul with CROSSMINER](doc/prosoul-crossminer.md) for creating the visualization for a quality model and generating the assessment of the projects with CROSSMINER.
 
-There is a [demo online of prosoul for CROSSMINER](http://prosoul.castalia.camp).
+There is a [demo online of prosoul for CROSSMINER](https://eclipse.zoom.us/recording/share/cMm_9gGMNir9UWqY0Mn7mWCETlA_9LJhcZF0uGIru_KwIumekTziMw).
 
 ## Prosoul with GrimoireLab
 
