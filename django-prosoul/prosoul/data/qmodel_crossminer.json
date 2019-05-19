@@ -9,99 +9,27 @@
        "factoids": [],
        "metrics": [
         {
-         "data_implementation": "Average Sentiment",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "average sentiment on bugs",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Comment Emotions",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "comment emotions",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Comment Emotions(anger)",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "comment anger",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Comment Emotions(joy)",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "comment joy",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Comment Emotions(sadness)",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "comment sadness",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Article Emotions",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "article emotions",
-         "thresholds": "1,10,20,30,40"
-        }
-       ],
-       "name": "sentiment",
-       "subattributes": []
-      },
-      {
-       "description": "",
-       "factoids": [],
-       "metrics": [
-        {
          "data_implementation": "Active Users",
          "data_params": null,
          "data_source_type": null,
-         "description": "",
+         "description": "The max number of active users",
          "name": "active users",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Core committers",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "core committers",
-         "thresholds": "1,10,20,30,40"
+         "thresholds": "10,50,100,500,1000"
         },
         {
          "data_implementation": "New Users",
          "data_params": null,
          "data_source_type": null,
-         "description": "",
+         "description": "The max number of new users",
          "name": "new users",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Inactive Users",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "inactive users",
-         "thresholds": "1,10,20,30,40"
+         "thresholds": "10,20,30,50,100"
         }
        ],
        "name": "users",
        "subattributes": []
       }
      ],
-     "description": "",
+     "description": "Measure the community of a project based on new and active users",
      "name": "community",
      "subgoals": []
     },
@@ -112,52 +40,12 @@
        "factoids": [],
        "metrics": [
         {
-         "data_implementation": "Bugs",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "number of bugs",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Won't-Fix Bugs",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "wont fix bugs",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Invalid Bugs",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "invalid bugs",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
          "data_implementation": "Fixed Bugs",
          "data_params": null,
          "data_source_type": null,
-         "description": "",
+         "description": "The max number of fixed bugs",
          "name": "fixed bugs",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Unanswered Bugs",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "unanswered bugs",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Resolved or Closed Bugs",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "processed bugs",
-         "thresholds": "1,10,20,30,40"
+         "thresholds": "1,10,20,50,100"
         }
        ],
        "name": "bugs",
@@ -171,200 +59,17 @@
          "data_implementation": "Patches",
          "data_params": null,
          "data_source_type": null,
-         "description": "",
+         "description": "The max number of patches submitted",
          "name": "patches",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "commits",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "commits",
-         "thresholds": "1,10,20,30,40"
+         "thresholds": "10,20,50,100,200"
         }
        ],
        "name": "code",
        "subattributes": []
-      },
-      {
-       "description": "",
-       "factoids": [],
-       "metrics": [
-        {
-         "data_implementation": "Articles",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "articles",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Comments",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "comments",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "New Threads",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "new threads",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Replies",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "replies",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Requests",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "requests",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Threads",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "threads",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Unanswered Threads",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "unanswered threads",
-         "thresholds": "1,10,20,30,40"
-        }
-       ],
-       "name": "interactions",
-       "subattributes": []
       }
      ],
-     "description": "",
+     "description": "Measure the community of a project based on the number of fixed bugs and patches submitte",
      "name": "activity",
-     "subgoals": []
-    },
-    {
-     "attributes": [
-      {
-       "description": "",
-       "factoids": [],
-       "metrics": [
-        {
-         "data_implementation": "Unstructured Module Smells",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "unstructured modules",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Weaken Modularity Smells",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "weaken modularity",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Unnecessary Abstraction Smells",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "unnecessary abstractions",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Tightly-coupled Module Smells",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "tightly-coupled modules",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Broken Hierarchy Smells",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "broken hierarchies",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Hairball Structure Smells",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "hairball structures",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Deficient Encapsulation Smells",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "deficient encapsulations",
-         "thresholds": "1,10,20,30,40"
-        }
-       ],
-       "name": "bad smells",
-       "subattributes": []
-      },
-      {
-       "description": "",
-       "factoids": [],
-       "metrics": [
-        {
-         "data_implementation": "Unit test coverage (all methods)",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "test coverage for all methods",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Specialization Ratio (Java)",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "code specialization",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Reuse Ratio (Java)",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "code reuse",
-         "thresholds": "1,10,20,30,40"
-        },
-        {
-         "data_implementation": "Advanced usage of Java features",
-         "data_params": null,
-         "data_source_type": null,
-         "description": "",
-         "name": "advanced features",
-         "thresholds": "1,10,20,30,40"
-        }
-       ],
-       "name": "good smells",
-       "subattributes": []
-      }
-     ],
-     "description": "",
-     "name": "quality",
      "subgoals": []
     }
    ],
