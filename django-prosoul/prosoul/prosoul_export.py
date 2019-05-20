@@ -79,7 +79,8 @@ def fetch_model(model_name):
                 "data_implementation": metric_data_implementation,
                 "data_params": metric_data_params,
                 "data_source_type": data_source_type_name,
-                "thresholds": metric_orm.thresholds
+                "thresholds": metric_orm.thresholds,
+                "calculation_type": metric_orm.calculation_type
             }
             attribute_json['metrics'].append(metric_json)
 
@@ -95,7 +96,7 @@ def fetch_model(model_name):
 
             }
             attribute_json['factoids'].append(factoid_json)
-
+    
         for subattribute_orm in attribute_orm.subattributes.all():
             attribute_json['subattributes'].append(fetch_attribute(subattribute_orm))
 
