@@ -104,6 +104,7 @@ def feed_models(models_json):
                 metric_data_orm = add(MetricData, **mdparams)
 
             metparams = {"name": metric['name'],
+                         "description": metric['description'],
                          "data_source_type": data_source_orm,
                          "data": metric_data_orm}
             if 'thresholds' in metric and metric['thresholds']:

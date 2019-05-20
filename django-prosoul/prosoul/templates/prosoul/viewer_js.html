@@ -190,31 +190,14 @@ function click(d) {
 
       var ptitle = mydiv.append('p');
       ptitle.classed("title", true);
-      ptitle.text(d.type.charAt(0).toUpperCase() + d.type.slice(1) + ": " + mynode.name + " (" + mynode.mnemo + ")");
-
-      p = mydiv.append('p');
-      ptitle = p.append('span');
-      ptitle.classed("details-title", true);
-      ptitle.text("Active:")
-      pactive = p.append('span');
-      pactive.classed("details", true);
-      pactive.text(mynode.active.charAt(0).toUpperCase() + mynode.active.slice(1));
-
-      p = mydiv.append('p');
-      ptitle = p.append('span');
-      ptitle.classed("details-title", true);
-      ptitle.text("Data source:")
-      psource = ptitle.append('span');
-      psource.classed("details", true);
-      psource.text(mynode.datasource);
+      ptitle.text("Name: " + mynode.name);
 
       pdesct = mydiv.append('p');
       pdesct.classed("details-title", true);
-      pdesct.text("Description:");
-
+      pdesct.html("<b>Description:</b>")
       var pdesc = mydiv.append('p');
       pdesc.classed("details", true);
-      pdesc.html(mynode.description);
+      pdesc.text(mynode.description);
     } else if (d.type == "attribute") {
       mynode = d;
       mynode.description = myattrs[d.mnemo]["description"];
@@ -226,15 +209,7 @@ function click(d) {
 
       var ptitle = mydiv.append('p');
       ptitle.classed("title", true);
-      ptitle.text(d.type.charAt(0).toUpperCase() + d.type.slice(1) + ": " + mynode.name + " (" + mynode.mnemo + ")");
-
-      var pactive = mydiv.append('p');
-      ptitle = pactive.append('span');
-      ptitle.classed("details-title", true);
-      ptitle.text("Active:");
-      pactive = pactive.append('span');
-      pactive.classed("details", true);
-      pactive.text(mynode.active);
+      ptitle.text("Name: " + mynode.name);
 
       pdesct = mydiv.append('p');
       pdesct.classed("details-title", true);
