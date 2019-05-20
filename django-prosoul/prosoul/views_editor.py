@@ -400,6 +400,7 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             thresholds = form.cleaned_data['metric_thresholds']
             attribute_id = form.cleaned_data['attributes']
             metric_data_id = form.cleaned_data['metrics_data']
+            calculation_type = form.cleaned_data['calculation_type']
 
             attribute_orm = Attribute.objects.get(id=attribute_id)
 
@@ -412,7 +413,7 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             except Metric.DoesNotExist:
                 # Create a new metric
                 metric_orm = Metric(name=name, attribute=attribute_orm,
-                                    thresholds=thresholds)
+                                    thresholds=thresholds, calculation_type=calculation_type)
             if metric_data_id:
                 metric_data_orm = MetricData.objects.get(id=metric_data_id)
                 metric_orm.data = metric_data_orm
@@ -482,11 +483,13 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             metric_data_id = form.cleaned_data['metrics_data']
             old_attribute_id = form.cleaned_data['old_attribute_id']
             thresholds = form.cleaned_data['metric_thresholds']
+            calculation_type = form.cleaned_data['calculation_type']
 
             metric_orm = Metric.objects.get(id=metric_id)
             metric_orm.name = name
             metric_orm.data = None
             metric_orm.thresholds = thresholds
+            metric_orm.calculation_type = calculation_type
             if metric_data_id:
                 metric_data_orm = MetricData.objects.get(id=metric_data_id)
                 metric_orm.data = metric_data_orm

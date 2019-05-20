@@ -40,6 +40,7 @@ class MetricData(ProsoulModel):
 
 class Metric(ProsoulModel):
     name = models.CharField(max_length=200, unique=True)
+    calculation_type = models.CharField(max_length=200, default='max')
     data = models.ForeignKey(MetricData, on_delete=models.CASCADE, null=True, blank=True)
 
     data_source_type = models.ForeignKey(DataSourceType,

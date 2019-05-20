@@ -237,7 +237,8 @@ class MetricForm(ProsoulEditorForm):
                 kwargs['initial'].update({
                     'metric_id': self.metric_id,
                     'metric_name': metric_orm.name,
-                    'metric_thresholds': metric_orm.thresholds
+                    'metric_thresholds': metric_orm.thresholds,
+                    'calculation_type': metric_orm.calculation_type
                 })
                 if metric_orm.data:
                     kwargs['initial'].update({'metrics_data': metric_orm.data.id})
@@ -266,6 +267,10 @@ class MetricForm(ProsoulEditorForm):
         self.widget = forms.Select(attrs={'class': 'form-control'})
         self.fields['attributes'] = forms.ChoiceField(label='Attributes', required=True,
                                                       widget=self.widget, choices=choices)
+
+        calculation_types = [('max', 'Max'), ('min', 'Min'), ('avg', 'Average'), ('median', 'Median')]
+        self.fields['calculation_type'] = forms.ChoiceField(label='Calculation Type', required=True,
+                                                            widget=self.widget, choices=calculation_types)
 
         choices = ()
 
