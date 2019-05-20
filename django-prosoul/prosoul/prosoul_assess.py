@@ -193,6 +193,7 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
     :param to_date: end date of the time frame
     """
     metric_name = metric_data.implementation
+    calculation_type = metric_data.calculation_type
 
     project_metrics = []
     es_query = """
@@ -230,24 +231,43 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
           "terms": {
             "field": "project"
           },
-          "aggs": {
-            "2": {
-              "max": {
-                "field": "metric_es_value"
+    """ % (metric_field, metric_name, from_date, to_date)
+
+    if calculation_type == 'median':
+        es_query += """
+            "aggs": {
+                "2": {
+                   "percentiles": {
+                        "field": "metric_es_value",
+                        "percents": [50]
+                   }
+                }
               }
             }
           }
-        }
-      }
-    }
-    """ % (metric_field, metric_name, from_date, to_date)
+        }"""
+    else:
+        es_query += """
+            "aggs": {
+                "2": {
+                  "%s": {
+                    "field": "metric_es_value"
+                  }
+                }
+              }
+            }
+          }
+        }""" % calculation_type
 
     res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT, headers=HEADERS_JSON)
     res.raise_for_status()
 
     project_buckets = res.json()["aggregations"]["3"]["buckets"]
     for pb in project_buckets:
-        metric_value = pb["2"]["value"]
+        if calculation_type == 'median':
+            metric_value = pb["2"]["values"]['50.0']
+        else:
+            metric_value = pb["2"]["value"]
         project_metrics.append({"project": pb['key'], "metric": metric_value})
 
     return project_metrics
@@ -302,6 +322,7 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     for metric in attribute.metrics.all():
         # We need the metric values and the metric indicators
         if metric.data:
+            metric.data.calculation_type = metric.calculation_type
             metrics_with_data.append(metric)
         else:
             logging.debug("Can't find data for %s", metric.name)
