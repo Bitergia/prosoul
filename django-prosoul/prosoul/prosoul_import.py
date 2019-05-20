@@ -108,6 +108,10 @@ def feed_models(models_json):
                          "data": metric_data_orm}
             if 'thresholds' in metric and metric['thresholds']:
                 metparams['thresholds'] = metric['thresholds']
+            if 'calculation_type' in metric and metric['calculation_type']:
+                metparams['calculation_type'] = metric['calculation_type']
+            else:
+                metparams['calculation_type'] = "max"
             metric_orm = add(Metric, **metparams)
             if metric_orm is None:
                 raise RuntimeError("Can not import attribute " + attribute['name'])
