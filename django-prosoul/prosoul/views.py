@@ -10,9 +10,10 @@ from django.views import View
 from prosoul.prosoul_export import fetch_models, gl2viewer
 from prosoul.prosoul_assess import assess, ASSESSMENT_CSV_DIR_PATH, ASSESSMENT_CSV_FILE_NAME
 from prosoul.prosoul_vis import build_dashboards
-from prosoul.forms import AssessmentForm, VisualizationForm, KIBANA_URL
+from prosoul.forms import AssessmentForm, VisualizationForm
 
 ATTR_TEMPLATE = 'panels/templates/attribute-template.json'
+KIBANA_HOST = str(os.getenv('KIBITER_HOST', 'http://localhost:80'))
 
 
 class Viewer(LoginRequiredMixin, View):
@@ -80,7 +81,7 @@ class Visualize(LoginRequiredMixin, View):
 
                 context.update({"errors": error})
                 if not error:
-                    context.update({"kibana_url": kibana_url})
+                    context.update({"kibana_url": KIBANA_HOST})
                 return shortcuts.render(request, 'prosoul/visualize.html', context)
             else:
                 context.update({"errors": form.errors})
@@ -194,7 +195,7 @@ class Assessment(LoginRequiredMixin, View):
     def post(self, request):
         error = None
         form = AssessmentForm(request.POST)
-        context = {'active_page': "assess", "assess_config_form": form, 'kibana_url': KIBANA_URL}
+        context = {'active_page': "assess", "assess_config_form": form, 'kibana_url': KIBANA_HOST}
         if form.is_valid():
             qmodel_name = form.cleaned_data['quality_model']
             es_url = form.cleaned_data['es_url']
