@@ -9,27 +9,55 @@
        "factoids": [],
        "metrics": [
         {
+         "calculation_type": "avg",
          "data_implementation": "Active Users",
          "data_params": null,
          "data_source_type": null,
          "description": "The max number of active users",
-         "name": "active users",
-         "thresholds": "10,50,100,500,1000"
+         "name": "AvgActiveUsers",
+         "thresholds": "1,2,3,4,5"
         },
         {
+         "calculation_type": "avg",
          "data_implementation": "New Users",
          "data_params": null,
          "data_source_type": null,
          "description": "The max number of new users",
-         "name": "new users",
-         "thresholds": "10,20,30,50,100"
+         "name": "AvgNewUsers",
+         "thresholds": "1,2,3,4,5"
         }
        ],
        "name": "users",
        "subattributes": []
+      },
+      {
+       "description": "",
+       "factoids": [],
+       "metrics": [
+        {
+         "calculation_type": "max",
+         "data_implementation": "Replies (Cumulative)",
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "NumOfReplies",
+         "thresholds": "1,5,10,15,20"
+        },
+        {
+         "calculation_type": "max",
+         "data_implementation": "Comments (Cumulative)",
+         "data_params": null,
+         "data_source_type": null,
+         "description": "",
+         "name": "NumOfComments",
+         "thresholds": "10,50,100,200,300"
+        }
+       ],
+       "name": "discussions",
+       "subattributes": []
       }
      ],
-     "description": "Measure the community of a project based on new and active users",
+     "description": "Measure the community of a project based on users (active and new ones) and discussions (comments and replies)",
      "name": "community",
      "subgoals": []
     },
@@ -40,12 +68,13 @@
        "factoids": [],
        "metrics": [
         {
-         "data_implementation": "Fixed Bugs",
+         "calculation_type": "max",
+         "data_implementation": "Bugs (Cumulative)",
          "data_params": null,
          "data_source_type": null,
          "description": "The max number of fixed bugs",
-         "name": "fixed bugs",
-         "thresholds": "1,10,20,50,100"
+         "name": "numberOfBugs",
+         "thresholds": "0,20,75,100,150"
         }
        ],
        "name": "bugs",
@@ -56,11 +85,12 @@
        "factoids": [],
        "metrics": [
         {
-         "data_implementation": "Patches",
+         "calculation_type": "max",
+         "data_implementation": "commits(Repository)",
          "data_params": null,
          "data_source_type": null,
          "description": "The max number of patches submitted",
-         "name": "patches",
+         "name": "numOfCommits",
          "thresholds": "10,20,50,100,200"
         }
        ],
@@ -68,7 +98,7 @@
        "subattributes": []
       }
      ],
-     "description": "Measure the community of a project based on the number of fixed bugs and patches submitte",
+     "description": "Measure the community of a project based on the number of bugs and commits",
      "name": "activity",
      "subgoals": []
     }
