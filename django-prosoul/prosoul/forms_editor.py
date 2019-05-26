@@ -268,7 +268,11 @@ class MetricForm(ProsoulEditorForm):
         self.fields['attributes'] = forms.ChoiceField(label='Attributes', required=True,
                                                       widget=self.widget, choices=choices)
 
-        calculation_types = [('max', 'Max'), ('min', 'Min'), ('avg', 'Average'), ('median', 'Median')]
+        calculation_types = [('max', 'Max'),
+                             ('min', 'Min'),
+                             ('avg', 'Average'),
+                             ('median', 'Median'),
+                             ('sum', 'Sum')]
         self.fields['calculation_type'] = forms.ChoiceField(label='Calculation Type', required=True,
                                                             widget=self.widget, choices=calculation_types)
 
