@@ -119,7 +119,7 @@ class Assessment(LoginRequiredMixin, View):
                 metric_col_found = False
                 for metric in goal[attribute]:
                     if metric == metric_col['name']:
-                        table += "<td>%s</td>" % goal[attribute][metric]
+                        table += "<td>%s</td>" % (str(goal[attribute][metric]['score']) + " (" + str(goal[attribute][metric]['raw_value']) + ")")
                         metric_col_found = True
                         break
                 if not metric_col_found:

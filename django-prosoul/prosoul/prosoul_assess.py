@@ -371,7 +371,10 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
                     threshold = score - 1 if score else 0
                     logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
                                   metric.data.implementation, score, THRESHOLDS[threshold])
-                atribute_assessment[metric.data.implementation][pname] = score
+                if pname not in atribute_assessment[metric.data.implementation]:
+                    atribute_assessment[metric.data.implementation][pname] = {}
+                atribute_assessment[metric.data.implementation][pname]['score'] = score
+                atribute_assessment[metric.data.implementation][pname]['raw_value'] = project_metric['metric']
                 atribute_assessment[metric.data.implementation]['cal_type'] = metric.data.calculation_type
         else:
             logging.debug("Can't find value for for %s", metric)
@@ -414,7 +417,9 @@ def goals2projects(assessment):
                 for project in assessment[goal][attr][metric]:
                     if project != 'cal_type':
                         projects[project] = check_project_dict(projects, project, goal, attr, metric)
-                        projects[project][goal][attr][metric]['score'] = assessment[goal][attr][metric][project]
+                        projects[project][goal][attr][metric]['score'] = assessment[goal][attr][metric][project]['score']
+                        projects[project][goal][attr][metric]['raw_value'] = assessment[goal][attr][metric][project][
+                            'raw_value']
                         projects[project][goal][attr][metric]['cal_type'] = assessment[goal][attr][metric]['cal_type']
 
     return projects
@@ -439,8 +444,9 @@ def enrich_assessment(assessment):
                             "metric": metric,
                             "calculation_type": cal_type,
                             "project": project,
-                            "score_" + metric: assessment[goal][attr][metric][project],
-                            "score": assessment[goal][attr][metric][project]
+                            "score_" + metric: assessment[goal][attr][metric][project]['score'],
+                            "score": assessment[goal][attr][metric][project]['score'],
+                            "raw_value": assessment[goal][attr][metric][project]['raw_value']
                         }
                         yield aitem
 
@@ -607,9 +613,11 @@ def dump_csv(projects_data):
                         for metric in projects_data[project][goal][attr]:
                             csvwritter.writerow([goal, attr, metric, project,
                                                  projects_data[project][goal][attr][metric]['cal_type'],
+                                                 projects_data[project][goal][attr][metric]['raw_value'],
                                                  projects_data[project][goal][attr][metric]['score']])
                             csvwritter_project.writerow([goal, attr, metric, project,
                                                          projects_data[project][goal][attr][metric]['cal_type'],
+                                                         projects_data[project][goal][attr][metric]['raw_value'],
                                                          projects_data[project][goal][attr][metric]['score']])
 
 
