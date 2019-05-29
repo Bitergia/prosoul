@@ -108,7 +108,7 @@ class Assessment(LoginRequiredMixin, View):
         for metric in metrics:
             # Clean the metric name
             # "GitHubEnrich {\"filter\": {\"term\": {\"state\": \"closed\"}}}
-            table += "<th>%s</th>" % metric
+            table += "<th>%s</th>" % (metric['name'] + " (" + metric['cal_type'] + ")")
 
         table += "</thead>"
         for attribute in goal:
@@ -118,7 +118,7 @@ class Assessment(LoginRequiredMixin, View):
             for metric_col in metrics:
                 metric_col_found = False
                 for metric in goal[attribute]:
-                    if metric == metric_col:
+                    if metric == metric_col['name']:
                         table += "<td>%s</td>" % goal[attribute][metric]
                         metric_col_found = True
                         break
@@ -165,7 +165,7 @@ class Assessment(LoginRequiredMixin, View):
         for goal in assessment:
             for attribute in assessment[goal]:
                 for metric in assessment[goal][attribute]:
-                    metrics.append(metric + " (" + assessment[goal][attribute][metric]['cal_type'] + ")")
+                    metrics.append({'name': metric, 'cal_type': assessment[goal][attribute][metric]['cal_type']})
                     for project in assessment[goal][attribute][metric]:
                         if project != 'cal_type':
                             if project not in projects_data:
@@ -178,7 +178,7 @@ class Assessment(LoginRequiredMixin, View):
 
         print(projects_data)
 
-        metrics = list(set(metrics))
+        metrics = list(metrics)
         # TODO: move this table rendering to Django templates
         tables = ""
 
