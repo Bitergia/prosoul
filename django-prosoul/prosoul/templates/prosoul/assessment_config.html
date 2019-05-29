@@ -137,7 +137,7 @@
                   .attr("fill", function(d) { return d.active == "true" ? "black" : "gray";})
                   .text(function(d) {
                     if(d[project]) {
-                      return d.name + " - " + d[project]
+                      return d.name + " (" + d.cal_type + ") - " + d[project]
                     } else {
                         if(d.children){
                             med = analyzeAssess(d, project)

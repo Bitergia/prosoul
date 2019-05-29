@@ -347,6 +347,7 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
                     logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
                                   metric.data.implementation, score, THRESHOLDS[threshold])
                 atribute_assessment[metric.data.implementation][pname] = score
+                atribute_assessment[metric.data.implementation]['cal_type'] = metric.data.calculation_type
         else:
             logging.debug("Can't find value for for %s", metric)
 
@@ -386,8 +387,10 @@ def goals2projects(assessment):
         for attr in assessment[goal]:
             for metric in assessment[goal][attr]:
                 for project in assessment[goal][attr][metric]:
-                    projects[project] = check_project_dict(projects, project, goal, attr, metric)
-                    projects[project][goal][attr][metric] = assessment[goal][attr][metric][project]
+                    if project != 'cal_type':
+                        projects[project] = check_project_dict(projects, project, goal, attr, metric)
+                        projects[project][goal][attr][metric]['score'] = assessment[goal][attr][metric][project]
+                        projects[project][goal][attr][metric]['cal_type'] = assessment[goal][attr][metric]['cal_type']
 
     return projects
 
@@ -402,16 +405,19 @@ def enrich_assessment(assessment):
     for goal in assessment:
         for attr in assessment[goal]:
             for metric in assessment[goal][attr]:
+                cal_type = assessment[goal][attr][metric]['cal_type']
                 for project in assessment[goal][attr][metric]:
-                    aitem = {
-                        "goal": goal,
-                        "attribute": attr,
-                        "metric": metric,
-                        "project": project,
-                        "score_" + metric: assessment[goal][attr][metric][project],
-                        "score": assessment[goal][attr][metric][project]
-                    }
-                    yield aitem
+                    if project != 'cal_type':
+                        aitem = {
+                            "goal": goal,
+                            "attribute": attr,
+                            "metric": metric,
+                            "calculation_type": cal_type,
+                            "project": project,
+                            "score_" + metric: assessment[goal][attr][metric][project],
+                            "score": assessment[goal][attr][metric][project]
+                        }
+                        yield aitem
 
 
 def publish_assessment(es_url, es_index, assessment):
@@ -525,7 +531,7 @@ def extract_metrics(qm_assessment):
     for goal in qm_assessment:
         for attr in qm_assessment[goal]:
             for metric in qm_assessment[goal][attr]:
-                metrics.append(qm_assessment[goal][attr][metric])
+                metrics.append(qm_assessment[goal][attr][metric]['score'])
 
     return metrics
 
@@ -574,8 +580,12 @@ def dump_csv(projects_data):
                 for goal in projects_data[project]:
                     for attr in projects_data[project][goal]:
                         for metric in projects_data[project][goal][attr]:
-                            csvwritter.writerow([goal, attr, metric, project, projects_data[project][goal][attr][metric]])
-                            csvwritter_project.writerow([goal, attr, metric, project, projects_data[project][goal][attr][metric]])
+                            csvwritter.writerow([goal, attr, metric, project,
+                                                 projects_data[project][goal][attr][metric]['cal_type'],
+                                                 projects_data[project][goal][attr][metric]['score']])
+                            csvwritter_project.writerow([goal, attr, metric, project,
+                                                         projects_data[project][goal][attr][metric]['cal_type'],
+                                                         projects_data[project][goal][attr][metric]['score']])
 
 
 def build_report(assessment, kind):

@@ -165,15 +165,16 @@ class Assessment(LoginRequiredMixin, View):
         for goal in assessment:
             for attribute in assessment[goal]:
                 for metric in assessment[goal][attribute]:
-                    metrics.append(metric)
+                    metrics.append(metric + " (" + assessment[goal][attribute][metric]['cal_type'] + ")")
                     for project in assessment[goal][attribute][metric]:
-                        if project not in projects_data:
-                            projects_data[project] = {}
-                        if goal not in projects_data[project]:
-                            projects_data[project][goal] = {}
-                        if attribute not in projects_data[project][goal]:
-                            projects_data[project][goal][attribute] = {}
-                        projects_data[project][goal][attribute][metric] = assessment[goal][attribute][metric][project]
+                        if project != 'cal_type':
+                            if project not in projects_data:
+                                projects_data[project] = {}
+                            if goal not in projects_data[project]:
+                                projects_data[project][goal] = {}
+                            if attribute not in projects_data[project][goal]:
+                                projects_data[project][goal][attribute] = {}
+                            projects_data[project][goal][attribute][metric] = assessment[goal][attribute][metric][project]
 
         print(projects_data)
 
