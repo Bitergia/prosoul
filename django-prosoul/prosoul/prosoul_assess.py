@@ -246,6 +246,29 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
             }
           }
         }"""
+    elif calculation_type == 'last':
+        es_query += """
+            "aggs": {
+                "2": {
+                  "top_hits": {
+                    "docvalue_fields": [
+                      "metric_es_value"
+                    ],
+                    "_source": "metric_es_value",
+                    "size": 1,
+                    "sort": [
+                      {
+                        "datetime": {
+                          "order": "desc"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+        }
+        }"""
     else:
         es_query += """
             "aggs": {
@@ -266,6 +289,8 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
     for pb in project_buckets:
         if calculation_type == 'median':
             metric_value = pb["2"]["values"]['50.0']
+        elif calculation_type == "last":
+            metric_value = pb["2"]["hits"]["hits"][0]["fields"]["metric_es_value"][0]
         else:
             metric_value = pb["2"]["value"]
         project_metrics.append({"project": pb['key'], "metric": metric_value})
