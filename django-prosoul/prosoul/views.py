@@ -165,7 +165,8 @@ class Assessment(LoginRequiredMixin, View):
         for goal in assessment:
             for attribute in assessment[goal]:
                 for metric in assessment[goal][attribute]:
-                    metrics.append({'name': metric, 'cal_type': assessment[goal][attribute][metric]['cal_type']})
+                    metric_cal_type = assessment[goal][attribute][metric].get('cal_type', '-')
+                    metrics.append({'name': metric, 'cal_type': metric_cal_type})
                     for project in assessment[goal][attribute][metric]:
                         if project != 'cal_type':
                             if project not in projects_data:

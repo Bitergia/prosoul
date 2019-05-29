@@ -25,6 +25,7 @@
 
 import argparse
 import csv
+import dateutil
 import json
 import logging
 import operator
@@ -52,6 +53,11 @@ THRESHOLDS = ["Very Poor", "Poor", "Fair", "Good", "Very Good"]
 HEADERS_JSON = {"Content-Type": "application/json"}
 MAX_PROJECTS = 10000  # max number of projects to analyze
 HTTPS_CHECK_CERT = False
+
+SCORES = "_scores"
+SCORE_QUARTERS = "_scores_by_quarters"
+SCORES_QUARTER_TYPE = "quarter"
+SCORES_ALL_TYPE = "all"
 
 
 def get_params():
@@ -362,7 +368,7 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
                 pname = project_metric['project']
                 pmetric = project_metric['metric']
                 logging.debug("Project %s metric %s value %i", pname, metric.data.implementation, pmetric)
-                logging.debug("Doing the assesment ...")
+                logging.debug("Doing the assessment ...")
                 score = 0
                 if metric.thresholds:
                     for threshold in metric.thresholds.split(","):
@@ -435,8 +441,8 @@ def enrich_assessment(assessment):
     for goal in assessment:
         for attr in assessment[goal]:
             for metric in assessment[goal][attr]:
-                cal_type = assessment[goal][attr][metric]['cal_type']
                 for project in assessment[goal][attr][metric]:
+                    cal_type = assessment[goal][attr][metric]['cal_type']
                     if project != 'cal_type':
                         aitem = {
                             "goal": goal,
@@ -451,7 +457,7 @@ def enrich_assessment(assessment):
                         yield aitem
 
 
-def publish_assessment(es_url, es_index, assessment):
+def publish_assessment(es_url, scores_index, assessment, datetime_value, score_type=SCORES_ALL_TYPE):
     """
     Publish all the scores for the metrics in assessment in the
     target index: `es_index`+ '_scores' (e.g., scava-metrics_scores). Note
@@ -474,26 +480,27 @@ def publish_assessment(es_url, es_index, assessment):
           "score_Threads" : 5,
           "score" : 5,
           "attribute" : "interactions"
+          "type": "all"/"quarter",
+          "datetime": none/date
         }
       }
 
     :param es_url: URL for Elasticsearch
-    :param es_index: index in Elasticsearch
+    :param scores_index: index in Elasticsearch
     :param assessment: dict with the assessment data
+    :param datetime_value: start date of the quarter
+    :param score_type: type of the score items (all or quarter)
     :return:
     """
-
-    scores_index = es_index + "_scores"
-
     es_conn = Elasticsearch([es_url], timeout=100, verify_certs=HTTPS_CHECK_CERT)
-
-    if es_conn.indices.exists(index=scores_index):
-        es_conn.indices.delete(index=scores_index)
 
     scores = []
 
     # Uploading info to the new ES
     for item in enrich_assessment(assessment):
+        item['type'] = score_type
+        item['datetime'] = datetime_value
+
         score = {
             "_index": scores_index,
             "_type": "item",
@@ -502,12 +509,16 @@ def publish_assessment(es_url, es_index, assessment):
         scores.append(score)
 
     helpers.bulk(es_conn, scores)
+
+    if es_conn.indices.exists(index=scores_index):
+        es_conn.indices.refresh(index=scores_index)
+
     logging.info("Total scores published in %s: %i", scores_index, len(scores))
 
     return len(scores)
 
 
-def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute=None):
+def __assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute=None):
     """
     Build the assessment for all projects
 
@@ -520,8 +531,6 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
     :param to_date: date until which the metrics must be computed
     :return: a dict with the assessment for all goals and attributes at projects level
     """
-    logging.debug('Building the assessment for projects ...')
-
     assessment = {}  # Includes the assessment for each attribute
 
     # Check that the model exists
@@ -542,7 +551,50 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
 
     logging.debug(json.dumps(assessment, indent=True))
 
-    publish_assessment(es_url, es_index, assessment)
+    return assessment
+
+
+def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute=None):
+    """
+    Build the assessment for all projects from from-date to to-date and by quarters. The former is stored
+    in scava-metrics_scores, the latter in scava-metrics_scores_by_quarters
+
+    :param es_url: Elasticsearch URL
+    :param es_index: Elasticsearch index with the metrics data
+    :param model_name: Quality model name
+    :param backend_metrics_data: backend to be used for getting the metrics (ossmeter or grimoirelab)
+    :param only_attribute: do the assessment only for this attribute
+    :param from_date: date since which the metrics must be computed
+    :param to_date: date until which the metrics must be computed
+    :return: a dict with the assessment for all goals and attributes at projects level
+    """
+    # delete the indexes, if they exist
+    es_conn = Elasticsearch([es_url], timeout=100, verify_certs=HTTPS_CHECK_CERT)
+    scores_index = es_index + SCORES
+    scores_quarters_index = es_index + SCORE_QUARTERS
+
+    if es_conn.indices.exists(index=scores_index):
+        es_conn.indices.delete(index=scores_index)
+
+    if es_conn.indices.exists(index=scores_quarters_index):
+        es_conn.indices.delete(index=scores_quarters_index)
+
+    # execute the assessment by quarter
+    start_date = from_date
+
+    while True:
+        next_date = start_date + dateutil.relativedelta.relativedelta(months=+3)
+        assessment = __assess(es_url, es_index, model_name, backend_metrics_data, start_date, next_date, only_attribute)
+        publish_assessment(es_url, scores_quarters_index, assessment, start_date.isoformat(), score_type=SCORES_QUARTER_TYPE)
+
+        if next_date > to_date:
+            break
+
+        start_date = next_date
+
+    # execute the assessment over the full time frame
+    assessment = __assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute)
+    publish_assessment(es_url, scores_index, assessment, None, score_type=SCORES_ALL_TYPE)
 
     projects_data = goals2projects(assessment)
     dump_csv(projects_data)
