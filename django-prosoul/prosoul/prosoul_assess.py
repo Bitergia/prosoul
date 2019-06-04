@@ -383,7 +383,10 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
                 atribute_assessment[metric.data.implementation][pname]['raw_value'] = project_metric['metric']
                 atribute_assessment[metric.data.implementation]['cal_type'] = metric.data.calculation_type
         else:
-            logging.debug("Can't find value for for %s", metric)
+            msg = "Metric {} has not value for time range {} - {}".format(metric,
+                                                                          from_date.strftime('%Y-%m-%d'),
+                                                                          to_date.strftime('%Y-%m-%d'))
+            logging.debug(msg)
 
     return atribute_assessment
 
