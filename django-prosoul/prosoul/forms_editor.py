@@ -249,7 +249,7 @@ class MetricForm(ProsoulEditorForm):
         self.fields['metric_id'] = forms.CharField(label='metric_id', required=False, max_length=100)
         self.fields['metric_id'].widget = forms.HiddenInput()
 
-        self.fields['metric_name'] = forms.CharField(label='name', max_length=100, required=False)
+        self.fields['metric_name'] = forms.CharField(label='name', max_length=100, required=True)
         self.fields['metric_name'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'metric name'})
 
         self.fields['metric_thresholds'] = forms.CharField(label='Thresholds', max_length=100, required=False)
