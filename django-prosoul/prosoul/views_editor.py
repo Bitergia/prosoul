@@ -749,7 +749,7 @@ class GoalView(LoginRequiredMixin, JustPostByEditorMixin, View):
 def get_metrics_data():
     es = Elasticsearch([ES_URL], timeout=120, max_retries=20, retry_on_timeout=True, verify_certs=HTTPS_CHECK_CERT)
 
-    metrics_names = set()
+    metrics_names = []
 
     if not es.indices.exists(index=METRICS_INDEX):
         print("Index %s doesnt exist!" % METRICS_INDEX)
@@ -760,34 +760,22 @@ def get_metrics_data():
         scroll="1m",
         size=10,
         body={
-            "_source": ["metric_name"],
-            "query": {
-                "match_all": {}
+            "size": 0,
+            "aggs": {
+                "unique_metric_name": {
+                    "terms": {
+                        "field": "metric_name",
+                        "size": 5000
+                    }
+                }
             }
         }
     )
 
-    sid = page['_scroll_id']
-    scroll_size = page['hits']['total']
+    buckets = page['aggregations']['unique_metric_name']['buckets']
 
-    if scroll_size == 0:
-        print("No data found!")
-        return
-
-    while scroll_size > 0:
-
-        for scava_metric in page['hits']['hits']:
-            # This check is needed to make sure that the METRICS_INDEX doesn't
-            # contain anything else beyond metric data.
-            if 'metric_name' not in scava_metric['_source']:
-                print("Item %s is not a metric, skipping it. Clean the index %s" % (str(scava_metric), METRICS_INDEX))
-                continue
-
-            metrics_names.add(scava_metric['_source']['metric_name'])
-
-        page = es.scroll(scroll_id=sid, scroll='1m')
-        sid = page['_scroll_id']
-        scroll_size = len(page['hits']['hits'])
+    for bucket in buckets:
+        metrics_names.append(bucket['key'])
 
     count = MetricData.objects.aggregate(last_id_inserted=Count('id'))['last_id_inserted'] + 1
     for id, m in enumerate(metrics_names):
