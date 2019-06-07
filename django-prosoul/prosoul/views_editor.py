@@ -389,6 +389,25 @@ class MetricDataView(LoginRequiredMixin, JustPostByEditorMixin, View):
             raise Http404
 
 
+def check_thresholds(thresholds):
+    # Check thresholds
+    error = ""
+    thresholds_ok = True
+    thresholds_value = thresholds.split(',')
+    if len(thresholds_value) != 5:
+        error = "The thresholds must be 5"
+        thresholds_ok = False
+    else:
+        for x in thresholds_value:
+            try:
+                int(x)
+            except ValueError:
+                error = "Thresholds must be integers"
+                thresholds_ok = False
+                break
+    return thresholds_ok, error
+
+
 class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
 
     @staticmethod
@@ -402,26 +421,28 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             metric_data_id = form.cleaned_data['metrics_data']
             calculation_type = form.cleaned_data['calculation_type']
 
-            attribute_orm = Attribute.objects.get(id=attribute_id)
+            thresholds_ok, error = check_thresholds(thresholds)
+            if thresholds_ok:
+                attribute_orm = Attribute.objects.get(id=attribute_id)
 
-            # Try to find a metric already created
-            try:
-                metric_orm = Metric.objects.get(name=name)
-                error = "The metric %s already exists" % name
-                # metric_orm.attribute = attribute_orm
-                # metric_orm.thresholds = thresholds
-            except Metric.DoesNotExist:
-                # Create a new metric
-                metric_orm = Metric(name=name, attribute=attribute_orm,
-                                    thresholds=thresholds, calculation_type=calculation_type)
-            if metric_data_id:
-                metric_data_orm = MetricData.objects.get(id=metric_data_id)
-                metric_orm.data = metric_data_orm
+                # Try to find a metric already created
+                try:
+                    metric_orm = Metric.objects.get(name=name)
+                    error = "The metric %s already exists" % name
+                    # metric_orm.attribute = attribute_orm
+                    # metric_orm.thresholds = thresholds
+                except Metric.DoesNotExist:
+                    # Create a new metric
+                    metric_orm = Metric(name=name, attribute=attribute_orm,
+                                        thresholds=thresholds, calculation_type=calculation_type)
+                if metric_data_id:
+                    metric_data_orm = MetricData.objects.get(id=metric_data_id)
+                    metric_orm.data = metric_data_orm
 
-            metric_orm.save()
+                metric_orm.save()
 
-            attribute_orm.metrics.add(metric_orm)
-            attribute_orm.save()
+                attribute_orm.metrics.add(metric_orm)
+                attribute_orm.save()
         else:
             error = form.errors
 
@@ -485,28 +506,36 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             thresholds = form.cleaned_data['metric_thresholds']
             calculation_type = form.cleaned_data['calculation_type']
 
-            metric_orm = Metric.objects.get(id=metric_id)
-            metric_orm.name = name
-            metric_orm.data = None
-            metric_orm.thresholds = thresholds
-            metric_orm.calculation_type = calculation_type
-            if metric_data_id:
-                metric_data_orm = MetricData.objects.get(id=metric_data_id)
-                metric_orm.data = metric_data_orm
-            metric_orm.save()
+            thresholds_ok, error = check_thresholds(thresholds)
+            if thresholds_ok:
+                metric_orm = Metric.objects.get(id=metric_id)
+                metric_orm.name = name
+                metric_orm.data = None
+                metric_orm.thresholds = thresholds
+                metric_orm.calculation_type = calculation_type
+                if metric_data_id:
+                    metric_data_orm = MetricData.objects.get(id=metric_data_id)
+                    metric_orm.data = metric_data_orm
+                metric_orm.save()
 
-            # Add the metric to the new attribute
-            if attribute_id != old_attribute_id:
-                attribute = Attribute.objects.get(id=attribute_id)
-                attribute.metrics.add(metric_orm)
-                attribute.save()
-                attribute = Attribute.objects.get(name=old_attribute_id)
-                attribute.metrics.remove(metric_orm)
-                attribute.save()
+                # Add the metric to the new attribute
+                if attribute_id != old_attribute_id:
+                    attribute = Attribute.objects.get(id=attribute_id)
+                    attribute.metrics.add(metric_orm)
+                    attribute.save()
+                    attribute = Attribute.objects.get(name=old_attribute_id)
+                    attribute.metrics.remove(metric_orm)
+                    attribute.save()
 
-            state = EditorState(metrics=[metric_id], form=form)
-            return shortcuts.render(request, 'prosoul/editor.html',
-                                    build_forms_context(state))
+                state = EditorState(metrics=[metric_id], form=form)
+                return shortcuts.render(request, 'prosoul/editor.html',
+                                        build_forms_context(state))
+            else:
+                state = EditorState(metrics=[metric_id], form=form)
+                context = build_forms_context(state)
+                context.update({"errors": error})
+                return shortcuts.render(request, 'prosoul/editor.html',
+                                        context)
         else:
             # TODO: Show error
             print(form.errors)
