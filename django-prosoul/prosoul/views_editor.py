@@ -322,7 +322,7 @@ class QualityModelView(JustPostByEditorMixin, UserPassesTestMixin, LoginRequired
         if form.is_valid():
             qmodel_name = form.cleaned_data['qmodel_name']
             try:
-                QualityModel.objects.get(name=qmodel_name, created_by=request.user).delete()
+                QualityModel.objects.get(name=qmodel_name).delete()
             except QualityModel.DoesNotExist:
                 errors = "Can't delete not found quality model %s" % qmodel_name
         else:
