@@ -371,9 +371,15 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
                 logging.debug("Doing the assessment ...")
                 score = 0
                 if metric.thresholds:
-                    for threshold in metric.thresholds.split(","):
-                        if project_metric['metric'] > float(threshold):
-                            score += 1
+                    if not metric.reverse_thresholds:
+                        for threshold in metric.thresholds.split(","):
+                            if project_metric['metric'] > float(threshold):
+                                score += 1
+                    else:
+                        reverse_thresholds = reversed(metric.thresholds.split(","))
+                        for threshold in reverse_thresholds:
+                            if project_metric['metric'] > float(threshold):
+                                score += 1
                     threshold = score - 1 if score else 0
                     logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
                                   metric.data.implementation, score, THRESHOLDS[threshold])

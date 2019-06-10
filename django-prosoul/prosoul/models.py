@@ -48,6 +48,7 @@ class Metric(ProsoulModel):
 
     thresholds = models.CharField(max_length=200, default=None, null=True, blank=True,
                                   validators=[validate_comma_separated_integer_list])
+    reverse_thresholds = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

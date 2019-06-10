@@ -420,6 +420,7 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             attribute_id = form.cleaned_data['attributes']
             metric_data_id = form.cleaned_data['metrics_data']
             calculation_type = form.cleaned_data['calculation_type']
+            reverse_thresholds = form.cleaned_data['metric_reverse_thresholds']
 
             thresholds_ok, error = check_thresholds(thresholds)
             if thresholds_ok:
@@ -434,7 +435,8 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
                 except Metric.DoesNotExist:
                     # Create a new metric
                     metric_orm = Metric(name=name, attribute=attribute_orm,
-                                        thresholds=thresholds, calculation_type=calculation_type)
+                                        thresholds=thresholds, reverse_thresholds=reverse_thresholds,
+                                        calculation_type=calculation_type)
                 if metric_data_id:
                     metric_data_orm = MetricData.objects.get(id=metric_data_id)
                     metric_orm.data = metric_data_orm
@@ -505,6 +507,7 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
             old_attribute_id = form.cleaned_data['old_attribute_id']
             thresholds = form.cleaned_data['metric_thresholds']
             calculation_type = form.cleaned_data['calculation_type']
+            reverse_thresholds = form.cleaned_data['metric_reverse_thresholds']
 
             thresholds_ok, error = check_thresholds(thresholds)
             if thresholds_ok:
@@ -513,6 +516,7 @@ class MetricView(LoginRequiredMixin, JustPostByEditorMixin, View):
                 metric_orm.data = None
                 metric_orm.thresholds = thresholds
                 metric_orm.calculation_type = calculation_type
+                metric_orm.reverse_thresholds = reverse_thresholds
                 if metric_data_id:
                     metric_data_orm = MetricData.objects.get(id=metric_data_id)
                     metric_orm.data = metric_data_orm

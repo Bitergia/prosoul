@@ -238,6 +238,7 @@ class MetricForm(ProsoulEditorForm):
                     'metric_id': self.metric_id,
                     'metric_name': metric_orm.name,
                     'metric_thresholds': metric_orm.thresholds,
+                    'metric_reverse_thresholds': metric_orm.reverse_thresholds,
                     'calculation_type': metric_orm.calculation_type
                 })
                 if metric_orm.data:
@@ -255,6 +256,12 @@ class MetricForm(ProsoulEditorForm):
         self.fields['metric_thresholds'] = forms.CharField(label='Thresholds', max_length=100, required=False)
         self.fields['metric_thresholds'].widget = forms.TextInput(attrs={'class': 'form-control', 'placeholder': '1,2,3,4,5'})
 
+        reverse_choices = [('False', 'No'), ('True', 'Yes')]
+        self.widget = forms.Select(attrs={'class': 'form-control'})
+        self.fields['metric_reverse_thresholds'] = forms.ChoiceField(label='Reverse thresholds', required=True,
+                                                                     widget=self.widget, choices=reverse_choices,
+                                                                     initial=reverse_choices[0])
+
         choices = ()
 
         # Show only the attributes for this quality model
@@ -264,7 +271,6 @@ class MetricForm(ProsoulEditorForm):
         empty_choice = [('', '')]
         choices = empty_choice + sorted(choices, key=lambda x: x[1])
 
-        self.widget = forms.Select(attrs={'class': 'form-control'})
         self.fields['attributes'] = forms.ChoiceField(label='Attributes', required=True,
                                                       widget=self.widget, choices=choices)
 

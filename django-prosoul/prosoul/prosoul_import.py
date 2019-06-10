@@ -113,6 +113,10 @@ def feed_models(models_json):
                 metparams['calculation_type'] = metric['calculation_type']
             else:
                 metparams['calculation_type'] = "max"
+            if 'reverse_thresholds' in metric and metric['reverse_thresholds']:
+                metparams['reverse_thresholds'] = metric['reverse_thresholds']
+            else:
+                metparams['reverse_thresholds'] = False
             metric_orm = add(Metric, **metparams)
             if metric_orm is None:
                 raise RuntimeError("Can not import attribute " + attribute['name'])
