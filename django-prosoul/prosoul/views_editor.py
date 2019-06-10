@@ -410,9 +410,9 @@ def check_thresholds(thresholds):
     else:
         for x in thresholds_value:
             try:
-                int(x)
+                float(x)
             except ValueError:
-                error = "Thresholds must be integers"
+                error = "Thresholds must be float"
                 thresholds_ok = False
                 break
     return thresholds_ok, error
