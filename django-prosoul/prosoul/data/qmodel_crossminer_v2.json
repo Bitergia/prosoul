@@ -10,22 +10,20 @@
        "metrics": [
         {
          "calculation_type": "avg",
-         "data_implementation": "Bug Tracker Active Users",
+         "data_implementation": "Active Users",
          "data_params": null,
          "data_source_type": null,
          "description": "The max number of active users",
          "name": "AvgActiveUsers",
-         "reverse_thresholds": false,
          "thresholds": "1,2,3,4,5"
         },
         {
          "calculation_type": "avg",
-         "data_implementation": "Bug Tracker New Users",
+         "data_implementation": "New Users",
          "data_params": null,
          "data_source_type": null,
          "description": "The max number of new users",
          "name": "AvgNewUsers",
-         "reverse_thresholds": false,
          "thresholds": "1,2,3,4,5"
         }
        ],
@@ -38,22 +36,20 @@
        "metrics": [
         {
          "calculation_type": "max",
-         "data_implementation": "Bug Replies (Cumulative)",
+         "data_implementation": "Replies (Cumulative)",
          "data_params": null,
          "data_source_type": null,
          "description": "",
          "name": "NumOfReplies",
-         "reverse_thresholds": false,
          "thresholds": "1,5,10,15,20"
         },
         {
          "calculation_type": "max",
-         "data_implementation": "Bug Tracker Comments (Cumulative)",
+         "data_implementation": "Comments (Cumulative)",
          "data_params": null,
          "data_source_type": null,
          "description": "",
          "name": "NumOfComments",
-         "reverse_thresholds": false,
          "thresholds": "10,50,100,200,300"
         }
        ],
@@ -61,7 +57,7 @@
        "subattributes": []
       }
      ],
-     "description": "",
+     "description": "Measure the community of a project based on users (active and new ones) and discussions (comments and replies)",
      "name": "community",
      "subgoals": []
     },
@@ -73,12 +69,11 @@
        "metrics": [
         {
          "calculation_type": "max",
-         "data_implementation": "Bugs",
+         "data_implementation": "Bugs (Cumulative)",
          "data_params": null,
          "data_source_type": null,
          "description": "The max number of fixed bugs",
          "name": "numberOfBugs",
-         "reverse_thresholds": false,
          "thresholds": "0,20,75,100,150"
         }
        ],
@@ -96,7 +91,6 @@
          "data_source_type": null,
          "description": "The max number of patches submitted",
          "name": "numOfCommits",
-         "reverse_thresholds": false,
          "thresholds": "10,20,50,100,200"
         }
        ],
@@ -104,7 +98,7 @@
        "subattributes": []
       }
      ],
-     "description": "",
+     "description": "Measure the community of a project based on the number of bugs and commits",
      "name": "activity",
      "subgoals": []
     }
