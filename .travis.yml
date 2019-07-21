@@ -12,9 +12,6 @@ before_install:
   - cd django-prosoul && python manage.py makemigrations && cd ..
   - cd django-prosoul && python manage.py migrate && cd ..
 
-# install:
-#   - ./setup.py install
-
 script:
   - flake8 .
   - cd django-prosoul && python manage.py test && cd ..
