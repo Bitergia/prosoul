@@ -778,29 +778,29 @@ def get_metrics_data():
         scroll="1m",
         size=10,
         body={
-          "size": 0,
-          "aggs": {
-            "unique_metric_id": {
-              "terms": {
-                "field": "metric_id",
-                "size": 5000,
-                "order": {
-                  "_count": "desc"
-                }
-              },
-              "aggs": {
-                "unique_metric_name": {
-                  "terms": {
-                    "field": "metric_name",
-                    "size": 1,
-                    "order": {
-                      "_count": "desc"
+            "size": 0,
+            "aggs": {
+                "unique_metric_id": {
+                    "terms": {
+                        "field": "metric_id",
+                        "size": 5000,
+                        "order": {
+                            "_count": "desc"
+                        }
+                    },
+                    "aggs": {
+                        "unique_metric_name": {
+                            "terms": {
+                                "field": "metric_name",
+                                "size": 1,
+                                "order": {
+                                    "_count": "desc"
+                                }
+                            }
+                        }
                     }
-                  }
                 }
-              }
             }
-          }
         }
     )
 
