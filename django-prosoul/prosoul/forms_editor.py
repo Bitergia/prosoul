@@ -291,8 +291,9 @@ class MetricForm(ProsoulEditorForm):
         empty_choice = [('', '')]
         choices = empty_choice + sorted(choices, key=lambda x: x[1])
 
+        self.metric_data_widget = forms.Select(attrs={'class': 'dataselect'})
         self.fields['metrics_data'] = forms.ChoiceField(label='Metrics Data', required=False,
-                                                        widget=self.widget, choices=choices)
+                                                        widget=self.metric_data_widget, choices=choices)
 
         self.fields['old_attribute_id'] = forms.CharField(label='old_attribute', max_length=100, required=False)
         self.fields['old_attribute_id'].widget = forms.HiddenInput(attrs={'class': 'form-control', 'readonly': 'True'})
