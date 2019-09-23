@@ -32,7 +32,7 @@
 
         function convertJSON(object) {
           for (var key in object) {
-            if (typeof(object[key]) == "object" && !object[key]['raw_value']) {
+            if (typeof(object[key]) == "object" && (object[key]['raw_value'] === undefined)) {
               var obj = convertJSON(object[key]);
               obj.key = obj.name ? obj.name : "";
               obj.name = key;
