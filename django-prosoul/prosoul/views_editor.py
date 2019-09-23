@@ -778,22 +778,36 @@ def get_metrics_data():
         scroll="1m",
         size=10,
         body={
-            "size": 0,
-            "aggs": {
-                "unique_metric_name": {
-                    "terms": {
-                        "field": "metric_name",
-                        "size": 5000
-                    }
+          "size": 0,
+          "aggs": {
+            "unique_metric_id": {
+              "terms": {
+                "field": "metric_id",
+                "size": 5000,
+                "order": {
+                  "_count": "desc"
                 }
+              },
+              "aggs": {
+                "unique_metric_name": {
+                  "terms": {
+                    "field": "metric_name",
+                    "size": 1,
+                    "order": {
+                      "_count": "desc"
+                    }
+                  }
+                }
+              }
             }
+          }
         }
     )
 
-    buckets = page['aggregations']['unique_metric_name']['buckets']
+    buckets = page['aggregations']['unique_metric_id']['buckets']
 
     for bucket in buckets:
-        metrics_names.append(bucket['key'])
+        metrics_names.append("{} - {}".format(bucket['unique_metric_name']['buckets'][0]['key'], bucket['key']))
 
     count = MetricData.objects.aggregate(last_id_inserted=Count('id'))['last_id_inserted'] + 1
     for id, m in enumerate(metrics_names):
