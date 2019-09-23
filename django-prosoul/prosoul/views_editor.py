@@ -133,7 +133,11 @@ def import_from_file(request):
 
         print("Total loading time ... %.2f sec", time() - task_init)
 
-    return shortcuts.redirect("/")
+    if 'qualityModels' in import_models_json:
+        return shortcuts.redirect("/prosoul/viewer?qmodel_selected={}"
+                                  .format(import_models_json['qualityModels'][0]['name']))
+    else:
+        return shortcuts.redirect("/")
 
 
 def export_to_file(request, qmodel=None):
