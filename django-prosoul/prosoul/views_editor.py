@@ -807,10 +807,14 @@ def get_metrics_data():
     buckets = page['aggregations']['unique_metric_id']['buckets']
 
     for bucket in buckets:
-        metrics_names.append("{} - {}".format(bucket['unique_metric_name']['buckets'][0]['key'], bucket['key']))
+        metric_data = {
+            "name": bucket['unique_metric_name']['buckets'][0]['key'],
+            "show_name": "{} - {}".format(bucket['unique_metric_name']['buckets'][0]['key'], bucket['key'])
+        }
+        metrics_names.append(metric_data)
 
     count = MetricData.objects.aggregate(last_id_inserted=Count('id'))['last_id_inserted'] + 1
     for id, m in enumerate(metrics_names):
-        if not MetricData.objects.filter(implementation=m).exists():
-            MetricData.objects.create(id=count, implementation=m)
+        if not MetricData.objects.filter(description=m['show_name']).exists():
+            MetricData.objects.create(id=count, implementation=m['name'], description=m['show_name'])
             count = count + 1
