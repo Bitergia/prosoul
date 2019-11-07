@@ -38,7 +38,8 @@ import django
 os.environ['DJANGO_SETTINGS_MODULE'] = 'django_prosoul.settings'
 django.setup()
 
-from grimoirelab_toolkit.datetime import (str_to_datetime)
+from grimoirelab_toolkit.datetime import (datetime_utcnow,
+                                          str_to_datetime)
 
 import matplotlib.pyplot as plot
 
@@ -466,7 +467,8 @@ def enrich_assessment(assessment):
                         yield aitem
 
 
-def publish_assessment(es_url, scores_index, assessment, datetime_value, score_type=SCORES_ALL_TYPE):
+def publish_assessment(es_url, scores_index, assessment, start_date, end_date,
+                       score_type=SCORES_ALL_TYPE, creation_date=None):
     """
     Publish all the scores for the metrics in assessment in the
     target index: `es_index`+ '_scores' (e.g., scava-metrics_scores). Note
@@ -490,15 +492,20 @@ def publish_assessment(es_url, scores_index, assessment, datetime_value, score_t
           "score" : 5,
           "attribute" : "interactions"
           "type": "all"/"quarter",
-          "datetime": none/date
+          "start_time": date,
+          "end_date": date,
+          "creation": date
         }
       }
 
     :param es_url: URL for Elasticsearch
     :param scores_index: index in Elasticsearch
     :param assessment: dict with the assessment data
-    :param datetime_value: start date of the quarter
+    :param start_date: start date of the assessment
+    :param end_date: end date of the assessment
     :param score_type: type of the score items (all or quarter)
+    :param creation_date: date when the assessment was done
+
     :return:
     """
     es_conn = Elasticsearch([es_url], timeout=100, verify_certs=HTTPS_CHECK_CERT)
@@ -508,7 +515,9 @@ def publish_assessment(es_url, scores_index, assessment, datetime_value, score_t
     # Uploading info to the new ES
     for item in enrich_assessment(assessment):
         item['type'] = score_type
-        item['datetime'] = datetime_value
+        item['start_date'] = start_date
+        item['end_date'] = end_date
+        item['creation_date'] = creation_date
 
         score = {
             "_index": scores_index,
@@ -588,13 +597,15 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
     if es_conn.indices.exists(index=scores_quarters_index):
         es_conn.indices.delete(index=scores_quarters_index)
 
+    creation_date = datetime_utcnow().isoformat()
     # execute the assessment by quarter
     start_date = from_date
 
     while True:
         next_date = start_date + dateutil.relativedelta.relativedelta(months=+3)
         assessment = __assess(es_url, es_index, model_name, backend_metrics_data, start_date, next_date, only_attribute)
-        publish_assessment(es_url, scores_quarters_index, assessment, start_date.isoformat(), score_type=SCORES_QUARTER_TYPE)
+        publish_assessment(es_url, scores_quarters_index, assessment, start_date.isoformat(), next_date.isoformat(),
+                           score_type=SCORES_QUARTER_TYPE, creation_date=creation_date)
 
         if next_date > to_date:
             break
@@ -603,7 +614,8 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
 
     # execute the assessment over the full time frame
     assessment = __assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute)
-    publish_assessment(es_url, scores_index, assessment, None, score_type=SCORES_ALL_TYPE)
+    publish_assessment(es_url, scores_index, assessment, from_date.isoformat(), to_date.isoformat(),
+                       score_type=SCORES_ALL_TYPE, creation_date=creation_date)
 
     projects_data = goals2projects(assessment)
     dump_csv(projects_data)
