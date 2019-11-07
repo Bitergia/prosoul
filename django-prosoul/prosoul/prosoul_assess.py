@@ -236,7 +236,8 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
       "aggs": {
         "3": {
           "terms": {
-            "field": "project"
+            "field": "project",
+            "size": 5000
           },
     """ % (metric_field, metric_name, from_date, to_date)
 
