@@ -134,18 +134,24 @@
                   .attr("x", function(d) { return d.children || d._children ? -20 : 20; })
                   .attr("dy", function(d) { return d.children || d._children ? "-0.5em" : ".35em" })
                   .attr("text-anchor", function(d) { return d.children || d.children ? "end" : "start"; })
-                  .attr("fill", function(d) { return d.active == "true" ? "black" : "gray";})
                   .text(function(d) {
                     if(d[project]) {
                       return d.name + " (" + d.cal_type + ") - " + d[project].score + " (" + d[project].raw_value + ")"
                     } else {
                         if(d.children){
-                            med = analyzeAssess(d, project)
-                            return d.name + " - " + med
+                            [med, n_children] = analyzeAssess(d, project)
+                            if (n_children !== d.children.length){
+                                return d.name + " - " + med + " ( ! )"
+                            }else{
+                                return d.name + " - " + med
+                            }
                         } else {
-                            return d.name + " - " + 0
+                            return d.name + " - no_value"
                         }
                     }
+                  })
+                  .attr("fill", function(d) {
+                    return (this.innerHTML.includes("( ! )") || this.innerHTML.includes("- no_value")) ? "red" : "gray";
                   })
                   .style("fill-opacity", 1e-6);
 
@@ -208,17 +214,28 @@
         }
 
         function analyzeAssess(node, project) {
-            value = 0
+            let value = 0
+            let n_children = 0
             node.children.forEach(function(e) {
                 if (e.children) {
-                    value += analyzeAssess(e, project)
+                    [new_value, new_n_children] = analyzeAssess(e, project)
+                    if(new_value !== "no_value"){
+                        value += new_value;
+                        n_children++
+                    }
                 }else{
                     if (e[project]){
                         value += e[project].score
+                        n_children++
                     }
                 }
             });
-            return Math.round(value/node.children.length * 100) / 100
+            //return Math.round(value/node.children.length * 100) / 100
+            if(n_children > 0){
+                return [Math.round(value/n_children * 100) / 100, n_children]
+            } else {
+                return ["no_value", 0]
+            }
         }
 
     </script>
