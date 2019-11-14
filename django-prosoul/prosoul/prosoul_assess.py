@@ -357,7 +357,7 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     logging.debug('Doing the assessment for attribute: %s', attribute.name)
     # Collect all metrics that are included in the models
     metrics_with_data = []
-    atribute_assessment = {}  # Includes the assessment for each metric per project
+    attribute_assessment = {}  # Includes the assessment for each non-empty metric per project
 
     for metric in attribute.metrics.all():
         # We need the metric values and the metric indicators
@@ -370,7 +370,7 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     logging.debug("Metrics to be included: %s (%s attribute)", metrics_with_data, attribute.name)
 
     for metric in metrics_with_data:
-        atribute_assessment[metric.data.implementation] = {}
+        attribute_assessment[metric.data.implementation] = {}
         metric_value = compute_metric_per_project(es_url, es_index, metric.data, backend_metrics_data, from_date, to_date)
         if metric_value:
             for project_metric in metric_value:
@@ -392,18 +392,20 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
                     threshold = score - 1 if score else 0
                     logging.debug("Score %s for %s: %i (%s)", project_metric['project'],
                                   metric.data.implementation, score, THRESHOLDS[threshold])
-                if pname not in atribute_assessment[metric.data.implementation]:
-                    atribute_assessment[metric.data.implementation][pname] = {}
-                atribute_assessment[metric.data.implementation][pname]['score'] = score
-                atribute_assessment[metric.data.implementation][pname]['raw_value'] = project_metric['metric']
-                atribute_assessment[metric.data.implementation]['cal_type'] = metric.data.calculation_type
+
+                if pname not in attribute_assessment[metric.data.implementation]:
+                    attribute_assessment[metric.data.implementation][pname] = {}
+
+                attribute_assessment[metric.data.implementation][pname]['score'] = score
+                attribute_assessment[metric.data.implementation][pname]['raw_value'] = project_metric['metric']
+                attribute_assessment[metric.data.implementation]['cal_type'] = metric.data.calculation_type
         else:
             msg = "Metric {} has not value for time range {} - {}".format(metric,
                                                                           from_date.strftime('%Y-%m-%d'),
                                                                           to_date.strftime('%Y-%m-%d'))
             logging.debug(msg)
 
-    return atribute_assessment
+    return attribute_assessment
 
 
 def goals2projects(assessment):
