@@ -168,7 +168,7 @@ def compute_metric_per_projects_grimoirelab(es_url, es_index, metric_field, metr
 
     logging.debug(json.dumps(json.loads(es_query), indent=True))
 
-    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT, headers=HEADERS_JSON)
+    res = requests.get(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT, headers=HEADERS_JSON)
     res.raise_for_status()
 
     project_buckets = res.json()["aggregations"]["3"]["buckets"]
@@ -290,7 +290,7 @@ def compute_metric_per_project_ossmeter(es_url, es_index, metric_field, metric_d
           }
         }""" % calculation_type
 
-    res = requests.post(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT, headers=HEADERS_JSON)
+    res = requests.get(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT, headers=HEADERS_JSON)
     res.raise_for_status()
 
     project_buckets = res.json()["aggregations"]["3"]["buckets"]
