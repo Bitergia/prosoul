@@ -24,6 +24,7 @@
 #
 
 import argparse
+import copy
 import csv
 import dateutil
 import json
@@ -56,7 +57,13 @@ MAX_PROJECTS = 10000  # max number of projects to analyze
 HTTPS_CHECK_CERT = False
 
 SCORES = "_scores"
+NULL_SCORES = "_null_scores"
+ALL_SCORES = "_all_scores"
+
 SCORE_QUARTERS = "_scores_by_quarters"
+NULL_SCORE_QUARTERS = "_null_scores_by_quarters"
+ALL_SCORE_QUARTERS = "_all_scores_by_quarters"
+
 SCORES_QUARTER_TYPE = "quarter"
 SCORES_ALL_TYPE = "all"
 
@@ -537,6 +544,95 @@ def publish_assessment(es_url, scores_index, assessment, start_date, end_date,
     return len(scores)
 
 
+def get_scava_projects(es_url, es_index, from_date, to_date):
+    """Get the projects in the `es_index` between to given dates.
+
+    :param es_url: Elasticsearch URL
+    :param es_index: Elasticsearch index with the metrics data
+    :param from_date: date since which the metrics must be computed
+    :param to_date: date until which the metrics must be computed
+
+    :return: a list of the projects available in the index
+    """
+    from_date_str = from_date.strftime('%Y-%m-%d')
+    to_date_str = to_date.strftime('%Y-%m-%d')
+
+    projects = []
+    es_query = """
+        {
+          "size": 0,
+          "query": {
+            "bool": {
+              "must": [
+                {
+                    "range": {
+                        "datetime": {
+                            "gte": "%s",
+                            "format": "yyyy-MM-dd"
+                        }
+                    }
+                },
+                {
+                    "range": {
+                        "datetime": {
+                            "lte": "%s",
+                            "format": "yyyy-MM-dd"
+                        }
+                    }
+                }
+              ]
+            }
+          },
+          "aggs": {
+            "3": {
+              "terms": {
+                "field": "project",
+                "size": 5000
+              }
+            }
+          }
+        }
+        """ % (from_date_str, to_date_str)
+
+    res = requests.get(es_url + "/" + es_index + "/_search", data=es_query, verify=HTTPS_CHECK_CERT,
+                       headers=HEADERS_JSON)
+    res.raise_for_status()
+
+    project_buckets = res.json()["aggregations"]["3"]["buckets"]
+    for pb in project_buckets:
+        projects.append(pb['key'])
+
+    return projects
+
+
+def __diff_assess(all_projects, assessment):
+    """Based on the given assessment, calculate the diff assessment composed of those projects goals,
+    attributes and metrics without data.
+
+    :param all_projects: list of all projects
+    :param assessment: assessment dict with projects with quality model data
+    :return: a dict representing an assessment composed of projects goals,
+        attributes and metrics without data.
+    """
+    diff_assessment = copy.deepcopy(assessment)
+    empty_data = {'score': None, 'raw_value': None}
+
+    for goal in diff_assessment:
+        for attribute in diff_assessment[goal]:
+            for metric in diff_assessment[goal][attribute]:
+                cal_type = diff_assessment[goal][attribute][metric].get('cal_type', None)
+                # get the names of the projects in the assessment
+                projects = list(diff_assessment[goal][attribute][metric].keys())
+                # make the diff
+                diff_projects = set(all_projects) - set(projects)
+                diff_projects_data = {'cal_type': cal_type}
+                [diff_projects_data.update({dp: empty_data}) for dp in diff_projects]
+                # add the diff projects to the assessment
+                diff_assessment[goal][attribute][metric] = diff_projects_data
+
+    return diff_assessment
+
+
 def __assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute=None):
     """
     Build the assessment for all projects
@@ -575,8 +671,11 @@ def __assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_d
 
 def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute=None):
     """
-    Build the assessment for all projects from from-date to to-date and by quarters. The former is stored
-    in scava-metrics_scores, the latter in scava-metrics_scores_by_quarters
+    Assess the quality model for all projects from from-date to to-date and by quarters. The former is stored
+    in scava-metrics_scores (and scava-metrics_null_scores), the latter in scava-metrics_scores_by_quarters
+    (and scava-metrics_null_scores_by_quarters). Scava-metrics_score indexes are aliased with
+    scava-metrics_all_scores, scava-metrics_scores_by_quarters indexes are aliased with
+    scava-metrics_scores_by_quarters_all_scores.
 
     :param es_url: Elasticsearch URL
     :param es_index: Elasticsearch index with the metrics data
@@ -585,18 +684,24 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
     :param only_attribute: do the assessment only for this attribute
     :param from_date: date since which the metrics must be computed
     :param to_date: date until which the metrics must be computed
-    :return: a dict with the assessment for all goals and attributes at projects level
+
+    :return: a dict with the assessment for all goals and attributes per project
     """
     # delete the indexes, if they exist
     es_conn = Elasticsearch([es_url], timeout=100, verify_certs=HTTPS_CHECK_CERT)
+    # indexes with data
     scores_index = es_index + SCORES
     scores_quarters_index = es_index + SCORE_QUARTERS
+    # indexes without data (see issue https://github.com/Bitergia/prosoul/issues/186#issuecomment-553328202)
+    null_scores_index = es_index + NULL_SCORES
+    null_scores_quarters_index = es_index + NULL_SCORE_QUARTERS
+    # aliases
+    all_scores_alias = es_index + ALL_SCORES
+    all_scores_quarters_alias = es_index + ALL_SCORE_QUARTERS
 
-    if es_conn.indices.exists(index=scores_index):
-        es_conn.indices.delete(index=scores_index)
-
-    if es_conn.indices.exists(index=scores_quarters_index):
-        es_conn.indices.delete(index=scores_quarters_index)
+    for index in [scores_index, null_scores_index, scores_quarters_index, null_scores_quarters_index]:
+        if es_conn.indices.exists(index=index):
+            es_conn.indices.delete(index=index)
 
     creation_date = datetime_utcnow().isoformat()
     # execute the assessment by quarter
@@ -604,8 +709,17 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
 
     while True:
         next_date = start_date + dateutil.relativedelta.relativedelta(months=+3)
+
         assessment = __assess(es_url, es_index, model_name, backend_metrics_data, start_date, next_date, only_attribute)
-        publish_assessment(es_url, scores_quarters_index, assessment, start_date.isoformat(), next_date.isoformat(),
+        publish_assessment(es_url, scores_quarters_index, assessment,
+                           start_date.isoformat(), next_date.isoformat(),
+                           score_type=SCORES_QUARTER_TYPE, creation_date=creation_date)
+
+        # store diff assessment (assessment including empty data) in a separated index
+        all_projects = get_scava_projects(es_url, es_index, start_date, next_date)
+        diff_assessment = __diff_assess(all_projects, assessment)
+        publish_assessment(es_url, null_scores_quarters_index, diff_assessment,
+                           start_date.isoformat(), next_date.isoformat(),
                            score_type=SCORES_QUARTER_TYPE, creation_date=creation_date)
 
         if next_date > to_date:
@@ -617,6 +731,23 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
     assessment = __assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_date, only_attribute)
     publish_assessment(es_url, scores_index, assessment, from_date.isoformat(), to_date.isoformat(),
                        score_type=SCORES_ALL_TYPE, creation_date=creation_date)
+
+    # store diff assessment (assessment including empty data) in a separated index
+    all_projects = get_scava_projects(es_url, es_index, from_date, to_date)
+    diff_assessment = __diff_assess(all_projects, assessment)
+    publish_assessment(es_url, null_scores_index, diff_assessment,
+                       start_date.isoformat(), next_date.isoformat(),
+                       score_type=SCORES_ALL_TYPE, creation_date=creation_date)
+
+    # set aliases to query all scores and all scores per quarters (null and not null values)
+    es_conn.indices.update_aliases({
+        "actions": [
+            {"add": {"index": null_scores_index, "alias": all_scores_alias}},
+            {"add": {"index": scores_index, "alias": all_scores_alias}},
+            {"add": {"index": null_scores_quarters_index, "alias": all_scores_quarters_alias}},
+            {"add": {"index": scores_quarters_index, "alias": all_scores_quarters_alias}},
+        ]
+    })
 
     projects_data = goals2projects(assessment)
     dump_csv(projects_data)
