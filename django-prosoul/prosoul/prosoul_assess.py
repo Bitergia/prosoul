@@ -408,11 +408,12 @@ def assess_attribute(es_url, es_index, attribute, backend_metrics_data, from_dat
     return attribute_assessment
 
 
-def goals2projects(assessment):
+def goals2projects(assessment, diff_assessment):
     """
     Converts an goals assessment dict to a projects assessment dict
 
     :param assessment: the goal assessment dict
+    :param diff_assessment: the goal assessment dict with only empty data
     :return: the project assessment dict
     """
 
@@ -435,18 +436,22 @@ def goals2projects(assessment):
 
         return project_dict
 
-    projects = {}
+    def populate_projects(prjs, assess):
+        for goal in assess:
+            for attr in assess[goal]:
+                for metric in assess[goal][attr]:
+                    for prj in assess[goal][attr][metric]:
+                        if prj == 'cal_type':
+                            continue
 
-    for goal in assessment:
-        for attr in assessment[goal]:
-            for metric in assessment[goal][attr]:
-                for project in assessment[goal][attr][metric]:
-                    if project != 'cal_type':
-                        projects[project] = check_project_dict(projects, project, goal, attr, metric)
-                        projects[project][goal][attr][metric]['score'] = assessment[goal][attr][metric][project]['score']
-                        projects[project][goal][attr][metric]['raw_value'] = assessment[goal][attr][metric][project][
-                            'raw_value']
-                        projects[project][goal][attr][metric]['cal_type'] = assessment[goal][attr][metric]['cal_type']
+                        prjs[prj] = check_project_dict(prjs, prj, goal, attr, metric)
+                        prjs[prj][goal][attr][metric]['score'] = assess[goal][attr][metric][prj]['score']
+                        prjs[prj][goal][attr][metric]['raw_value'] = assess[goal][attr][metric][prj]['raw_value']
+                        prjs[prj][goal][attr][metric]['cal_type'] = assess[goal][attr][metric].get('cal_type', None)
+
+    projects = {}
+    populate_projects(projects, assessment)
+    populate_projects(projects, diff_assessment)
 
     return projects
 
@@ -751,7 +756,7 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
         ]
     })
 
-    projects_data = goals2projects(assessment)
+    projects_data = goals2projects(assessment, diff_assessment)
     dump_csv(projects_data)
 
     return assessment
@@ -800,32 +805,22 @@ def dump_csv(projects_data):
     :param projects_data: dict with the projects metrics score
     :return:
     """
-
-    fieldnames = ['project']
-    # Get all score fields: we need to cross all projects to be sure all metrics are found
-    for project in projects_data:
-        for goal in projects_data[project]:
-            for attr in projects_data[project][goal]:
-                for metric in projects_data[project][goal][attr]:
-                    if metric not in fieldnames:
-                        fieldnames.append(metric)
-
     with open(ASSESSMENT_CSV_DIR_PATH + ASSESSMENT_CSV_FILE_NAME, 'w') as csvfile:  # Just use 'w' mode in 3.x
-        csvwritter = csv.writer(csvfile)
+        csvwriter = csv.writer(csvfile)
         for project in projects_data:
             with open(ASSESSMENT_CSV_DIR_PATH + "assessment_csv_" + project + ".csv", 'w') as csvprojectfile:
-                csvwritter_project = csv.writer(csvprojectfile)
+                csvwriter_project = csv.writer(csvprojectfile)
                 for goal in projects_data[project]:
                     for attr in projects_data[project][goal]:
                         for metric in projects_data[project][goal][attr]:
-                            csvwritter.writerow([goal, attr, metric, project,
-                                                 projects_data[project][goal][attr][metric]['cal_type'],
-                                                 projects_data[project][goal][attr][metric]['raw_value'],
-                                                 projects_data[project][goal][attr][metric]['score']])
-                            csvwritter_project.writerow([goal, attr, metric, project,
-                                                         projects_data[project][goal][attr][metric]['cal_type'],
-                                                         projects_data[project][goal][attr][metric]['raw_value'],
-                                                         projects_data[project][goal][attr][metric]['score']])
+                            csvwriter.writerow([goal, attr, metric, project,
+                                                projects_data[project][goal][attr][metric]['cal_type'],
+                                                projects_data[project][goal][attr][metric]['raw_value'],
+                                                projects_data[project][goal][attr][metric]['score']])
+                            csvwriter_project.writerow([goal, attr, metric, project,
+                                                        projects_data[project][goal][attr][metric]['cal_type'],
+                                                        projects_data[project][goal][attr][metric]['raw_value'],
+                                                        projects_data[project][goal][attr][metric]['score']])
 
 
 def build_report(assessment, kind):
