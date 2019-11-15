@@ -100,38 +100,6 @@ class Assessment(LoginRequiredMixin, View):
         render_index = template.render(context, request)
         return HttpResponse(render_index)
 
-    @staticmethod
-    def render_attribute_table(metrics, goal):
-        table = "<table class='table'>"
-        # Headers
-        table += "<thead><th scope='col'>Attribute</th>"
-        for metric in metrics:
-            # Clean the metric name
-            # "GitHubEnrich {\"filter\": {\"term\": {\"state\": \"closed\"}}}
-            table += "<th>%s</th>" % (metric['name'] + " (" + metric['cal_type'] + ")")
-
-        table += "</thead>"
-        for attribute in goal:
-            # One row per atribute with its metrics
-            table += "<tr><th scope='row'>%s</th>" % attribute
-            # Let's find the metrics to fill the metrics columns
-            for metric_col in metrics:
-                metric_col_found = False
-                for metric in goal[attribute]:
-                    if metric == metric_col['name']:
-                        metric_score = goal[attribute][metric]['score']
-                        metric_raw_value = goal[attribute][metric]['raw_value']
-                        td_value = str(metric_score) + " (" + str(metric_raw_value) + ")"
-                        table += "<td>%s</td>" % td_value
-                        metric_col_found = True
-                        break
-                if not metric_col_found:
-                    table += "<td>-</td>"
-            table += "</tr>"
-        table += "</table>"
-
-        return table
-
     def render_tables(assessment):
         """ Convert the JSON with the assessmet in an HTML table
 
@@ -191,9 +159,6 @@ class Assessment(LoginRequiredMixin, View):
                                                   "href='./download_project_assessment_csv/" + project \
                       + "'> Download as CSV</a></h3> "
             projects_list.append(project)
-            for goal in projects_data[project]:
-                tables += "<h5>Goal: " + goal + "</h5>"
-                tables += Assessment.render_attribute_table(metrics, projects_data[project][goal])
 
         return tables, projects_list
 
