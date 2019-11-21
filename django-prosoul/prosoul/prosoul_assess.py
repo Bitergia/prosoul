@@ -743,7 +743,7 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
     all_projects = get_scava_projects(es_url, es_index, from_date, to_date)
     diff_assessment = __diff_assess(all_projects, assessment)
     publish_assessment(es_url, null_scores_index, diff_assessment,
-                       start_date.isoformat(), next_date.isoformat(),
+                       from_date.isoformat(), to_date.isoformat(),
                        score_type=SCORES_ALL_TYPE, creation_date=creation_date)
 
     # set aliases to query all scores and all scores per quarters (null and not null values)
