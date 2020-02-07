@@ -6,16 +6,15 @@ models.
 
 ## Description
 
-The goal of this project is to create a web editor and viewer for [software quality models](https://github.com/borisbaldassari/se-quality-models) that are used to show metrics in a meaning way. Also, importers and exporters for the different quality models used in the industry will be implemented so they can be used as models or evolved for the creation of new quality models.
+The goal of this project is to create a web editor and viewer for [software quality models](https://github.com/borisbaldassari/se-quality-models) that are used to show metrics in a meaningful way. Also, importers and exporters for the different quality models used in the industry will be implemented so they can be used as models or evolved for the creation of new quality models.
 
-In the initial version the metrics supported will be the [CROSSMINER ones](https://github.com/crossminer/crossminer/tree/dev/web-dashboards/ossmeter-metrics).
+In the initial version, the metrics supported will be the [CROSSMINER ones](https://github.com/crossminer/crossminer/tree/dev/web-dashboards/ossmeter-metrics).
 
-Based on the models, visualizations and assessment for the projects are generated. In the inital version
-Kibana dashoards will be created using [GrimoireLab](http://grimoirelab.github.io/).
+Based on the models, visualizations and assessment for the projects are generated. In the initial version, Kibana dashboards will be created using [GrimoireLab](http://grimoirelab.github.io/).
 
 The final goal is to have a tool for "Automatic Project Assessment and Visualization based on Evolved Quality Models".
 
-The original name for this project was Meditor but is was chaged to Prosoul because meditor already was used in pip.
+The original name for this project was Meditor but it was changed to Prosoul because meditor already was used in pip.
 
 ## Source code and contributions
 
@@ -32,7 +31,7 @@ Change VENV_DIR with the path to the folder in which you want to store the virtu
 
 ### From source code repository
 
-This is the recommend way if you want to contribute to the development of ProSoul.
+This is the recommended way if you want to contribute to the development of ProSoul.
 
 ```
 git clone https://github.com/Bitergia/prosoul.git
@@ -51,7 +50,7 @@ prosoul/django-prosoul $ python3 manage.py migrate
 prosoul/django-prosoul $ python3 manage.py runserver
 ```
 
-By default the applicacion will be accesible in: http://127.0.0.1:8000/
+By default, the application will be accessible in: http://127.0.0.1:8000/
 
 
 ### From pip package
@@ -143,11 +142,11 @@ the metrics data backend. In the case of CROSSMINER, all form fields except the 
 with the default Docker configuration of the [scava-deployment](https://github.com/crossminer/scava-deployment/tree/dev#scava-deployment).
 
 Once the form is filled, by clicking on the `Create` button, you will be redirected to a page summarizing how the projects
-in your data comply to the QM selected.
+in your data comply with the QM selected.
 
 ## Tutorials
 
-There is two introductory videos: showing the import and view feature, and howto use the editor for adding a new quality model:
+There are two introductory videos: showing the import and view feature, and how to use the editor for adding a new quality model:
 
 * Import and view of quality models: [prosoul-intro.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/doc/meditor-intro.webm)
 * Adding a new quality model: [prosoul-editor.webm](https://raw.githubusercontent.com/Bitergia/prosoul/master/doc/meditor-editor.webm)
