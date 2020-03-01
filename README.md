@@ -52,6 +52,20 @@ prosoul/django-prosoul $ python3 manage.py runserver
 
 By default, the application will be accessible in: http://127.0.0.1:8000/
 
+#### Demo Video
+
+There is a demo video in YouTube about how to install the Prosoul application from the source code. Please click to watch it.
+
+<div align="center">
+
+[![Setting up Prosoul](https://img.youtube.com/vi/-wU1ck4ZrUw/0.jpg "Setting up Prosoul | YouTube")](https://www.youtube.com/watch?v=-wU1ck4ZrUw)
+
+</div>
+
+**Quick Links**
+
+1. Setting up Prosoul with PyCharm - [0:20](https://www.youtube.com/watch?v=-wU1ck4ZrUw&t=20s)
+2. Setting up Prosoul with Terminal - [3:33](https://www.youtube.com/watch?v=-wU1ck4ZrUw&t=213s)
 
 ### From pip package
 
