@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Create a Kibana Dashboard to show a Quality Model
-#
-# Copyright (C) Bitergia
+# Copyright (C) 2015-2020 Bitergia
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,11 +14,13 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 # Authors:
 #   Alvaro del Castillo San Felix <acs@bitergia.com>
+#   Valerio Cosentino <valcos@bitergia.com>
+#   David Moreno <dmoreno@bitergia.com>
+#
 #
 
 import argparse
