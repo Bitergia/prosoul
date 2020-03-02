@@ -4,40 +4,71 @@
     {{ block.super }}
 {% endblock %}
 
-
-
 {% block body %}
+
 {% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
+<div class="alert alert-danger" role="alert">
+    Your username and password didn't match. Please try again.
+</div>
 {% endif %}
 
 {% if next %}
     {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
+    <div class="alert alert-danger" role="alert">
+        Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.
+    </div>
     {% else %}
-    <p>Please login to see this page.</p>
+    <div class="alert alert-warning" role="alert">
+        Please login to see this page.
+    </div>
     {% endif %}
 {% endif %}
 
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-<table>
-<tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Login</div>
+            <div class="card-body">
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
 
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
-</form>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label text-md-right">{{ form.username.label_tag }}</label>
+                        <div class="col-md-6">
+                            {{ form.username }}
+                        </div>
+                    </div>
 
-{# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label text-md-right">{{ form.password.label_tag }}</label>
+                        <div class="col-md-6">
+                            {{ form.password }}
+                        </div>
+                    </div>
+
+                    <div class="row m-2">
+                        <div class="col-md-6">
+                            <button type="submit" value="login" class="btn btn-primary">
+                                Login
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="hidden" name="next" value="{{ next }}" />
+                        </div>
+                    </div>
+
+                    <div class="row m-2">
+                        <div class="col-md-6">
+                            {# Assumes you setup the password_reset view in your URLconf #}
+                            <a href="{% url 'password_reset' %}">Lost password?</a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
