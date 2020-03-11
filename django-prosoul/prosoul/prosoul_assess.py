@@ -746,6 +746,10 @@ def assess(es_url, es_index, model_name, backend_metrics_data, from_date, to_dat
                        from_date.isoformat(), to_date.isoformat(),
                        score_type=SCORES_ALL_TYPE, creation_date=creation_date)
 
+    for index in [scores_index, null_scores_index, scores_quarters_index, null_scores_quarters_index]:
+        if not es_conn.indices.exists(index=index):
+            es_conn.indices.create(index=index)
+
     # set aliases to query all scores and all scores per quarters (null and not null values)
     es_conn.indices.update_aliases({
         "actions": [
