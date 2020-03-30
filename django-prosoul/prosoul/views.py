@@ -105,7 +105,7 @@ class Visualize(LoginRequiredMixin, View):
 
                 context.update({"errors": error})
                 if not error:
-                    context.update({"kibana_url": KIBANA_HOST})
+                    context.update({"kibana_url": kibana_url})
                 return shortcuts.render(request, 'prosoul/visualize.html', context)
             else:
                 context.update({"errors": form.errors})
