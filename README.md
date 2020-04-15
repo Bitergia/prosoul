@@ -25,6 +25,8 @@ A draft diagram for the architecture is:
 
 **Prosoul** is a Django application. The recommended way to execute it is inside a python virtual environment. 
 
+You will need Elasticsearch and Kibana in order to execute Prosoul. You can install them using docker-compose. You can find a walkthrough here, [Getting the containers](https://github.com/chaoss/grimoirelab-sirmordred/blob/master/Getting-Started.md#getting-the-containers-). You can omit (comment/remove) the mariadb section.
+
 ### Requirements
 
 * Python >=3.4
